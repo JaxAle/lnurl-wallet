@@ -112,9 +112,10 @@ const Gruppe: Component<{titel: string; children: JSX.Element}> = props => (
 )
 
 const Einstellungen: Component = () => {
-  const {state, encrypted, encryptionUpgraded, forgetWallet} = useWallet()
+  const {state, encrypted, encryptionUpgraded, forgetWallet, activity, clearActivity} = useWallet()
   const navigate = useNavigate()
   const [fragt, setFragt] = createSignal(false)
+  const [verlaufFrage, setVerlaufFrage] = createSignal(false)
   const offen = () => state() === 'unlocked'
 
   // eingeschaltete Extras mit eigener Seite — im Original standen sie im Menü
@@ -211,6 +212,29 @@ const Einstellungen: Component = () => {
           />
           <Zeile label="Alle Einstellungen des Originals" href="/settings/erweitert" />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />
+          <Show when={offen() && activity().length > 0}>
+            <Zeile label="Verlauf löschen" onClick={() => setVerlaufFrage(v => !v)} />
+            <Show when={verlaufFrage()}>
+              <div class="rz-rueckfrage">
+                <p>Nur die Liste im Verlauf verschwindet — deine Scheine bleiben unberührt.</p>
+                <div class="rz-duo">
+                  <button
+                    type="button"
+                    class="rz-knopf-gefahr"
+                    onClick={() => {
+                      clearActivity()
+                      setVerlaufFrage(false)
+                    }}
+                  >
+                    Löschen
+                  </button>
+                  <button type="button" class="rz-knopf" onClick={() => setVerlaufFrage(false)}>
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            </Show>
+          </Show>
         </details>
       </Gruppe>
 

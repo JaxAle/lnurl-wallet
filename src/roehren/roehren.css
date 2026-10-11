@@ -697,6 +697,8 @@ select {
 }
 
 /* Einstellungen als Bedienfeld (Prototyp .group/.setting/.switch/details.adv) */
+/* ein Seitentitel für alle Seiten, auch die des Originals (Prototyp .topbar h1) */
+.page > h2,
 .rz-titel {
   margin: 0 0 4px;
   font: 300 22px/1.2 'Jost', 'Futura', system-ui, sans-serif;
@@ -899,4 +901,97 @@ select {
 }
 .rz-duo-flach {
   margin: 8px 0;
+}
+
+/* Verlauf (Prototyp .daylabel/.list/.item/.wire) */
+.rz-tag {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #a3907c;
+}
+.rz-liste {
+  display: grid;
+}
+.rz-eintrag {
+  border-bottom: 1px solid #2f2218;
+}
+.rz-eintrag:last-child {
+  border-bottom: 0;
+}
+.rz-eintrag-kopf {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #f4ebdf;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rz-eintrag-kopf .ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #1f1710;
+  color: #a3907c;
+}
+.rz-eintrag-kopf .ic svg {
+  width: 19px;
+  height: 19px;
+}
+.rz-eintrag-kopf .ic.in {
+  color: rgba(238, 152, 90, 0.8);
+}
+.rz-eintrag-kopf .ic.out {
+  color: #ffefc4;
+}
+.rz-eintrag-kopf .mitte {
+  display: grid;
+  min-width: 0;
+}
+.rz-eintrag-kopf .t,
+.rz-eintrag-kopf .s {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rz-eintrag-kopf .t {
+  font-size: 17px;
+  font-weight: 400;
+}
+.rz-eintrag-kopf .s {
+  font-size: 12.5px;
+  color: #a3907c;
+}
+.rz-eintrag-kopf .amt {
+  display: inline-block;
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  transform: scaleX(0.82);
+  transform-origin: right center;
+  color: #a3907c;
+}
+.rz-eintrag-kopf .amt.in {
+  color: rgba(238, 152, 90, 0.8);
+}
+.rz-eintrag-kopf .amt.out {
+  color: #ffefc4;
+}
+.rz-eintrag-text {
+  padding: 0 0 12px 52px;
+  font-size: 14px;
+  color: #a3907c;
+}
+.rz-eintrag-text p {
+  margin: 0 0 6px;
 }

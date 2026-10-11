@@ -40,7 +40,7 @@ const UnterwegsListe: Component = () => {
   return (
     <Show when={liste().length > 0}>
       <section class="rz-unterwegs">
-        <h3>Unterwegs</h3>
+        <div class="rz-tag">Unterwegs</div>
         <p class="rz-hinweis">
           Übergeben, aber noch nicht eingelöst — die Wallet fragt nach, solange sie offen ist.
         </p>
