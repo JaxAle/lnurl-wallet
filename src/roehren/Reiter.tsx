@@ -53,7 +53,7 @@ const Reiter: Component = () => {
     <Show when={state() === 'unlocked'}>
       <EinloeseWache />
       {/* beim Eintippen eines Betrags keine Leiste — wie im Prototyp (keypadScreen: tabs: false) */}
-      <Show when={!ort.pathname.startsWith('/senden')}>
+      <Show when={!['/senden', '/empfangen'].some(p => ort.pathname.startsWith(p))}>
       {/* div statt nav: style.scss hängt jedem nav "position: fixed; top: 0" an — zusammen mit
       bottom: 0 streckte sich die Leiste über den ganzen Bildschirm und verdeckte alles (Pixel) */}
       <div class="rz-reiter" role="navigation" aria-label="Hauptnavigation">

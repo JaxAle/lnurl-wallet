@@ -20,6 +20,7 @@ import Hero from './pages/Hero'
 import Wallet from './pages/Wallet'
 import Reiter from './roehren/Reiter'
 import Senden from './roehren/Senden'
+import Empfangen from './roehren/Empfangen'
 import Setup from './pages/Setup'
 import Mint from './pages/Mint'
 import Activity from './pages/Activity'
@@ -91,6 +92,7 @@ const cleanup = render(
       {/* Fork: Reiter „Scheine“ (Profi-Modus) — dieselbe Seite, nur die Liste */}
       <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />
       <Route path="/senden" component={Senden} />
+      <Route path="/empfangen" component={Empfangen} />
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={Mint} />
       {/* /mints merged into /mint (trusted-mint management now lives at

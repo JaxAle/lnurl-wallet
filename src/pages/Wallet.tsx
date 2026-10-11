@@ -92,6 +92,7 @@ import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
 import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
+import {eingang, setEingang} from '../roehren/uebergabe'
 
 const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
@@ -253,6 +254,13 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   // Es schließt sich, sobald eine Rechnung zum Zahlen weitergereicht ist oder ein Schein
   // fertig empfangen wurde — dann übernimmt der Dialog bzw. zählt das Zählwerk.
   const [blatt, setBlatt] = createSignal<'senden' | 'empfangen' | null>(null)
+  // vom Empfangen-Bildschirm: Gescanntes/Eingefügtes mit dem Werkzeug des Originals verarbeiten
+  createEffect(() => {
+    const wert = eingang()
+    if (wert === null) return
+    setEingang(null)
+    handleHeroValue(wert)
+  })
   // vom Senden-Bildschirm: „Rechnung oder Adresse bekommen? bezahlen ›“
   const [suche, setSuche] = useSearchParams()
   onMount(() => {
@@ -1576,7 +1584,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     ? notify('Noch nichts zu senden — zuerst empfangen oder aufladen.')
                     : navigate('/senden')
                 }
-                onEmpfangen={() => setBlatt('empfangen')}
+                onEmpfangen={() => navigate('/empfangen')}
               />
               <Show when={blatt()}>
                 <Dialog onClose={() => setBlatt(null)}>
