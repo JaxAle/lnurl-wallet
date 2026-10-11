@@ -1557,7 +1557,24 @@ const Wallet: Component = () => {
             </Show>
             <section class="wallet-hero">
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
-              <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)} />
+              <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)}>
+                <Show when={unterwegsScheine().length > 0}>
+                  <button
+                    type="button"
+                    class="rz-hinweiszeile"
+                    onClick={() => setZeigeScheine(true)}
+                  >
+                    {unterwegsScheine().length === 1
+                      ? '1 Schein unterwegs'
+                      : `${unterwegsScheine().length} Scheine unterwegs`}
+                    {' · '}
+                    {Math.floor(
+                      unterwegsScheine().reduce((a, b) => a + b.amount, 0) / 1000
+                    ).toLocaleString('de-AT')}{' '}
+                    Sats ›
+                  </button>
+                </Show>
+              </Zaehlwerk>
               <EinloeseWache />
               {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
               <Knoepfe
@@ -1686,22 +1703,6 @@ const Wallet: Component = () => {
                     </Show>
                   </div>
                 </Dialog>
-              </Show>
-              <Show when={unterwegsScheine().length > 0}>
-                <button
-                  type="button"
-                  class="rz-hinweiszeile"
-                  onClick={() => setZeigeScheine(true)}
-                >
-                  {unterwegsScheine().length === 1
-                    ? '1 Schein unterwegs'
-                    : `${unterwegsScheine().length} Scheine unterwegs`}
-                  {' · '}
-                  {Math.floor(
-                    unterwegsScheine().reduce((a, b) => a + b.amount, 0) / 1000
-                  ).toLocaleString('de-AT')}{' '}
-                  Sats ›
-                </button>
               </Show>
               <Show when={spendableBearers().length > 0}>
                 <button

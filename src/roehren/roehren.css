@@ -1,10 +1,30 @@
 /* Röhren-Zählwerk — übernommen aus dem abgenommenen Prototyp (PROJEKTE/lnurlcash-wallet/prototyp.html,
    Version 53). Eigene Datei, damit Updates des Originals ohne Konflikt nachgezogen werden können. */
 
+/* Maße 1:1 aus dem Prototyp (.amount-entry › .inrow › .bal-tubes.mid, .eurrow, .entry-foot):
+   Röhren, darunter die Euro-Zeile 74 px und ein fester Platz 86 px für die Hinweiszeile, dann die
+   Schalter mit 18 px Abstand — „auf der Höhe der Tastatur“, wie beim Senden (Gerhard, 2026-10-11) */
 .roehren-zaehlwerk {
   --rz-font: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
   text-align: center;
-  padding: 18px 0 14px;
+  padding: 18px 0 8px;
+}
+.roehren-zaehlwerk .rz-inrow {
+  padding: 10px 8px 12px;
+  margin: 4px 0;
+  border: 1px solid transparent;
+}
+.roehren-zaehlwerk .rz-eurrow {
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.roehren-zaehlwerk .rz-fuss {
+  height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .roehren-zaehlwerk .bal-tubes {
@@ -12,6 +32,7 @@
   justify-content: center;
   align-items: flex-end;
   gap: 3px;
+  margin: 4px 0;
 }
 
 .roehren-zaehlwerk .tube {
@@ -133,7 +154,6 @@
 /* Euro darunter, in Drahtform wie im Prototyp (.eurin, ungewählt) */
 .roehren-zaehlwerk .rz-euro {
   display: inline-block;
-  margin-top: 10px;
   font-family: var(--rz-font);
   font-weight: 300;
   font-size: 30px;
@@ -148,7 +168,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin: 6px 0 18px;
+  margin: 18px 0 18px;
 }
 .rz-knopf {
   display: grid;
@@ -224,7 +244,7 @@
   display: block;
   width: 100%;
   min-height: 44px;
-  margin: 0 0 6px;
+  margin: 0;
   padding: 10px 14px;
   border-radius: 14px;
   border: 1px solid #3a2414;

@@ -1,7 +1,7 @@
 // Röhren-Zählwerk für das Guthaben — aus dem abgenommenen Prototyp (tubeRow/balTubes).
 // Immer sieben Röhren, rechtsbündig; links der Zahl bleiben sie dunkel (keine führenden
 // Nullen), ihre Tausenderpunkte auch. Steigt das Guthaben, glühen die geänderten Ziffern auf.
-import type {Component} from 'solid-js'
+import type {Component, JSX} from 'solid-js'
 import {createEffect, createMemo, createSignal, For, on, onCleanup, Show} from 'solid-js'
 
 import {currency, satsToFiat} from '../currency'
@@ -68,7 +68,7 @@ export const zeigeGebuehr = (sats: number): void => {
   gebuehrUhr = setTimeout(() => setGebuehr(null), 7000)
 }
 
-const Zaehlwerk: Component<{sats: number}> = props => {
+const Zaehlwerk: Component<{sats: number; children?: JSX.Element}> = props => {
   const [angezeigt, setAngezeigtRoh] = createSignal(zuletzt ?? props.sats)
   const setAngezeigt = (wert: number) => {
     zuletzt = wert
@@ -114,6 +114,7 @@ const Zaehlwerk: Component<{sats: number}> = props => {
   return (
     <div class="roehren-zaehlwerk">
       {/* keyed: bei jedem neuen Stand neu aufbauen, damit das Aufglühen erneut abläuft */}
+      <div class="rz-inrow">
       <Show when={stand()} keyed>
         {s => (
           <div class="bal-tubes" role="img" aria-label={`Guthaben ${anzeige()} Sats`}>
@@ -141,6 +142,8 @@ const Zaehlwerk: Component<{sats: number}> = props => {
           </div>
         )}
       </Show>
+      </div>
+      <div class="rz-eurrow">
       <Show
         when={gebuehr()}
         fallback={
@@ -157,6 +160,10 @@ const Zaehlwerk: Component<{sats: number}> = props => {
           </span>
         </div>
       </Show>
+      </div>
+      {/* fester Platz: hier steht die Hinweiszeile, wenn etwas offen ist — sonst bleibt er leer,
+      damit die Schalter nicht springen */}
+      <div class="rz-fuss">{props.children}</div>
     </div>
   )
 }
