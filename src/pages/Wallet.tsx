@@ -94,6 +94,8 @@ import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
 import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
+import Scheine from '../roehren/Scheine'
+import type {ScheineMotor} from '../roehren/Scheine'
 
 const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
@@ -1379,6 +1381,35 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     }
   }
 
+
+  // Fork: Reiter Scheine im Bild des Prototyps (roehren/Scheine.tsx) — die Arbeit tun die
+  // Funktionen oben; die volle Werkzeugleiste des Originals bleibt über „Alle Werkzeuge“ erreichbar
+  const [werkstatt, setWerkstatt] = createSignal(false)
+  const nurDieser = (id: string) => setSelected(new Set([id]))
+  const scheineMotor: ScheineMotor = {
+    scheine: () => bearers().filter(b => !b.spent),
+    ausgewaehlt: selected,
+    waehle: toggleSelect,
+    leereAuswahl: () => setSelected(new Set<string>()),
+    kannZusammenlegen: canCombine,
+    arbeitet: () => splittingSingle() || combining() || refreshing(),
+    teilen: async (schein, sats) => {
+      nurDieser(schein.id)
+      setSplitSingleSats(String(sats))
+      setSplitSingleTimes('1')
+      await splitSingleSelected()
+    },
+    zusammenlegen: combineSelected,
+    beschriften: (schein, text) => {
+      nurDieser(schein.id)
+      setLabelInputValue(text)
+      saveLabelSelected()
+    },
+    erneuern: async schein => {
+      await refreshOneBearer(schein)
+    }
+  }
+
   return (
     <Show
       when={state() !== 'none'}
@@ -1434,103 +1465,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           when={bearers().length > 0 || !scheineAnsicht()}
           fallback={
             <div id="wallet" class="page">
-              <section class="hero-intro">
-                <h1>Noch keine Scheine</h1>
-                <p class="hero-subtitle">
-                  Deine Wallet ist bereit, aber leer. Lade bei einer Ausgabestelle auf, oder scanne bzw. füge einen Schein ein, den dir jemand gegeben hat.
-                </p>
-                <div class="hero-actions">
-                  <A href="/aufladen" class="hero-btn hero-btn-primary">
-                    <IoAddCircleSharp />
-                    &nbsp;Aufladen
-                  </A>
-                  <figure class="paste-widget hero-paste-widget">
-                    <div class="paste-input-row">
-                      <ScanToggle
-                        onScan={onHeroScan}
-                        accept={isValidHeroInput}
-                      />
-                      <NfcToggle
-                        onScan={onHeroScan}
-                        accept={isValidHeroInput}
-                      />
-                      <button
-                        type="button"
-                        class="icon-btn paste-icon-btn"
-                        title="Aus der Zwischenablage einfügen"
-                        onClick={pasteHero}
-                      >
-                        <IoClipboardSharp />
-                      </button>
-                      <Show when={storeableMeltAddresses().length > 0}>
-                        <button
-                          type="button"
-                          class="icon-btn paste-at-btn"
-                          title="Gespeicherte Adresse bezahlen"
-                          onClick={() => setShowSavedAddresses(true)}
-                        >
-                          <IoAtCircleSharp />
-                        </button>
-                      </Show>
-                      <button
-                        type="button"
-                        class="icon-btn paste-keyboard-btn"
-                        title="Stattdessen eintippen"
-                        onClick={() => setShowHeroKeyboard(v => !v)}
-                      >
-                        <MdSharpKeyboard />
-                      </button>
-                      <div
-                        class="paste-input-wrapper"
-                        classList={{'mobile-open': showHeroKeyboard()}}
-                      >
-                        <input
-                          ref={el => (heroPasteRef = el)}
-                          type="text"
-                          class="paste-input"
-                          placeholder="Schein, Rechnung oder Lightning-Adresse …"
-                          value={heroValue()}
-                          onInput={e => setHeroValue(e.currentTarget.value)}
-                          onKeyDown={e => e.key === 'Enter' && handleHero()}
-                        />
-                        <Show when={heroValue() !== ''}>
-                          <button
-                            type="button"
-                            class="icon-btn paste-clear-btn"
-                            title="Leeren"
-                            onClick={() => setHeroValue('')}
-                          >
-                            <IoCloseSharp />
-                          </button>
-                        </Show>
-                      </div>
-                      <button
-                        type="button"
-                        class="icon-btn paste-confirm-btn"
-                        classList={{'mobile-open': showHeroKeyboard()}}
-                        title="Schein empfangen oder Rechnung/Adresse bezahlen"
-                        disabled={heroValue() === '' || heroReceiving()}
-                        onClick={handleHero}
-                      >
-                        <Show
-                          when={heroReceiving()}
-                          fallback={<IoReturnDownForwardSharp />}
-                        >
-                          <IoRefreshSharp class="spin" />
-                        </Show>
-                      </button>
-                    </div>
-                  </figure>
-                </div>
-                <Show when={showMelt()}>
-                  <MeltDialog
-                    initialInvoice={meltHandoffInvoice() ?? undefined}
-                    initialAddress={meltHandoffAddress() ?? undefined}
-                    onClose={closeMelt}
-                  />
-                </Show>
-                {savedAddressPicker()}
-              </section>
+              {/* Fork: leer wie die Startseite — kalte Null und der Weg zu Empfangen (Steve) */}
+              <Scheine motor={scheineMotor} />
             </div>
           }
         >
@@ -1706,6 +1642,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
 
             {/* Fork: Werkzeugleiste und Scheine nur im Reiter „Scheine“ (Profi-Modus, Steve 2026-10-11) */}
             <Show when={scheineAnsicht()}>
+              <Scheine motor={scheineMotor} onWerkstatt={werkstatt() ? undefined : () => setWerkstatt(true)} />
+            </Show>
+            <Show when={scheineAnsicht() && werkstatt()}>
             <section class="list-controls">
               <div class="list-controls-row">
                 <Show
