@@ -1,5 +1,5 @@
 import type {Component} from 'solid-js'
-import {Show, For, createSignal, createMemo, onMount, onCleanup} from 'solid-js'
+import {Show, For, createSignal, createMemo, createEffect, on, onMount, onCleanup} from 'solid-js'
 import {render} from 'solid-js/web'
 import {A} from '@solidjs/router'
 import {QRCodeSVG, ErrorCorrectionLevel} from 'solid-qr-code'
@@ -91,6 +91,7 @@ import NfcToggle from '../components/NfcToggle'
 import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
 import EinloeseWache from '../roehren/EinloeseWache'
+import Knoepfe from '../roehren/Knoepfe'
 
 const Wallet: Component = () => {
   const {
@@ -245,6 +246,14 @@ const Wallet: Component = () => {
   // pause: the person hasn't asked for anything yet, they've just followed
   // a link. Here they scanned or pasted with clear intent to receive.
   const [heroReceiving, setHeroReceiving] = createSignal(false)
+  // Fork: Senden/Empfangen öffnen ein Blatt mit den Werkzeugen des Originals (roehren/Knoepfe).
+  // Es schließt sich, sobald eine Rechnung zum Zahlen weitergereicht ist oder ein Schein
+  // fertig empfangen wurde — dann übernimmt der Dialog bzw. zählt das Zählwerk.
+  const [blatt, setBlatt] = createSignal<'senden' | 'empfangen' | null>(null)
+  createEffect(on(openDialog, d => d === 'melt' && setBlatt(null), {defer: true}))
+  createEffect(
+    on(heroReceiving, (jetzt, vorher) => vorher && !jetzt && setBlatt(null), {defer: true})
+  )
   // same idea as meltHandoffInvoice above, for a scanned/pasted Lightning
   // Address that doesn't have an invoice yet - MeltDialog resolves it via
   // its own initialAddress
@@ -1524,38 +1533,31 @@ const Wallet: Component = () => {
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
               <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)} />
               <EinloeseWache />
-              <div class="wallet-stats">
-                <div class="wallet-stat">
-                  <span class="wallet-stat-value">
-                    {spendableBearers().length}
-                  </span>
-                  <span class="wallet-stat-label">
-                    {spendableBearers().length === 1 ? 'Note' : 'Notes'}
-                  </span>
-                </div>
-                <div class="wallet-stat">
-                  <span class="wallet-stat-value">{mintCount()}</span>
-                  <span class="wallet-stat-label">
-                    {mintCount() === 1 ? 'Mint' : 'Mints'}
-                  </span>
-                </div>
-                <Show when={spentCount() > 0}>
-                  <div class="wallet-stat">
-                    <span class="wallet-stat-value">
-                      {msatToSats(spentTotal())} sats
-                      <FiatValue msat={spentTotal()} />
-                    </span>
-                    <span class="wallet-stat-label">
-                      Spent&nbsp;·&nbsp;{spentCount()}
-                    </span>
-                  </div>
-                </Show>
-              </div>
-              <div class="btns">
-                <A href="/mint" class="link-btn wallet-hero-btn">
-                  <IoAddCircleSharp />
-                  &nbsp;Mint
-                </A>
+              {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
+              <Knoepfe
+                onSenden={() => setBlatt('senden')}
+                onEmpfangen={() => setBlatt('empfangen')}
+              />
+              <Show when={blatt()}>
+                <Dialog onClose={() => setBlatt(null)}>
+                  <div class="rz-blatt">
+                    <Show
+                      when={blatt() === 'senden'}
+                      fallback={
+                        <>
+                          <h3>Empfangen</h3>
+                          <p class="rz-hinweis">
+                            Schein scannen oder einfügen — oder per Lightning aufladen.
+                          </p>
+                        </>
+                      }
+                    >
+                      <h3>Senden</h3>
+                      <p class="rz-hinweis">
+                        Rechnung oder Lightning-Adresse scannen oder einfügen — oder unten
+                        einen Schein übergeben.
+                      </p>
+                    </Show>
                 <div class="paste-widget hero-paste-widget">
                   <div class="paste-input-row">
                     <ScanToggle onScan={onHeroScan} accept={isValidHeroInput} />
@@ -1627,7 +1629,38 @@ const Wallet: Component = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+                    <Show when={blatt() === 'empfangen'}>
+                      <div class="rz-abschnitt">
+                        <A href="/mint" class="link-btn wallet-hero-btn">
+                          <IoAddCircleSharp />
+                          &nbsp;Aufladen per Lightning
+                        </A>
+                      </div>
+                    </Show>
+                    <Show when={blatt() === 'senden' && spendableBearers().length > 0}>
+                      <div class="rz-abschnitt">
+                        <h4>Schein übergeben</h4>
+                        <p class="rz-hinweis">
+                          Auge antippen, QR zeigen — die Wallet merkt selbst, wenn er eingelöst ist.
+                        </p>
+                        <div class="bearer-list">
+                          <For each={spendableBearers()}>
+                            {bearer => (
+                              <BearerCard
+                                bearer={bearer}
+                                selected={false}
+                                onSelect={() => {}}
+                                onRefresh={refreshOneBearer}
+                                onUpgrade={upgradeOneBearer}
+                              />
+                            )}
+                          </For>
+                        </div>
+                      </div>
+                    </Show>
+                  </div>
+                </Dialog>
+              </Show>
             </section>
             <Show when={showMelt()}>
               <MeltDialog

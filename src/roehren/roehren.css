@@ -143,6 +143,78 @@
   text-shadow: 0 0 2px rgba(255, 112, 30, 0.25);
 }
 
+/* Senden / Empfangen — Prototyp .duo / .big-action.tubes */
+.rz-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 6px 0 18px;
+}
+.rz-knopf {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 18px 10px;
+  min-height: 96px;
+  border-radius: 20px;
+  border: 1px solid #2a1a10;
+  background: #070504;
+  color: rgba(238, 152, 90, 0.66);
+  font-family: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rz-knopf svg {
+  width: 26px;
+  height: 26px;
+}
+.rz-knopf .lbl {
+  display: inline-block;
+  font-weight: 300;
+  font-size: 27px;
+  line-height: 1;
+  transform: scaleX(0.8);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 2px rgba(255, 112, 30, 0.35), 0 0 6px rgba(255, 80, 0, 0.14);
+  -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+  mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+}
+.rz-knopf.an,
+.rz-knopf:active {
+  background: radial-gradient(70% 80% at 50% 60%, rgba(255, 110, 20, 0.22), transparent 75%), #070504;
+  border-color: #3a2414;
+  box-shadow: inset 0 0 18px rgba(255, 90, 0, 0.18);
+  color: #ffefc4;
+}
+.rz-knopf.an .lbl,
+.rz-knopf:active .lbl {
+  text-shadow: 0 0 1px #fff, 0 0 3px #ffd27a, 0 0 7px #ff9a22, 0 0 13px #ff5a00, 0 0 24px #ff3c00;
+}
+.rz-knopf.an svg,
+.rz-knopf:active svg {
+  color: #ffd59a;
+  filter: drop-shadow(0 0 3px #ff9a22) drop-shadow(0 0 8px #ff5a00);
+}
+.rz-knopf.an:active {
+  filter: brightness(1.25);
+}
+.rz-knopf:focus-visible {
+  outline: 2px solid #ff9a22;
+  outline-offset: 2px;
+}
+
+/* Blatt hinter Senden / Empfangen */
+.rz-blatt h3 {
+  margin: 0 0 4px;
+}
+.rz-blatt .rz-hinweis {
+  margin: 0 0 14px;
+  opacity: 0.75;
+}
+.rz-blatt .rz-abschnitt {
+  margin-top: 18px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .roehren-zaehlwerk .tube.up,
   .roehren-zaehlwerk .tube.up .glow,
