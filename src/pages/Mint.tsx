@@ -246,7 +246,7 @@ const Mint: Component = () => {
           await claim(secret, invoicedMsat(), invoicedGrossMsat())
         } else {
           notify(
-            'Payment settled, but the wallet-held note secret is missing. Do not pay or retry this invoice.',
+            'Bezahlt, aber das Geheimnis für den Schein fehlt. Diese Rechnung nicht noch einmal bezahlen.',
             NotifyKind.ERROR
           )
         }
@@ -357,7 +357,7 @@ const Mint: Component = () => {
     }
     const url = resolveMintInput(mintInput())
     if (!url) {
-      notify('Enter a mint LNURL or Lightning Address.', NotifyKind.ERROR)
+      notify('Bitte LNURL oder Adresse einer Ausgabestelle eingeben.', NotifyKind.ERROR)
       return
     }
     setPendingTrust(null)
@@ -394,7 +394,7 @@ const Mint: Component = () => {
       const info = await fetchPayRequest(payUrl)
       if (!info.withdrawLink) {
         notify(
-          'This payRequest does not advertise lnurlcash minting (no withdrawLink).',
+          'Diese Adresse bietet kein Aufladen von LNURLcash an (kein withdrawLink).',
           NotifyKind.ERROR
         )
         return
@@ -481,7 +481,7 @@ const Mint: Component = () => {
 
   const cancelTrust = () => {
     setPendingTrust(null)
-    notify('Mint not trusted - lookup cancelled.', NotifyKind.ERROR)
+    notify('Ausgabestelle nicht vertraut – abgebrochen.', NotifyKind.ERROR)
   }
 
   // what amountSats() is typed as is the note value the holder wants to end
@@ -514,7 +514,7 @@ const Mint: Component = () => {
   ): {netMsat: number; grossMsat: number} | null => {
     const amount = amountBreakdown()
     if (!amount) {
-      notify('Enter an amount in sats.', NotifyKind.ERROR)
+      notify('Bitte einen Betrag in Sats eingeben.', NotifyKind.ERROR)
       return null
     }
     if (
@@ -531,7 +531,7 @@ const Mint: Component = () => {
         ? floorMsatToSat(applyMintFee(info.maxSendable, info.mintFee))
         : info.maxSendable
       notify(
-        `Amount must be between ${msatToSats(info.minSendable)} and ${msatToSats(maxNet)} sats.`,
+        `Der Betrag muss zwischen ${msatToSats(info.minSendable)} und ${msatToSats(maxNet)} Sats liegen.`,
         NotifyKind.ERROR
       )
       return null
@@ -753,7 +753,7 @@ const Mint: Component = () => {
     }
   }
 
-  // Shared by the manual "Claim note" button and checkVerify's automatic
+  // Shared by the manual "Schein abholen" button and checkVerify's automatic
   // claim once LUD-21 verify confirms settlement - rotates unconditionally
   // right after the informational GET below, in both cases, no separate
   // confirmation step. noteSecret is always the wallet-held one from
@@ -768,7 +768,7 @@ const Mint: Component = () => {
     const info = payRequest()
     if (!info?.withdrawLink) return
     if (!isPreimage(noteSecret) && !isCk1(noteSecret)) {
-      notify('The note secret is malformed.', NotifyKind.ERROR)
+      notify('Das Geheimnis des Scheins ist beschädigt.', NotifyKind.ERROR)
       return
     }
     setBusy(true)
@@ -790,7 +790,7 @@ const Mint: Component = () => {
       const noteInfo = await fetchNoteInfo(declaredUrl)
       if (noteInfo.maxWithdrawable !== expectedNetMsat) {
         notify(
-          `Amount changed: expected a ${msatToSats(expectedNetMsat)} sat note, the service reports ${msatToSats(noteInfo.maxWithdrawable)} sats.`,
+          `Betrag geändert: erwartet ${msatToSats(expectedNetMsat)} Sats, die Ausgabestelle meldet ${msatToSats(noteInfo.maxWithdrawable)} Sats.`,
           NotifyKind.ERROR
         )
       }
@@ -823,9 +823,9 @@ const Mint: Component = () => {
         })
         logActivity(
           'mint',
-          `Minted ${msatToSats(noteInfo.maxWithdrawable)} sats from ${serverOf(url)} (pub/sig).` +
+          `${msatToSats(noteInfo.maxWithdrawable)} Sats aufgeladen bei ${serverOf(url)} (pub/sig).` +
             (feePaidMsat > 0
-              ? ` (${msatToSats(feePaidMsat)} sat mint fee.)`
+              ? ` (${msatToSats(feePaidMsat)} Sat Gebühr.)`
               : '') +
             (verifyUrl() ? ` Verify: ${verifyUrl()}.` : '')
         )
@@ -969,7 +969,7 @@ const Mint: Component = () => {
       clearPendingMintSecret(serverOf(info.withdrawLink), noteSecret)
       logActivity(
         'mint',
-        `Minted ${msatToSats(noteInfo.maxWithdrawable)} sats from ${serverOf(url)}.` +
+        `${msatToSats(noteInfo.maxWithdrawable)} Sats aufgeladen bei ${serverOf(url)}.` +
           (verifyUrl() ? ` Verify: ${verifyUrl()}.` : '')
       )
       // one toast, not two - the note was minted either way (it's in the
@@ -977,7 +977,7 @@ const Mint: Component = () => {
       // rather than shown as a separate, easy-to-miss-the-relation error
       if (rotationError) {
         notify(
-          `Minted ${msatToSats(noteInfo.maxWithdrawable)} sats, but could not rotate (${rotationError}) - the note secret was just transmitted, treat this note as exposed.`,
+          `${msatToSats(noteInfo.maxWithdrawable)} Sats aufgeladen, aber Erneuern ging nicht (${rotationError}) – das Geheimnis wurde übertragen, der Schein gilt als offengelegt.`,
           NotifyKind.ERROR
         )
       } else {
@@ -1055,7 +1055,7 @@ const Mint: Component = () => {
     const url = resolveMintInput(value)
     if (!url) {
       notify(
-        'Enter a mint LNURL, Lightning Address, or bare domain.',
+        'Bitte LNURL, Adresse oder Domain einer Ausgabestelle eingeben.',
         NotifyKind.ERROR
       )
       return
@@ -1094,7 +1094,7 @@ const Mint: Component = () => {
           NotifyKind.ERROR
         )
       } else {
-        notify(`${mintServer}'s cached info refreshed.`, NotifyKind.SUCCESS)
+        notify(`Angaben von ${mintServer} aktualisiert.`, NotifyKind.SUCCESS)
       }
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
@@ -1120,7 +1120,7 @@ const Mint: Component = () => {
         )
       } else {
         notify(
-          `${pending.server} added to your trusted list.`,
+          `${pending.server} als vertraut eingetragen.`,
           NotifyKind.SUCCESS
         )
       }
@@ -1131,7 +1131,7 @@ const Mint: Component = () => {
 
   const cancelAddressTrust = () => {
     setAddressTrust(null)
-    notify('Mint not trusted - lookup cancelled.', NotifyKind.ERROR)
+    notify('Ausgabestelle nicht vertraut – abgebrochen.', NotifyKind.ERROR)
   }
 
   // the holder reviewed a mint's advertised new signing key (shown on its
@@ -1198,7 +1198,7 @@ const Mint: Component = () => {
       }
       setManualServer('')
       setManualPubkey('')
-      notify('Mint added to your trusted list.', NotifyKind.SUCCESS)
+      notify('Ausgabestelle als vertraut eingetragen.', NotifyKind.SUCCESS)
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     }
@@ -1208,7 +1208,7 @@ const Mint: Component = () => {
     try {
       removeTrustedMint(mintServer)
       setConfirmDelete(null)
-      notify('Mint removed from your trusted list.', NotifyKind.SUCCESS)
+      notify('Ausgabestelle entfernt.', NotifyKind.SUCCESS)
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     }
@@ -1216,7 +1216,7 @@ const Mint: Component = () => {
 
   return (
     <div id="mint" class="page">
-      <h2>Trusted Mints</h2>
+      <h2>Ausgabestellen</h2>
       <Show when={addressDialogFor()}>
         {server => (
           <AddressDialog
@@ -1235,7 +1235,7 @@ const Mint: Component = () => {
       </Show>
       <div class="two-columns">
         <div class="two-col">
-          <h4>Trusted mints</h4>
+          <h4>Vertraute Ausgabestellen</h4>
           <Show when={trustedMints().length > 0}>
             <div class="btns">
               <button
@@ -1249,13 +1249,13 @@ const Mint: Component = () => {
                 onClick={refreshAllMints}
               >
                 <IoRefreshSharp classList={{spin: addressBusy()}} />
-                &nbsp;Refresh all
+                &nbsp;Alle aktualisieren
               </button>
             </div>
           </Show>
           <Show
             when={trustedMints().length > 0}
-            fallback={<p>No trusted mints yet.</p>}
+            fallback={<p>Noch keine vertraute Ausgabestelle.</p>}
           >
             <div class="mint-list">
               <For each={trustedMints()}>
@@ -1280,10 +1280,10 @@ const Mint: Component = () => {
                         <Show when={hasNotesFrom(mint.server)}>
                           <span
                             class="mint-trusted-badge"
-                            title="You hold a bearer note from here."
+                            title="Du hast einen Schein von hier."
                           >
                             <IoLockClosedSharp />
-                            &nbsp;trusted
+                            &nbsp;vertraut
                           </span>
                         </Show>
                       </h4>
@@ -1378,10 +1378,10 @@ const Mint: Component = () => {
                         <p class="mint-pubkey">{mint.pendingMintPubkey}</p>
                         <div class="btns">
                           <button onClick={() => rekey(mint.server)}>
-                            Trust the new key
+                            Neuem Schlüssel vertrauen
                           </button>
                           <button onClick={() => dismissRekey(mint.server)}>
-                            Keep the current key
+                            Bisherigen Schlüssel behalten
                           </button>
                         </div>
                       </Show>
@@ -1403,14 +1403,14 @@ const Mint: Component = () => {
                               selectMint(mintAddressFor(mint.server))
                             }
                           >
-                            Mint
+                            Aufladen
                           </button>
                           <button
-                            title="Rescan this mint for missing notes (LUD-25)"
+                            title="Bei dieser Ausgabestelle nach fehlenden Scheinen suchen (LUD-25)"
                             onClick={() => setRescanDialogFor(mint.server)}
                           >
                             <IoSearchSharp />
-                            &nbsp;Rescan
+                            &nbsp;Suchen
                           </button>
                           <button
                             title={
@@ -1443,14 +1443,14 @@ const Mint: Component = () => {
                         </button>
                         <button
                           class="icon-btn icon-btn-gap"
-                          title="Copy signing pubkey"
+                          title="Signaturschlüssel kopieren"
                           onClick={() => copyToClipboard(mint.mintPubkey)}
                         >
                           <IoCopySharp />
                         </button>
                         <a
                           class="icon-btn icon-btn-gap"
-                          title="Open this mint"
+                          title="Ausgabestelle öffnen"
                           href={mint.server}
                           target="_blank"
                           rel="noreferrer"
@@ -1461,7 +1461,7 @@ const Mint: Component = () => {
                           {nodePubkey => (
                             <a
                               class="icon-btn icon-btn-gap"
-                              title="Look up this Lightning node on mempool.space"
+                              title="Diese Lightning-Node auf mempool.space ansehen"
                               href={mempoolNodeUrl(nodePubkey())}
                               target="_blank"
                               rel="noreferrer"
@@ -1478,7 +1478,7 @@ const Mint: Component = () => {
                         >
                           <button
                             class="icon-btn icon-btn-gap"
-                            title="Remove"
+                            title="Entfernen"
                             onClick={() => setConfirmDelete(mint.server)}
                           >
                             <IoTrashSharp />
@@ -1492,15 +1492,14 @@ const Mint: Component = () => {
                         }
                       >
                         <p class="warning">
-                          Remove this mint? Its notes will no longer show as
-                          offline-verified.
+                          Diese Ausgabestelle entfernen? Ihre Scheine gelten dann nicht mehr als offline geprüft.
                         </p>
                         <div class="btns">
                           <button onClick={() => removeMint(mint.server)}>
-                            Yes, remove
+                            Ja, entfernen
                           </button>
                           <button onClick={() => setConfirmDelete(null)}>
-                            Cancel
+                            Abbrechen
                           </button>
                         </div>
                       </Show>
@@ -1515,10 +1514,10 @@ const Mint: Component = () => {
           <Show when={state() === 'unlocked' && storeableMints().length > 0}>
             <div class="setup-card">
               <h4>
-                Your storeable mints
+                Deine gespeicherten Ausgabestellen
                 <span
                   class="help-icon"
-                  title="These mints said their own address is meant to be reused, not a one-time link (LUD-11) - saved here for a one-click return trip."
+                  title="Diese Ausgabestellen sind zum Wiederverwenden gedacht (LUD-11) – hier gespeichert für den schnellen Weg zurück."
                 >
                   <IoHelpCircleSharp />
                 </span>
@@ -1535,7 +1534,7 @@ const Mint: Component = () => {
                       </button>
                       <button
                         class="icon-btn"
-                        title="Forget this mint"
+                        title="Ausgabestelle vergessen"
                         onClick={() => removeStoreableMint(link.address)}
                       >
                         <IoTrashSharp />
@@ -1548,10 +1547,10 @@ const Mint: Component = () => {
           </Show>
           <div class="setup-card">
             <h4>
-              Public mints
+              Öffentliche Ausgabestellen
               <span
                 class="help-icon"
-                title="A small curated list, for a quick start - click one to look up and trust its signing key via its mint-address discovery endpoint, or refresh it if it's already trusted. The globe icon opens the mint's own site instead, to look it up by hand first."
+                title="Eine kleine Auswahl für den Anfang – antippen, um ihren Schlüssel abzufragen und ihr zu vertrauen (oder zu aktualisieren). Die Weltkugel öffnet ihre Webseite zum Nachsehen."
               >
                 <IoHelpCircleSharp />
               </span>
@@ -1584,7 +1583,7 @@ const Mint: Component = () => {
                         </button>
                         <a
                           class="icon-btn"
-                          title="Open this mint's site"
+                          title="Webseite der Ausgabestelle öffnen"
                           href={`https://${serverOf(url!)}`}
                           target="_blank"
                           rel="noreferrer"
@@ -1601,7 +1600,7 @@ const Mint: Component = () => {
           <Show when={addressTrust()}>
             {pending => (
               <div class="setup-card">
-                <h4>Trust this mint?</h4>
+                <h4>Dieser Ausgabestelle vertrauen?</h4>
                 <p>
                   {pending().server} advertises the signing key below. It will
                   decide whether notes from this mint show the "signed" badge -
@@ -1610,14 +1609,14 @@ const Mint: Component = () => {
                 </p>
                 <p class="mint-pubkey">{pending().pubkey}</p>
                 <div class="btns">
-                  <button onClick={confirmAddressTrust}>Trust this key</button>
-                  <button onClick={cancelAddressTrust}>Cancel</button>
+                  <button onClick={confirmAddressTrust}>Diesem Schlüssel vertrauen</button>
+                  <button onClick={cancelAddressTrust}>Abbrechen</button>
                 </div>
               </div>
             )}
           </Show>
           <RequireWallet>
-            <h4>Scan or paste mint address</h4>
+            <h4>Adresse einer Ausgabestelle scannen oder einfügen</h4>
             <figure class="paste-widget">
               <div class="paste-input-row">
                 <ScanToggle
@@ -1631,7 +1630,7 @@ const Mint: Component = () => {
                 <button
                   type="button"
                   class="icon-btn paste-icon-btn"
-                  title="Paste from clipboard"
+                  title="Aus der Zwischenablage einfügen"
                   onClick={pasteMint}
                 >
                   <IoClipboardSharp />
@@ -1639,7 +1638,7 @@ const Mint: Component = () => {
                 <button
                   type="button"
                   class="icon-btn paste-keyboard-btn"
-                  title="Type instead"
+                  title="Stattdessen eintippen"
                   onClick={() => setShowMintKeyboard(v => !v)}
                 >
                   <MdSharpKeyboard />
@@ -1651,7 +1650,7 @@ const Mint: Component = () => {
                   <input
                     type="text"
                     class="paste-input"
-                    placeholder="lnurl1... or mint@example.com"
+                    placeholder="lnurl1… oder mint@beispiel.at"
                     value={mintInput()}
                     onInput={e => setMintInput(e.currentTarget.value)}
                     onKeyDown={e => e.key === 'Enter' && lookup()}
@@ -1660,7 +1659,7 @@ const Mint: Component = () => {
                     <button
                       type="button"
                       class="icon-btn paste-clear-btn"
-                      title="Clear"
+                      title="Leeren"
                       onClick={() => setMintInput('')}
                     >
                       <IoCloseSharp />
@@ -1747,7 +1746,7 @@ const Mint: Component = () => {
                       <div class="btns">
                         <a
                           class="icon-btn"
-                          title="Open this mint"
+                          title="Ausgabestelle öffnen"
                           href={serviceOriginOf(node().payLink)}
                           target="_blank"
                           rel="noreferrer"
@@ -1757,7 +1756,7 @@ const Mint: Component = () => {
                         <Show when={node().nodePubkey}>
                           <a
                             class="icon-btn icon-btn-gap"
-                            title="Look up this Lightning node on mempool.space"
+                            title="Diese Lightning-Node auf mempool.space ansehen"
                             href={mempoolNodeUrl(node().nodePubkey!)}
                             target="_blank"
                             rel="noreferrer"
@@ -1772,21 +1771,18 @@ const Mint: Component = () => {
                 <Show when={pendingTrust()}>
                   {pending => (
                     <>
-                      <h4>Trust this mint?</h4>
+                      <h4>Dieser Ausgabestelle vertrauen?</h4>
                       <p>
                         First time seeing a signing key from{' '}
-                        <strong>{pending().server}</strong>. Trusting it lets
-                        its notes show as offline-verified against this key -
-                        you can remove the trust later, unless you end up
-                        holding a note from it.
+                        <strong>{pending().server}</strong>. Vertraust du ihr, gelten ihre Scheine mit diesem Schlüssel als offline geprüft – das lässt sich später aufheben, solange du keinen Schein von ihr hast.
                       </p>
                       <pre>{pending().mintPubkey}</pre>
                       <div class="btns">
-                        <button onClick={confirmTrust}>Trust this mint</button>
-                        <button onClick={cancelTrust}>Cancel</button>
+                        <button onClick={confirmTrust}>Dieser Ausgabestelle vertrauen</button>
+                        <button onClick={cancelTrust}>Abbrechen</button>
                         <a
                           class="icon-btn"
-                          title="Open this mint"
+                          title="Ausgabestelle öffnen"
                           href={pending().server}
                           target="_blank"
                           rel="noreferrer"
@@ -1797,7 +1793,7 @@ const Mint: Component = () => {
                           {nodePubkey => (
                             <a
                               class="icon-btn icon-btn-gap"
-                              title="Look up this Lightning node on mempool.space"
+                              title="Diese Lightning-Node auf mempool.space ansehen"
                               href={mempoolNodeUrl(nodePubkey())}
                               target="_blank"
                               rel="noreferrer"
@@ -1852,7 +1848,7 @@ const Mint: Component = () => {
                       <input
                         type="number"
                         min="1"
-                        placeholder="amount in sats"
+                        placeholder="Betrag in Sats"
                         value={amountSats()}
                         onInput={e => setAmountSats(e.currentTarget.value)}
                       />
@@ -1860,10 +1856,7 @@ const Mint: Component = () => {
                         {amount => (
                           <Show when={amount().feeMsat > 0}>
                             <p class="bearer-hint">
-                              Invoice: {msatToSats(amount().grossMsat)} sats
-                              (includes a {msatToSats(amount().feeMsat)} sat
-                              mint fee) - note: {msatToSats(amount().netMsat)}{' '}
-                              sats
+                              Rechnung: {msatToSats(amount().grossMsat)} Sats (davon {msatToSats(amount().feeMsat)} Sat Gebühr) – Schein: {msatToSats(amount().netMsat)}{' '} Sats
                               <FiatValue msat={amount().netMsat} />
                             </p>
                           </Show>
@@ -1871,7 +1864,7 @@ const Mint: Component = () => {
                       </Show>
                       <label
                         class="plain-secret-toggle"
-                        title="Mint a plain random bearer secret, sent as its 64-hex short-form hash, instead of a seed-derived key - not recoverable from your seed"
+                        title="Zufallsgeheimnis statt eines aus den zwölf Wörtern abgeleiteten Schlüssels – nicht mit den Wörtern wiederherstellbar"
                       >
                         <input
                           type="checkbox"
@@ -1891,18 +1884,18 @@ const Mint: Component = () => {
                             <IoRefreshSharp class="spin" />
                             &nbsp;
                           </Show>
-                          Get invoice
+                          Rechnung erstellen
                         </button>
                       </div>
                       <Show when={invoice()}>
-                        <h4>1. Pay this invoice with any Lightning wallet</h4>
+                        <h4>1. Diese Rechnung mit einer beliebigen Lightning-Wallet bezahlen</h4>
                         <Qr
                           value={invoice()!.toUpperCase()}
                           href={`lightning:${invoice()!.toUpperCase()}`}
                         />
                         <div class="btns">
                           <button onClick={() => copyToClipboard(invoice()!)}>
-                            Copy invoice
+                            Rechnung kopieren
                           </button>
                           <Show when={verifyUrl()}>
                             <button
@@ -1923,9 +1916,7 @@ const Mint: Component = () => {
                           {secret => (
                             <>
                               <label>
-                                2. This current LUD-25 mint is bound to this
-                                wallet's secret - nothing to paste. Claim it
-                                below once paid
+                                2. Diese Rechnung ist an das Geheimnis dieser Wallet gebunden – nichts einzufügen. Nach dem Bezahlen unten abholen
                                 <Show when={verifyUrl()}>
                                   {' '}
                                   (or wait - this mint checks automatically)
@@ -1947,7 +1938,7 @@ const Mint: Component = () => {
                                     <IoRefreshSharp class="spin" />
                                     &nbsp;
                                   </Show>
-                                  Claim note
+                                  Schein abholen
                                 </button>
                               </div>
                             </>
@@ -1994,7 +1985,7 @@ const Mint: Component = () => {
             </Show>
           </RequireWallet>
           <div class="setup-card">
-            <h4>Add a mint manually</h4>
+            <h4>Ausgabestelle von Hand hinzufügen</h4>
             <label>SERVICE origin</label>
             <input
               type="text"
@@ -2012,7 +2003,7 @@ const Mint: Component = () => {
             <div class="btns">
               <button onClick={addManualMint}>
                 <IoAddCircleSharp />
-                &nbsp;Add mint
+                &nbsp;Hinzufügen
               </button>
             </div>
           </div>

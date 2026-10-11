@@ -345,7 +345,7 @@ const Settings: Component = () => {
 
   return (
     <div id="settings" class="page">
-      <h2>Settings</h2>
+      <h2>Einstellungen</h2>
       {/* Fork: was im Menü oben links lag, wohnt jetzt hier (Prototyp, Steve 2026-10-11) */}
       <EinstellungenOben />
       <div class="two-columns">

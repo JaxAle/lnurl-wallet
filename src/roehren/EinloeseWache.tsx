@@ -12,7 +12,7 @@ import {pruefeRunde, unterwegsIds} from './einloesen'
 const ABSTAND_MS = 8000
 
 const EinloeseWache: Component = () => {
-  const {bearers, updateBearer} = useWallet()
+  const {bearers, updateBearer, logActivity} = useWallet()
   let laeuft = false
   let uhr: ReturnType<typeof setInterval> | undefined
 
@@ -20,7 +20,24 @@ const EinloeseWache: Component = () => {
     if (laeuft || document.hidden || unterwegsIds().length === 0) return
     laeuft = true
     try {
-      await pruefeRunde(bearers(), id => updateBearer(id, {spent: true}))
+      await pruefeRunde(bearers(), async id => {
+        await updateBearer(id, {spent: true})
+        // im Verlauf soll stehen, dass Geld gegangen ist — das Original kennt nur „Mark done“
+        const b = bearers().find(x => x.id === id)
+        if (b) {
+          let stelle = ''
+          try {
+            stelle = new URL(b.url).host
+          } catch {
+            // ohne Adresse eben ohne Ausgabestelle
+          }
+          logActivity(
+            'spent',
+            `${Math.floor(b.amount / 1000).toLocaleString('de-AT')} Sats gesendet — vom Empfänger eingelöst${stelle ? ` (${stelle})` : ''}.`,
+            b.label
+          )
+        }
+      })
     } finally {
       laeuft = false
     }

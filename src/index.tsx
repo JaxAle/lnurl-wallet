@@ -137,14 +137,14 @@ const updateSW = registerSW({
   onNeedRefresh: () => {
     const id = toast.custom(
       <span>
-        A new version is ready.&nbsp;
+        Eine neue Fassung ist da.&nbsp;
         <button
           onClick={() => {
             toast.dismiss(id)
             updateSW(true)
           }}
         >
-          Reload
+          Neu laden
         </button>
       </span>,
       {duration: Infinity}
