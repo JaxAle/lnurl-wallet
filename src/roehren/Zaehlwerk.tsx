@@ -5,6 +5,8 @@ import type {Component} from 'solid-js'
 import {createMemo, For, Show} from 'solid-js'
 
 import {currency, satsToFiat} from '../currency'
+// Jost, die Schrift der Röhren — im Paket, nicht von Google Fonts (die App lädt nichts nach)
+import '@fontsource/jost/300.css'
 import './roehren.css'
 
 const ROEHREN = 7
