@@ -4,8 +4,8 @@
 // Null wie auf der Startseite und der Weg zu Empfangen.
 //
 // Nur das Bild ist hier. Teilen, Zusammenlegen, Beschriften und Erneuern sind die Funktionen des
-// Originals in pages/Wallet.tsx (dort kommt der „Motor“ her); dessen volle Werkzeugleiste bleibt
-// unten über „Alle Werkzeuge“ erreichbar. Umziehen zu einer anderen Ausgabestelle folgt später.
+// Originals in pages/Wallet.tsx (dort kommt der „Motor“ her); dessen volle Werkzeugleiste ist die
+// Scheine-Werkstatt unter Einstellungen › Erweitert. Umziehen zu einer anderen Ausgabestelle folgt später.
 import type {Accessor, Component} from 'solid-js'
 import {createMemo, createSignal, For, Show} from 'solid-js'
 import {A} from '@solidjs/router'
@@ -74,7 +74,7 @@ export const Schein: Component<{schein: Bearer; gewaehlt?: boolean; klein?: bool
   )
 }
 
-const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = props => {
+const Scheine: Component<{motor: ScheineMotor}> = props => {
   const m = props.motor
   const [blatt, setBlatt] = createSignal<string | null>(null)
   const [eingabe, setEingabe] = createSignal<'teilen' | 'etikett' | null>(null)
@@ -230,11 +230,6 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
         </div>
       </Show>
 
-      <Show when={props.onWerkstatt}>
-        <button type="button" class="rz-leise rz-werkstatt" onClick={() => props.onWerkstatt?.()}>
-          Alle Werkzeuge des Originals ›
-        </button>
-      </Show>
 
       <Show when={offen()}>
         {s => (

@@ -97,9 +97,11 @@ import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
 import type {ScheineMotor} from '../roehren/Scheine'
 
-const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
+const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props => {
   // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
-  const scheineAnsicht = () => props.ansicht === 'scheine'
+  // Fork: die Werkstatt (/scheine/werkstatt) ist das Original des Reiters, ohne unsere Kacheln
+  const werkstatt = () => props.ansicht === 'werkstatt'
+  const scheineAnsicht = () => props.ansicht === 'scheine' || werkstatt()
   const navigate = useNavigate()
   const {
     state,
@@ -1383,8 +1385,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
 
 
   // Fork: Reiter Scheine im Bild des Prototyps (roehren/Scheine.tsx) — die Arbeit tun die
-  // Funktionen oben; die volle Werkzeugleiste des Originals bleibt über „Alle Werkzeuge“ erreichbar
-  const [werkstatt, setWerkstatt] = createSignal(false)
+  // Funktionen oben; die volle Werkzeugleiste des Originals ist die Scheine-Werkstatt
+  // (Einstellungen › Erweitert) — im Reiter selbst war sie eine Falltür (Gerhard am Pixel)
   const nurDieser = (id: string) => setSelected(new Set([id]))
   const scheineMotor: ScheineMotor = {
     scheine: () => bearers().filter(b => !b.spent),
@@ -1642,9 +1644,20 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
 
             {/* Fork: Werkzeugleiste und Scheine nur im Reiter „Scheine“ (Profi-Modus, Steve 2026-10-11) */}
             <Show when={scheineAnsicht()}>
-              <Scheine motor={scheineMotor} onWerkstatt={werkstatt() ? undefined : () => setWerkstatt(true)} />
+              <Show
+                when={werkstatt()}
+                fallback={<Scheine motor={scheineMotor} />}
+              >
+                <div class="rz-seitenkopf">
+                  <A href="/settings" class="rz-zurueck" aria-label="Zurück zu den Einstellungen">
+                    ‹
+                  </A>
+                  <h2>Scheine-Werkstatt</h2>
+                </div>
+                <p class="rz-hinweis">Werkzeuge der Original-Wallet, teils englisch.</p>
+              </Show>
             </Show>
-            <Show when={scheineAnsicht() && werkstatt()}>
+            <Show when={werkstatt()}>
             <section class="list-controls">
               <div class="list-controls-row">
                 <Show

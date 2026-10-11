@@ -1176,10 +1176,6 @@ select {
   background: #17110c;
   color: #f4ebdf;
 }
-.rz-werkstatt {
-  display: block;
-  margin: 24px auto 0;
-}
 .rz-schein-blatt {
   display: grid;
   gap: 10px;
