@@ -90,6 +90,7 @@ import ScanToggle from '../components/ScanToggle'
 import NfcToggle from '../components/NfcToggle'
 import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
+import EinloeseWache from '../roehren/EinloeseWache'
 
 const Wallet: Component = () => {
   const {
@@ -1522,6 +1523,7 @@ const Wallet: Component = () => {
             <section class="wallet-hero">
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
               <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)} />
+              <EinloeseWache />
               <div class="wallet-stats">
                 <div class="wallet-stat">
                   <span class="wallet-stat-value">

@@ -2,7 +2,7 @@
 // Immer sieben Röhren, rechtsbündig; links der Zahl bleiben sie dunkel (keine führenden
 // Nullen), ihre Tausenderpunkte auch. Steigt das Guthaben, glühen die geänderten Ziffern auf.
 import type {Component} from 'solid-js'
-import {createMemo, For, Show} from 'solid-js'
+import {createEffect, createMemo, createSignal, For, on, onCleanup, Show} from 'solid-js'
 
 import {currency, satsToFiat} from '../currency'
 // Jost, die Schrift der Röhren — im Paket, nicht von Google Fonts (die App lädt nichts nach)
@@ -47,14 +47,49 @@ const fiatText = (sats: number): string | null => {
   return c === 'eur' ? `≈ ${zahl} €` : `≈ ${zahl} ${c.toUpperCase()}`
 }
 
+// Sinkt das Guthaben, zählt das Werk hinunter statt zu springen — das ist die Bestätigung,
+// dass Geld gegangen ist (Prototyp: countOnWallet/runCountdown). Dauer wächst mit dem Betrag.
+const zaehlDauer = (differenz: number) =>
+  Math.min(3200, 900 + 520 * Math.log10(Math.max(10, differenz)))
+
 const Zaehlwerk: Component<{sats: number}> = props => {
+  const [angezeigt, setAngezeigt] = createSignal(props.sats)
+  let uhr: ReturnType<typeof setTimeout> | undefined
+  const halt = () => {
+    if (uhr) clearTimeout(uhr)
+    uhr = undefined
+  }
+  createEffect(
+    on(
+      () => props.sats,
+      (ziel, vorher) => {
+        halt()
+        if (vorher === undefined || ziel >= angezeigt()) {
+          setAngezeigt(ziel)
+          return
+        }
+        const von = angezeigt()
+        const dauer = zaehlDauer(von - ziel)
+        const start = Date.now() + 350 // kurz innehalten, dann zählt das Werk los
+        const schritt = () => {
+          const t = Math.min(1, Math.max(0, (Date.now() - start) / dauer))
+          const e = 1 - Math.pow(1 - t, 3)
+          setAngezeigt(Math.round(von - (von - ziel) * e))
+          uhr = t < 1 ? setTimeout(schritt, 33) : undefined
+        }
+        uhr = setTimeout(schritt, 350)
+      }
+    )
+  )
+  onCleanup(halt)
+
   // vorheriger Stand, damit nur bei einer Änderung aufgeglüht wird
   const stand = createMemo<{sats: number; vorher: number | null}>(
-    prev => ({sats: props.sats, vorher: prev ? prev.sats : null}),
+    prev => ({sats: angezeigt(), vorher: prev ? prev.sats : null}),
     undefined
   )
-  const fiat = () => fiatText(props.sats)
-  const anzeige = () => props.sats.toLocaleString('de-AT')
+  const fiat = () => fiatText(angezeigt())
+  const anzeige = () => angezeigt().toLocaleString('de-AT')
 
   return (
     <div class="roehren-zaehlwerk">

@@ -56,6 +56,7 @@ import FiatValue from './FiatValue'
 import Dialog from './Dialog'
 import ScriptPreviewDialog from './ScriptPreviewDialog'
 import {decodeTag, parseLabelTags} from '../noteTags'
+import {merkeUnterwegs} from '../roehren/einloesen'
 
 export type BearerCardProps = {
   bearer: Bearer
@@ -233,6 +234,8 @@ const BearerCard: Component<BearerCardProps> = props => {
   // (their url already carries the real secret); device-backed ones wait
   // for an explicit reveal action (see revealDeviceNote)
   const startUnveil = () => {
+    // Fork: ab jetzt fragt die Wallet nach, ob der Schein eingelöst wurde (roehren/einloesen.ts)
+    if (!props.bearer.deviceId) merkeUnterwegs(props.bearer.id)
     setUnveiling(true)
     setRevealedUrl(props.bearer.deviceId ? null : props.bearer.url)
     setQrRevealed(false)
