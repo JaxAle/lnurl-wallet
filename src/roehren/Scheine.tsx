@@ -1,6 +1,6 @@
 // Reiter Scheine wie im Prototyp (screens.notes / noteCard / noteSheet): die Scheine als Papierkarten,
 // nach Ausgabestelle gruppiert,
-// Antippen öffnet ein Blatt mit Werkzeugen, lange antippen wählt zum Zusammenlegen aus. Leer: kalte
+// Antippen öffnet ein Blatt mit Werkzeugen („Teilen“ statt Prototyp-„Wechseln“ — Gerhard fand es nicht), lange antippen wählt zum Zusammenlegen aus. Leer: kalte
 // Null wie auf der Startseite und der Weg zu Empfangen.
 //
 // Nur das Bild ist hier. Teilen, Zusammenlegen, Beschriften und Erneuern sind die Funktionen des
@@ -250,8 +250,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                     <Symbol d={PFADE.teilen} />
                   </span>
                   <span>
-                    <span class="t">Wechseln</span>
-                    <span class="s">Einen Teil als eigenen Schein abtrennen</span>
+                    <span class="t">Teilen</span>
+                    <span class="s">In zwei Scheine aufteilen, z. B. 100 in 50 + 50</span>
                   </span>
                   <Symbol d={PFADE.chev} />
                 </button>
@@ -308,7 +308,7 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
 
               <Show when={eingabe() === 'teilen'}>
                 <label class="rz-feldname" for="rz-teil">
-                  Wie viele Sats sollen ein eigener Schein werden? (weniger als {zahl(sats(s()))})
+                  Wie viele Sats soll der neue Schein haben? (weniger als {zahl(sats(s()))})
                 </label>
                 <input
                   id="rz-teil"
@@ -330,7 +330,7 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   disabled={!(Number(text()) >= 1 && Number(text()) < sats(s())) || m.arbeitet()}
                   onClick={() => void ausfuehren(() => m.teilen(s(), Math.trunc(Number(text()))))}
                 >
-                  <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Wechseln'}</span>
+                  <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Teilen'}</span>
                 </button>
               </Show>
 
