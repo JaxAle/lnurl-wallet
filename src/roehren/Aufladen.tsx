@@ -5,7 +5,7 @@
 // Nur das Bild ist hier. Rechnung, Geheimnis, Nachfragen und Abholen bleiben unverändert in
 // pages/Mint.tsx (dort kommt der „Motor“ her); die Verwaltung der Ausgabestellen bleibt unter /mint.
 import type {Accessor, Component} from 'solid-js'
-import {createEffect, createMemo, createSignal, on, Show, untrack} from 'solid-js'
+import {createEffect, createMemo, on, Show, untrack} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import Qr from '../components/Qr'
@@ -16,6 +16,7 @@ import {serverOf} from '../lnurlcash'
 import {offlineMode} from '../offlineMode'
 import {trustedMints} from '../trustedMints'
 import {createBetrag, Tastatur} from './Betrag'
+import {standardStelle} from './standard'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -43,8 +44,8 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
   const m = props.motor
   const navigate = useNavigate()
   const ein = createBetrag()
-  const [stelle, setStelle] = createSignal(0)
-  const ziel = () => trustedMints()[stelle() % Math.max(1, trustedMints().length)]
+  // die Standard-Stelle (Einstellungen › Ausgabestellen); „ändern“ führt dorthin
+  const ziel = () => standardStelle(trustedMints())
 
   // die Ausgabestelle gleich beim Öffnen fragen (ein GET): dann sind Grenzen und Gebühr bekannt,
   // bevor jemand tippt
@@ -123,18 +124,9 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                         <Show when={gebuehr() > 0}>
                           {' '}· {gebuehr()} Sat{gebuehr() === 1 ? '' : 's'} Gebühr
                         </Show>{' '}
-                        <Show
-                          when={trustedMints().length > 1}
-                          fallback={
-                            <A href="/mint" class="rz-aendern">
-                              ändern
-                            </A>
-                          }
-                        >
-                          <button type="button" class="rz-aendern" onClick={() => setStelle(i => i + 1)}>
-                            ändern
-                          </button>
-                        </Show>
+                        <A href="/mint" class="rz-aendern">
+                          ändern
+                        </A>
                       </p>
                     }
                   >

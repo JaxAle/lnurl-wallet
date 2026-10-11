@@ -1187,3 +1187,70 @@ select {
 .rz-schein-blatt .rz-note {
   margin-bottom: 6px;
 }
+
+/* Ausgabestellen (Prototyp screens.mints): Liste, Standard-Marke, Hinzufügen, Frage */
+.rz-stelle-zeile .amt {
+  display: grid;
+  justify-items: end;
+}
+.rz-stelle-zeile .einheit {
+  font-size: 12px;
+  transform: none;
+  color: #a3907c;
+}
+.rz-marke {
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 239, 196, 0.35);
+  border-radius: 999px;
+  font-size: 14px;
+  color: #ffefc4;
+}
+.rz-eintrag-kopf + .rz-eintrag-kopf {
+  border-top: 1px solid #2f2218;
+}
+.rz-eintrag-kopf:disabled {
+  opacity: 0.5;
+}
+.rz-link-knopf {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  margin-top: 22px;
+  text-decoration: none;
+}
+.rz-abstand {
+  margin-top: 22px;
+}
+.rz-frage h3 {
+  margin: 10px 0 8px;
+  font: 300 24px/1.25 'Jost', system-ui, sans-serif;
+  color: #f4ebdf;
+  overflow-wrap: anywhere;
+}
+.rz-frage p {
+  margin: 0 0 10px;
+  color: #f4ebdf;
+}
+.rz-frage .rz-duo {
+  align-items: center;
+}
+.rz-frage .rz-knopf {
+  min-height: 64px;
+}
+.rz-technik {
+  display: block;
+  margin-top: 6px;
+}
+.rz-schluessel {
+  font: 12px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  word-break: break-all;
+  color: #ead8bf;
+}
+
+/* Erklärsätze grau, wie im Prototyp (.small.muted) — Orange heißt „antippbar“ (Steve) */
+.rz-hinweis,
+.rz-frage p.rz-hinweis {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #a3907c;
+}

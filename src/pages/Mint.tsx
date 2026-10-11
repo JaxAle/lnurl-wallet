@@ -118,6 +118,7 @@ import FiatValue from '../components/FiatValue'
 import AddressDialog from '../components/AddressDialog'
 import RescanDialog from '../components/RescanDialog'
 import Aufladen from '../roehren/Aufladen'
+import {AusgabestelleHinzufuegen, AusgabestellenListe} from '../roehren/Ausgabestellen'
 
 // LUD-21 auto-poll interval, in seconds - both the countdown shown on the
 // button and the cadence of the automatic check
@@ -147,7 +148,7 @@ const mintAddressFor = (server: string): string =>
 // without a network connection - only the minting half below is gated on
 // both (see RequireWallet, and the individual offlineMode() checks on its
 // own controls).
-const Mint: Component<{aufladen?: boolean}> = props => {
+const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> = props => {
   const {state, bearers, addBearer, logActivity} = useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
@@ -1213,6 +1214,23 @@ const Mint: Component<{aufladen?: boolean}> = props => {
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     }
+  }
+
+  // Fork: /mint ist die ruhige Liste, /mint/hinzufuegen der Weg dazu (roehren/Ausgabestellen.tsx);
+  // diese ganze Seite bleibt als Werkstatt unter /mint/werkstatt
+  if (props.ansicht === 'liste') return <AusgabestellenListe />
+  if (props.ansicht === 'hinzufuegen') {
+    return (
+      <AusgabestelleHinzufuegen
+        motor={{
+          nachschlagen: addByAddress,
+          frage: addressTrust,
+          sucht: addressBusy,
+          ja: confirmAddressTrust,
+          nein: () => setAddressTrust(null)
+        }}
+      />
+    )
   }
 
   // Fork: /aufladen zeigt eigenes Bild (roehren/Aufladen.tsx), Rechnung und Abholen bleiben hier

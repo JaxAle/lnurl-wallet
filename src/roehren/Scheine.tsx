@@ -1,4 +1,5 @@
 // Reiter Scheine wie im Prototyp (screens.notes / noteCard / noteSheet): die Scheine als Papierkarten,
+// nach Ausgabestelle gruppiert,
 // Antippen öffnet ein Blatt mit Werkzeugen, lange antippen wählt zum Zusammenlegen aus. Leer: kalte
 // Null wie auf der Startseite und der Weg zu Empfangen.
 //
@@ -79,7 +80,20 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
   const [text, setText] = createSignal('')
 
   const offen = () => m.scheine().find(b => b.id === blatt()) ?? null
-  const stellen = createMemo(() => new Set(m.scheine().map(b => serverOf(b.url))).size)
+  // nach Ausgabestelle geordnet (Steve, 2026-10-11): was zusammengehört, steht beisammen — und
+  // Zusammenlegen geht genau innerhalb einer Gruppe
+  const gruppen = createMemo(() => {
+    const je = new Map<string, Bearer[]>()
+    for (const b of m.scheine()) {
+      const h = serverOf(b.url)
+      je.set(h, [...(je.get(h) ?? []), b])
+    }
+    return [...je.entries()].map(([host, scheine]) => ({
+      host,
+      scheine,
+      summe: scheine.reduce((a, b) => a + sats(b), 0)
+    }))
+  })
   const wahl = () => m.ausgewaehlt().size
   const gleicheStelle = createMemo(() => {
     const gew = m.scheine().filter(b => m.ausgewaehlt().has(b.id))
@@ -145,10 +159,7 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
           </>
         }
       >
-        <p class="rz-hinweis">
-          {m.scheine().length} {m.scheine().length === 1 ? 'Schein' : 'Scheine'} bei {stellen()}{' '}
-          {stellen() === 1 ? 'Ausgabestelle' : 'Ausgabestellen'}. Antippen für Werkzeuge, lange antippen zum Auswählen.
-        </p>
+        <p class="rz-hinweis">Antippen für Werkzeuge, lange antippen zum Auswählen.</p>
 
         <Show when={wahl() > 1}>
           <div class="rz-auswahl">
@@ -167,29 +178,38 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
           </Show>
         </Show>
 
-        <div class="rz-notes">
-          <For each={m.scheine()}>
-            {b => (
-              <div class="rz-note-platz">
-                <button
-                  type="button"
-                  class="rz-note-knopf"
-                  aria-label={`Schein über ${zahl(sats(b))} Sats`}
-                  onPointerDown={() => druck(b.id)}
-                  onPointerUp={los}
-                  onPointerLeave={los}
-                  onContextMenu={e => e.preventDefault()}
-                  onClick={() => tipp(b.id)}
-                >
-                  <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} />
-                </button>
-                <Show when={b.label}>
-                  <div class="rz-etikett">{b.label}</div>
-                </Show>
+        <For each={gruppen()}>
+          {g => (
+            <section class="rz-gruppe">
+              <span class="rz-eyebrow">
+                {g.host} · {g.scheine.length} {g.scheine.length === 1 ? 'Schein' : 'Scheine'} · {zahl(g.summe)} Sats
+              </span>
+              <div class="rz-notes">
+              <For each={g.scheine}>
+                {b => (
+                  <div class="rz-note-platz">
+                    <button
+                      type="button"
+                      class="rz-note-knopf"
+                      aria-label={`Schein über ${zahl(sats(b))} Sats`}
+                      onPointerDown={() => druck(b.id)}
+                      onPointerUp={los}
+                      onPointerLeave={los}
+                      onContextMenu={e => e.preventDefault()}
+                      onClick={() => tipp(b.id)}
+                    >
+                      <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} />
+                    </button>
+                    <Show when={b.label}>
+                      <div class="rz-etikett">{b.label}</div>
+                    </Show>
+                  </div>
+                )}
+              </For>
               </div>
-            )}
-          </For>
-        </div>
+            </section>
+          )}
+        </For>
       </Show>
 
       <Show when={props.onWerkstatt}>
