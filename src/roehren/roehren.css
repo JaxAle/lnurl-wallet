@@ -1254,3 +1254,82 @@ select {
   line-height: 1.45;
   color: #a3907c;
 }
+
+/* Scheine als Kacheln: zwei je Reihe, beim Auswählen nur eine Stelle, Leiste unten fest (Steve, Pixel) */
+.rz-scheine .rz-notes {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rz-note.klein {
+  padding: 8px 10px;
+  border-radius: 10px;
+  grid-template-rows: auto 1fr;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+}
+.rz-note.klein::after {
+  inset: 4px;
+  border-radius: 7px;
+}
+.rz-note.klein .n-serial,
+.rz-note.klein .n-micro,
+.rz-note.klein .n-stamp {
+  display: none;
+}
+.rz-note.klein .n-mint {
+  font-size: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rz-note.klein .n-amt {
+  font-size: 26px;
+}
+.rz-note.klein .n-amt small {
+  margin-left: 4px;
+  font-size: 10px;
+}
+.rz-note.klein.sel {
+  outline-width: 2px;
+}
+.rz-gruppe-zu {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid #2f2218;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.rz-scheine:has(.rz-auswahl) {
+  padding-bottom: 96px;
+}
+.rz-auswahl {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid #2f2218;
+  border-radius: 18px;
+  background: #17110c;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
+  color: #f4ebdf;
+}
+.rz-auswahl .rz-knopf {
+  min-height: 48px;
+  padding: 8px 18px;
+}
+.rz-auswahl .rz-knopf .lbl {
+  font-size: 20px;
+}
+.rz-auswahl-leise {
+  color: #a3907c;
+  font-size: 13px;
+}

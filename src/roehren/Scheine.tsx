@@ -49,10 +49,11 @@ const PFADE = {
   empfangen: 'M12 4v12M6 10l6 6 6-6M5 20h14'
 }
 
-export const Schein: Component<{schein: Bearer; gewaehlt?: boolean}> = props => {
+// klein: Kachel im Reiter (zwei je Reihe) — nur Stelle und Betrag; groß erst im Blatt (Steve)
+export const Schein: Component<{schein: Bearer; gewaehlt?: boolean; klein?: boolean}> = props => {
   const host = () => serverOf(props.schein.url)
   return (
-    <div class={`rz-note hue-${farbe(host())}`} classList={{sel: props.gewaehlt}}>
+    <div class={`rz-note hue-${farbe(host())}`} classList={{sel: props.gewaehlt, klein: props.klein}}>
       <div class="n-top">
         <span class="n-mint">{host()}</span>
         <span class="n-serial">Nr. {props.schein.id.slice(0, 6).toUpperCase()}</span>
@@ -95,6 +96,11 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
     }))
   })
   const wahl = () => m.ausgewaehlt().size
+  // beim Auswählen zählt nur die Stelle des ersten gewählten Scheins — die anderen klappen zu
+  const gewaehlteStelle = createMemo(() => {
+    const erster = m.scheine().find(b => m.ausgewaehlt().has(b.id))
+    return erster ? serverOf(erster.url) : null
+  })
   const gleicheStelle = createMemo(() => {
     const gew = m.scheine().filter(b => m.ausgewaehlt().has(b.id))
     return new Set(gew.map(b => serverOf(b.url))).size === 1
@@ -161,26 +167,17 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
       >
         <p class="rz-hinweis">Antippen für Werkzeuge, lange antippen zum Auswählen.</p>
 
-        <Show when={wahl() > 1}>
-          <div class="rz-auswahl">
-            <span>{wahl()} ausgewählt</span>
-            <button
-              type="button"
-              class="rz-leise"
-              disabled={!gleicheStelle() || !m.kannZusammenlegen() || m.arbeitet()}
-              onClick={() => void m.zusammenlegen()}
-            >
-              {m.arbeitet() ? 'Einen Moment …' : 'Zusammenlegen'}
-            </button>
-          </div>
-          <Show when={!gleicheStelle()}>
-            <p class="rz-hinweis">Zusammenlegen geht nur bei derselben Ausgabestelle.</p>
-          </Show>
-        </Show>
-
         <For each={gruppen()}>
           {g => (
-            <section class="rz-gruppe">
+            <section class="rz-gruppe" classList={{zu: !!gewaehlteStelle() && gewaehlteStelle() !== g.host}}>
+              <Show
+                when={!gewaehlteStelle() || gewaehlteStelle() === g.host}
+                fallback={
+                  <button type="button" class="rz-eyebrow rz-gruppe-zu" onClick={() => m.leereAuswahl()}>
+                    {g.host} · {g.scheine.length} {g.scheine.length === 1 ? 'Schein' : 'Scheine'} · {zahl(g.summe)} Sats ›
+                  </button>
+                }
+              >
               <span class="rz-eyebrow">
                 {g.host} · {g.scheine.length} {g.scheine.length === 1 ? 'Schein' : 'Scheine'} · {zahl(g.summe)} Sats
               </span>
@@ -198,7 +195,7 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
                       onContextMenu={e => e.preventDefault()}
                       onClick={() => tipp(b.id)}
                     >
-                      <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} />
+                      <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} klein />
                     </button>
                     <Show when={b.label}>
                       <div class="rz-etikett">{b.label}</div>
@@ -207,9 +204,30 @@ const Scheine: Component<{motor: ScheineMotor; onWerkstatt?: () => void}> = prop
                 )}
               </For>
               </div>
+              </Show>
             </section>
           )}
         </For>
+      </Show>
+
+      {/* unten fest über den Reitern: bleibt unter dem Daumen, wie weit auch gescrollt (Steve) */}
+      <Show when={wahl() > 0}>
+        <div class="rz-auswahl">
+          <span>
+            {wahl()} ausgewählt
+            <Show when={wahl() === 1}>
+              <span class="rz-auswahl-leise"> — noch einen wählen</span>
+            </Show>
+          </span>
+          <button
+            type="button"
+            class="rz-knopf an"
+            disabled={wahl() < 2 || !gleicheStelle() || !m.kannZusammenlegen() || m.arbeitet()}
+            onClick={() => void m.zusammenlegen()}
+          >
+            <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Zusammenlegen'}</span>
+          </button>
+        </div>
       </Show>
 
       <Show when={props.onWerkstatt}>
