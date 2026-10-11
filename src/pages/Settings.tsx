@@ -430,7 +430,6 @@ const Settings: Component = () => {
               </For>
             </div>
           </div>
-          </div>
           <div class="setup-card">
             <h4>
               <IoCloudOfflineSharp />
