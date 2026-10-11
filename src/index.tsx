@@ -18,6 +18,7 @@ import Footer from './components/Footer'
 import AddressAutoScanner from './components/AddressAutoScanner'
 import Hero from './pages/Hero'
 import Wallet from './pages/Wallet'
+import Reiter from './roehren/Reiter'
 import Setup from './pages/Setup'
 import Mint from './pages/Mint'
 import Activity from './pages/Activity'
@@ -43,11 +44,12 @@ const App = (props: any) => {
         edge, which the fixed nav (taller still on mobile, see .nav-toggle in
         style.scss) then overlaps - pushed down past it instead */}
         {/* Fork: Meldungen unten statt oben rechts — oben steht das Röhren-Zählwerk, und eine
-        Meldung genau darüber verdeckte das Hinaufzählen (Gerhard am Pixel, 2026-10-11) */}
+        Meldung genau darüber verdeckte das Hinaufzählen (Gerhard am Pixel, 2026-10-11); 104 px:
+        über der Reiterleiste */}
         <Toaster
           position="bottom-center"
           toastOptions={{duration: 5000}}
-          containerStyle={{bottom: '24px'}}
+          containerStyle={{bottom: '104px'}}
         />
         <Nav />
         {/* mounted once, wallet-wide, regardless of which page is open -
@@ -74,6 +76,7 @@ const App = (props: any) => {
           {props.children}
         </ErrorBoundary>
         <Footer />
+        <Reiter />
       </DeviceProvider>
     </WalletProvider>
   )
@@ -84,6 +87,8 @@ const cleanup = render(
     <HashRouter root={App}>
       <Route path="/" component={Hero} />
       <Route path="/wallet" component={Wallet} />
+      {/* Fork: Reiter „Scheine“ (Profi-Modus) — dieselbe Seite, nur die Liste */}
+      <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={Mint} />
       {/* /mints merged into /mint (trusted-mint management now lives at

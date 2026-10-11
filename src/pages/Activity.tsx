@@ -1,4 +1,5 @@
 import type {Component} from 'solid-js'
+import UnterwegsListe from '../roehren/UnterwegsListe'
 import {Show, For, createSignal} from 'solid-js'
 import {Dynamic} from 'solid-js/web'
 import {A} from '@solidjs/router'
@@ -111,6 +112,8 @@ const Activity: Component = () => {
   return (
     <RequireWallet>
       <div id="activity" class="page">
+        {/* Fork: was unterwegs ist, steht oben im Verlauf (Prototyp) */}
+        <UnterwegsListe />
         <div class="activity-header">
           <A href="/wallet" class="icon-btn" title="Back to wallet">
             <IoArrowBackSharp />

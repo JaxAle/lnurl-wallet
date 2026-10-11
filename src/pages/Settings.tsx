@@ -21,6 +21,7 @@ import {
 
 import {useWallet} from '../WalletContext'
 import {offlineMode, setOfflineMode} from '../offlineMode'
+import {profi, setProfi} from '../roehren/profi'
 import {currency, setCurrency, CURRENCY_LABEL} from '../currency'
 import type {Currency} from '../currency'
 import {
@@ -425,6 +426,25 @@ const Settings: Component = () => {
                   </button>
                 )}
               </For>
+            </div>
+          </div>
+          {/* Fork: Profi-Modus — Text aus dem Prototyp */}
+          <div class="setup-card">
+            <h4>Profi-Modus</h4>
+            <p>
+              Einzelne Scheine sehen, wechseln, zusammenlegen, umziehen. Schaltet den Reiter
+              „Scheine“ mit allen Werkzeugen ein.
+            </p>
+            <div class="btns">
+              <button
+                type="button"
+                classList={{active: profi()}}
+                onClick={() => setProfi(!profi())}
+              >
+                <Show when={profi()} fallback="Einschalten">
+                  Ausschalten
+                </Show>
+              </button>
             </div>
           </div>
           <div class="setup-card">

@@ -1,7 +1,7 @@
 import type {Component} from 'solid-js'
 import {Show, For, createSignal, createMemo, createEffect, on, onMount, onCleanup} from 'solid-js'
 import {render} from 'solid-js/web'
-import {A} from '@solidjs/router'
+import {A, useNavigate} from '@solidjs/router'
 import {QRCodeSVG, ErrorCorrectionLevel} from 'solid-qr-code'
 import {
   IoAddCircleSharp,
@@ -90,11 +90,13 @@ import ScanToggle from '../components/ScanToggle'
 import NfcToggle from '../components/NfcToggle'
 import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
-import EinloeseWache from '../roehren/EinloeseWache'
 import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
 
-const Wallet: Component = () => {
+const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
+  // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
+  const scheineAnsicht = () => props.ansicht === 'scheine'
+  const navigate = useNavigate()
   const {
     state,
     bearers,
@@ -251,26 +253,6 @@ const Wallet: Component = () => {
   // Es schließt sich, sobald eine Rechnung zum Zahlen weitergereicht ist oder ein Schein
   // fertig empfangen wurde — dann übernimmt der Dialog bzw. zählt das Zählwerk.
   const [blatt, setBlatt] = createSignal<'senden' | 'empfangen' | null>(null)
-  // Fork: die Scheine sind Profi-Sache (Prototyp: eigener Reiter im Profi-Modus) — auf der
-  // Startseite stehen sie nur, wenn man sie aufklappt; gemerkt je Gerät
-  const SCHEINE_ZEIGEN = 'fork_scheine_zeigen'
-  const [zeigeScheine, setZeigeScheineRoh] = createSignal(
-    (() => {
-      try {
-        return localStorage.getItem(SCHEINE_ZEIGEN) === '1'
-      } catch {
-        return false
-      }
-    })()
-  )
-  const setZeigeScheine = (an: boolean) => {
-    setZeigeScheineRoh(an)
-    try {
-      localStorage.setItem(SCHEINE_ZEIGEN, an ? '1' : '0')
-    } catch {
-      // nur eine Bequemlichkeit
-    }
-  }
   // Verbergen heißt nicht verschweigen: was unterwegs ist, steht als eine Zeile da (Prototyp)
   const unterwegsScheine = createMemo(() => {
     const ids = new Set(unterwegs())
@@ -1555,6 +1537,7 @@ const Wallet: Component = () => {
                 </>
               </Dialog>
             </Show>
+            <Show when={!scheineAnsicht()}>
             <section class="wallet-hero">
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
               <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)}>
@@ -1562,7 +1545,7 @@ const Wallet: Component = () => {
                   <button
                     type="button"
                     class="rz-hinweiszeile"
-                    onClick={() => setZeigeScheine(true)}
+                    onClick={() => navigate('/activity')}
                   >
                     {unterwegsScheine().length === 1
                       ? '1 Schein unterwegs'
@@ -1575,7 +1558,6 @@ const Wallet: Component = () => {
                   </button>
                 </Show>
               </Zaehlwerk>
-              <EinloeseWache />
               {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
               <Knoepfe
                 onSenden={() => setBlatt('senden')}
@@ -1704,18 +1686,8 @@ const Wallet: Component = () => {
                   </div>
                 </Dialog>
               </Show>
-              <Show when={spendableBearers().length > 0}>
-                <button
-                  type="button"
-                  class="rz-leise"
-                  onClick={() => setZeigeScheine(!zeigeScheine())}
-                >
-                  {zeigeScheine()
-                    ? 'Scheine ausblenden'
-                    : `Alle Scheine (${spendableBearers().length}) ›`}
-                </button>
-              </Show>
             </section>
+            </Show>
             <Show when={showMelt()}>
               <MeltDialog
                 initialInvoice={meltHandoffInvoice() ?? undefined}
@@ -1725,8 +1697,8 @@ const Wallet: Component = () => {
             </Show>
             {savedAddressPicker()}
 
-            {/* Fork: Werkzeugleiste und Scheine nur aufgeklappt (Steve, 2026-10-11) */}
-            <Show when={zeigeScheine()}>
+            {/* Fork: Werkzeugleiste und Scheine nur im Reiter „Scheine“ (Profi-Modus, Steve 2026-10-11) */}
+            <Show when={scheineAnsicht()}>
             <section class="list-controls">
               <div class="list-controls-row">
                 <Show
