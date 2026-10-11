@@ -1,4 +1,4 @@
-// Reiterleiste unten wie im Prototyp: Wallet · Verlauf · (Scheine im Profi-Modus) · Einstellungen.
+// Reiterleiste unten: Wallet · Verlauf · Scheine · Einstellungen (Prototyp ohne Scheine; s. unten).
 // Der Daumen erreicht sie; das Menü oben links bleibt nur für Seltenes (Doku, Erweiterungen).
 // Das Lämpchen am Verlauf glimmt, solange ein Schein unterwegs ist. Hier läuft auch die
 // Einlöse-Wache, damit sie auf jeder Seite nachfragt, nicht nur auf der Startseite.
@@ -9,7 +9,6 @@ import {A, useLocation} from '@solidjs/router'
 import {useWallet} from '../WalletContext'
 import EinloeseWache from './EinloeseWache'
 import {unterwegs} from './einloesen'
-import {profi} from './profi'
 import './roehren.css'
 
 // Symbole wörtlich aus dem Prototyp (Konstante I: wallet, clock, notes, gear) — feste Zeichenketten
@@ -45,7 +44,9 @@ const Reiter: Component = () => {
       ['/wallet', 'Wallet', 'wallet'],
       ['/activity', 'Verlauf', 'clock']
     ]
-    if (profi()) r.push(['/scheine', 'Scheine', 'notes'])
+    // immer sichtbar: Teilen und Zusammenlegen sind der Kern von LNURLcash (Gerhard, 2026-10-11 —
+    // Abweichung vom Prototyp, dort nur im Profi-Modus)
+    r.push(['/scheine', 'Scheine', 'notes'])
     r.push(['/settings', 'Einstellungen', 'gear'])
     return r
   }

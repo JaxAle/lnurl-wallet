@@ -21,7 +21,6 @@ import {
 
 import {useWallet} from '../WalletContext'
 import {offlineMode, setOfflineMode} from '../offlineMode'
-import {profi, setProfi} from '../roehren/profi'
 import EinstellungenOben from '../roehren/EinstellungenOben'
 import {currency, setCurrency, CURRENCY_LABEL} from '../currency'
 import type {Currency} from '../currency'
@@ -431,7 +430,6 @@ const Settings: Component = () => {
               </For>
             </div>
           </div>
-          {/* Fork: Profi-Modus — Text aus dem Prototyp */}
           <div class="setup-card">
             <h4>Profi-Modus</h4>
             <p>
