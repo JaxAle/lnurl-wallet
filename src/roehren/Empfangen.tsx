@@ -76,6 +76,7 @@ const Empfangen: Component = () => {
           <Show when={scannt()}>
             <div class="rz-scanner">
               <Scanner onScan={uebernimm} />
+              <p class="rz-hinweis">QR-Code ins Bild halten — erkannt wird von selbst.</p>
             </div>
           </Show>
         </Show>

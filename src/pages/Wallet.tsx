@@ -1559,6 +1559,13 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
             <section class="wallet-hero">
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
               <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)}>
+                {/* Fork: Rückmeldung beim Einlösen eines gescannten/eingefügten Scheins — ohne sie
+                sah man am Pixel nicht, ob der Scan angekommen war (Gerhard, 2026-10-11) */}
+                <Show when={heroReceiving()}>
+                  <p class="rz-status">
+                    <span class="rz-lampe-klein" /> Schein wird eingelöst …
+                  </p>
+                </Show>
                 <Show when={unterwegsScheine().length > 0}>
                   <button
                     type="button"
