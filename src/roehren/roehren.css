@@ -284,6 +284,12 @@
 .rz-leise:active {
   color: #ffefc4;
 }
+.rz-zeilenknopf {
+  display: inline-block;
+  width: auto;
+  padding: 0 4px;
+  font-size: 14px;
+}
 
 /* Scheine in der Röhrenwelt: dunkles Glas, Bernstein statt Blau (Steve) */
 /* .bearer-list davor: gewinnt gegen style.scss unabhängig von der Reihenfolge im Bündel */

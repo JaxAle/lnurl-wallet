@@ -3,8 +3,7 @@
 // Ausgabestelle geht vom Rest ab, nicht vom übergebenen Betrag), dann der QR. Das Einlösen erkennt
 // die Einlöse-Wache; das Zählwerk zählt danach auf der Startseite herunter.
 //
-// Noch nicht hier (spätere Schleife): Eingabe in Euro, „Als Link teilen“, „Geschenkkarte“,
-// „Schein zurückholen“.
+// Noch nicht hier (spätere Schleife): Eingabe in Euro, „Als Link teilen“, „Geschenkkarte“.
 import type {Component} from 'solid-js'
 import {createMemo, createSignal, For, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
@@ -19,6 +18,7 @@ import {splitBearerIntoAmounts} from '../noteSplitting'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs} from './einloesen'
+import {holeZurueck} from './zurueckholen'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -95,6 +95,24 @@ const Senden: Component = () => {
   }
   const eingeloest = () => !!aktuell()?.spent
 
+  // „Doch nicht senden“: Schein erneuern, der gezeigte QR wird wertlos (Gerhard am Pixel, 2026-10-11)
+  const [holt, setHolt] = createSignal(false)
+  const [zurueck, setZurueck] = createSignal(false)
+  const zurueckholen = async () => {
+    const s = aktuell()
+    if (!s) return
+    setHolt(true)
+    try {
+      const ergebnis = await holeZurueck(s, {addBearer, updateBearer, logActivity})
+      if (ergebnis === 'zurueck') setZurueck(true)
+      // 'schon-eingeloest': der Schein steht nun auf "spent", die Seite zeigt „eingelöst“
+    } catch (err) {
+      notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+    } finally {
+      setHolt(false)
+    }
+  }
+
   return (
     <RequireWallet>
     <div class="page rz-senden">
@@ -156,6 +174,18 @@ const Senden: Component = () => {
       >
         {s => (
           <Show
+            when={!zurueck()}
+            fallback={
+              <div class="rz-fertig">
+                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt />
+                <p class="rz-hinweis">Zurückgeholt — der gezeigte QR ist wertlos, der Betrag bleibt bei dir.</p>
+                <button type="button" class="rz-knopf an rz-weiter" onClick={() => navigate('/wallet')}>
+                  <span class="lbl">Fertig</span>
+                </button>
+              </div>
+            }
+          >
+          <Show
             when={!eingeloest()}
             fallback={
               <div class="rz-fertig">
@@ -184,6 +214,15 @@ const Senden: Component = () => {
             <button type="button" class="rz-leise" onClick={() => navigate('/wallet')}>
               Zurück zur Wallet
             </button>
+            <button
+              type="button"
+              class="rz-leise"
+              disabled={holt()}
+              onClick={() => void zurueckholen()}
+            >
+              {holt() ? 'Einen Moment …' : 'Doch nicht senden, Schein zurückholen'}
+            </button>
+          </Show>
           </Show>
         )}
       </Show>
