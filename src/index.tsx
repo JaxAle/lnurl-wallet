@@ -42,10 +42,12 @@ const App = (props: any) => {
         {/* solid-toast's default top offset sits right under the viewport
         edge, which the fixed nav (taller still on mobile, see .nav-toggle in
         style.scss) then overlaps - pushed down past it instead */}
+        {/* Fork: Meldungen unten statt oben rechts — oben steht das Röhren-Zählwerk, und eine
+        Meldung genau darüber verdeckte das Hinaufzählen (Gerhard am Pixel, 2026-10-11) */}
         <Toaster
-          position="top-right"
+          position="bottom-center"
           toastOptions={{duration: 5000}}
-          containerStyle={{top: '64px'}}
+          containerStyle={{bottom: '24px'}}
         />
         <Nav />
         {/* mounted once, wallet-wide, regardless of which page is open -
