@@ -74,6 +74,8 @@ const Zaehlwerk: Component<{
   children?: JSX.Element
   sofort?: boolean
   kalt?: boolean
+  // frei vor den Röhren, z. B. „−“ beim Abschluss des Sendens: eine Bewegung, kein Stand
+  vorzeichen?: string
 }> = props => {
   const [angezeigt, setAngezeigtRoh] = createSignal(props.sofort ? props.sats : (zuletzt ?? props.sats))
   const setAngezeigt = (wert: number) => {
@@ -125,10 +127,13 @@ const Zaehlwerk: Component<{
         {s => (
           <div
             class="bal-tubes"
-            classList={{cold: s.sats === 0 || !!props.kalt}}
+            classList={{cold: s.sats === 0 || !!props.kalt, signed: !!props.vorzeichen}}
             role="img"
             aria-label={`Guthaben ${anzeige()} Sats`}
           >
+            <Show when={props.vorzeichen}>
+              <span class="sign">{props.vorzeichen}</span>
+            </Show>
             {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
             <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
               {zelle =>

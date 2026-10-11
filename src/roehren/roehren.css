@@ -97,6 +97,31 @@
   opacity: 0;
 }
 
+/* Vorzeichen frei vor den Röhren, Röhren etwas kleiner (Prototyp .bal-tubes.signed / .sign) */
+.roehren-zaehlwerk .bal-tubes.signed .tube {
+  width: 33px;
+  height: 52px;
+}
+.roehren-zaehlwerk .sign {
+  align-self: center;
+  margin-right: 4px;
+  font: 300 30px/1 'Jost', 'Futura', system-ui, sans-serif;
+  color: #ffd59a;
+  text-shadow: 0 0 3px #ffb04a, 0 0 9px #ff7a10, 0 0 16px rgba(255, 70, 0, 0.55);
+}
+/* Abschluss (Prototyp doneBody): Zeile matt, Erklärung klein */
+.rz-fertig .rz-zeile-matt {
+  margin: 0;
+  font: 300 18px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  color: #a3907c;
+}
+.rz-fertig .rz-klein {
+  max-width: 32ch;
+  margin: 4px auto 0;
+  font: 300 15px/1.4 'Jost', 'Futura', system-ui, sans-serif;
+  color: #a3907c;
+}
+
 /* Tausenderpunkt zwischen den Röhren */
 .roehren-zaehlwerk .dot {
   width: 6px;
@@ -532,6 +557,9 @@ body:has(.rz-reiter) {
 .rz-fertig {
   padding-top: 12%;
   text-align: center;
+}
+.rz-fertig .rz-weiter {
+  margin-top: 18px;
 }
 
 @media (prefers-reduced-motion: reduce) {

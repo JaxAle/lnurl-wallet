@@ -177,10 +177,13 @@ const Senden: Component = () => {
             when={!zurueck()}
             fallback={
               <div class="rz-fertig">
-                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt />
-                <p class="rz-hinweis">Zurückgeholt — der gezeigte QR ist wertlos, der Betrag bleibt bei dir.</p>
+                {/* nichts ist weggegangen, also glüht nichts und es gibt kein Vorzeichen (Steve) */}
+                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt>
+                  <p class="rz-zeile-matt">Sats zurückgeholt</p>
+                  <p class="rz-klein">Der gezeigte QR ist wertlos, der Betrag bleibt bei dir.</p>
+                </Zaehlwerk>
                 <button type="button" class="rz-knopf an rz-weiter" onClick={() => navigate('/wallet')}>
-                  <span class="lbl">Fertig</span>
+                  <span class="lbl">Zur Wallet</span>
                 </button>
               </div>
             }
@@ -189,10 +192,13 @@ const Senden: Component = () => {
             when={!eingeloest()}
             fallback={
               <div class="rz-fertig">
-                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort />
-                <p class="rz-hinweis">Der Empfänger hat den Schein eingelöst.</p>
+                {/* „−50“: eine Bewegung, kein Stand — sonst liest man es als Guthaben (Steve) */}
+                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort vorzeichen="−">
+                  <p class="rz-zeile-matt">Sats gesendet</p>
+                  <p class="rz-klein">Der Empfänger hat den Schein eingelöst.</p>
+                </Zaehlwerk>
                 <button type="button" class="rz-knopf an rz-weiter" onClick={() => navigate('/wallet')}>
-                  <span class="lbl">Fertig</span>
+                  <span class="lbl">Zur Wallet</span>
                 </button>
               </div>
             }
