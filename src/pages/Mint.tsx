@@ -8,6 +8,7 @@ import {
   onCleanup
 } from 'solid-js'
 import {useNavigate} from '@solidjs/router'
+import {zeigeGebuehr} from '../roehren/Zaehlwerk'
 import {
   IoRefreshSharp,
   IoClipboardSharp,
@@ -828,13 +829,8 @@ const Mint: Component = () => {
               : '') +
             (verifyUrl() ? ` Verify: ${verifyUrl()}.` : '')
         )
-        notify(
-          `Minted a bearer note of ${msatToSats(noteInfo.maxWithdrawable)} sats.` +
-            (feePaidMsat > 0
-              ? ` (${msatToSats(feePaidMsat)} sat mint fee.)`
-              : ''),
-          NotifyKind.SUCCESS
-        )
+        // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf; nur die Gebühr steht darunter
+        zeigeGebuehr(Math.floor(feePaidMsat / 1000))
         navigate('/wallet')
         return
       }
@@ -871,13 +867,8 @@ const Mint: Component = () => {
             `Minted ${msatToSats(result.amountMsat)} sats from ${serverOf(result.url)} (on device).` +
               (verifyUrl() ? ` Verify: ${verifyUrl()}.` : '')
           )
-          notify(
-            `Minted a bearer note of ${msatToSats(result.amountMsat)} sats.` +
-              (feePaidMsat > 0
-                ? ` (${msatToSats(feePaidMsat)} sat mint fee.)`
-                : ''),
-            NotifyKind.SUCCESS
-          )
+          // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf; nur die Gebühr steht darunter
+          zeigeGebuehr(Math.floor(feePaidMsat / 1000))
         } catch (err) {
           if (!(err instanceof DeviceImportLeftBehindError)) throw err
           // the imported note is still whole on the device - keep
@@ -990,13 +981,8 @@ const Mint: Component = () => {
           NotifyKind.ERROR
         )
       } else {
-        notify(
-          `Minted a bearer note of ${msatToSats(noteInfo.maxWithdrawable)} sats.` +
-            (feePaidMsat > 0
-              ? ` (${msatToSats(feePaidMsat)} sat mint fee.)`
-              : ''),
-          NotifyKind.SUCCESS
-        )
+        // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf; nur die Gebühr steht darunter
+        zeigeGebuehr(Math.floor(feePaidMsat / 1000))
       }
       navigate('/wallet')
     } catch (err) {

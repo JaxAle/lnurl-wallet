@@ -57,6 +57,17 @@ const zaehlDauer = (differenz: number) =>
 // das Werk vom alten zum neuen Guthaben, statt es fertig hinzustellen (Gerhard am Pixel)
 let zuletzt: number | null = null
 
+// Gebühr der Ausgabestelle: das Einzige, was das Zählwerk beim Aufladen nicht selbst sagt.
+// Steht ein paar Sekunden in der Drahtzeile statt des Euro-Betrags — kein Banner (Steve).
+const [gebuehr, setGebuehr] = createSignal<number | null>(null)
+let gebuehrUhr: ReturnType<typeof setTimeout> | undefined
+export const zeigeGebuehr = (sats: number): void => {
+  if (sats <= 0) return
+  if (gebuehrUhr) clearTimeout(gebuehrUhr)
+  setGebuehr(sats)
+  gebuehrUhr = setTimeout(() => setGebuehr(null), 7000)
+}
+
 const Zaehlwerk: Component<{sats: number}> = props => {
   const [angezeigt, setAngezeigtRoh] = createSignal(zuletzt ?? props.sats)
   const setAngezeigt = (wert: number) => {
@@ -130,9 +141,20 @@ const Zaehlwerk: Component<{sats: number}> = props => {
           </div>
         )}
       </Show>
-      <Show when={fiat()}>
+      <Show
+        when={gebuehr()}
+        fallback={
+          <Show when={fiat()}>
+            <div>
+              <span class="rz-euro">{fiat()}</span>
+            </div>
+          </Show>
+        }
+      >
         <div>
-          <span class="rz-euro">{fiat()}</span>
+          <span class="rz-euro">
+            {gebuehr()!.toLocaleString('de-AT')} {gebuehr() === 1 ? 'Sat' : 'Sats'} Gebühr
+          </span>
         </div>
       </Show>
     </div>

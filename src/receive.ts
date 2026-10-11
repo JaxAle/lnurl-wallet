@@ -150,10 +150,7 @@ export const receiveIntoWallet = async (
       'receive',
       `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)}.`
     )
-    notify(
-      `Received ${msatToSats(received.amount)} sats - secret rotated, previous copies are burned.`,
-      NotifyKind.SUCCESS
-    )
+    // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
   } catch (err) {
     if (err instanceof AmbiguousMutationError) {
       // the rotate request may have landed despite the failure - the fresh
@@ -167,10 +164,7 @@ export const receiveIntoWallet = async (
           'receive',
           `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)} (rotated - confirmed on re-check after an uncertain response).`
         )
-        notify(
-          `Received ${msatToSats(received.amount)} sats - secret rotated, previous copies are burned.`,
-          NotifyKind.SUCCESS
-        )
+        // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
         return
       }
       if (outcome === 'unknown') {
