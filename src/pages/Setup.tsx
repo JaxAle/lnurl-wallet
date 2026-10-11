@@ -354,7 +354,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
           await addBearer(note)
           logActivity(
             'recovered',
-            `Recovered ${msatToSats(note.amount)} sats from ${result.server} while restoring from seed.`
+            `${msatToSats(note.amount)} Sats von ${result.server} beim Wiederherstellen gefunden.`
           )
         }
         if (result.highestUsedIndex !== null) {

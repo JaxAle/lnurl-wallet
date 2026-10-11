@@ -224,10 +224,10 @@ const BearerCard: Component<BearerCardProps> = props => {
     setConfirmUnspend(false)
     logActivity(
       'unspent',
-      `Unspent ${msatToSats(props.bearer.amount)} sats from ${serverOf(props.bearer.url)}.`,
+      `Markierung aufgehoben: ${msatToSats(props.bearer.amount)} Sats von ${serverOf(props.bearer.url)}.`,
       props.bearer.label
     )
-    notify('Unspent - actions are available again.', NotifyKind.SUCCESS)
+    notify('Markierung aufgehoben – alle Aktionen wieder möglich.', NotifyKind.SUCCESS)
   }
 
   // opens the hand-over panel - browser-only notes reveal immediately
@@ -276,10 +276,10 @@ const BearerCard: Component<BearerCardProps> = props => {
     cancelUnveil()
     logActivity(
       'transfer',
-      `Handed over ${msatToSats(props.bearer.amount)} sats from ${serverOf(props.bearer.url)}.`,
+      `${msatToSats(props.bearer.amount)} Sats von ${serverOf(props.bearer.url)} übergeben.`,
       props.bearer.label
     )
-    notify('Marked as handed over and spent.', NotifyKind.SUCCESS)
+    notify('Als übergeben und ausgegeben markiert.', NotifyKind.SUCCESS)
   }
 
   return (
@@ -322,20 +322,20 @@ const BearerCard: Component<BearerCardProps> = props => {
                   title={`This mint plans to sunset on ${new Date(date()).toLocaleDateString()} - rotate, transfer, or melt this note before then.`}
                 >
                   <IoWarningSharp />
-                  &nbsp;sunsetting
+                  &nbsp;läuft aus
                 </span>
               )}
             </Show>
             <Show when={!props.bearer.verified}>
-              <span class="bearer-pending">unverified</span>
+              <span class="bearer-pending">ungeprüft</span>
             </Show>
             <Show when={offlineVerified()}>
               <span
                 class="bearer-signed"
-                title="Signature checks out against this mint's published pubkey"
+                title="Signatur passt zum veröffentlichten Schlüssel der Ausgabestelle"
               >
                 <IoShieldCheckmarkSharp />
-                &nbsp;signed
+                &nbsp;signiert
               </span>
             </Show>
             {/* A bearer note's hash preimage, as opposed to a key-path
@@ -349,9 +349,9 @@ const BearerCard: Component<BearerCardProps> = props => {
             <Show when={k1() && !isCk1(k1()) && !isScriptNote()}>
               <span
                 class="bearer-plain"
-                title="This note's own secret is a bearer hash preimage, not a key-path pubkey/signature"
+                title="Das Geheimnis dieses Scheins ist ein Hash-Preimage, kein Schlüsselpaar"
               >
-                plain secret
+                Zufallsgeheimnis
               </span>
             </Show>
             {/* A script-path note redeemed by revealing a Tapscript leaf (a cw1),
@@ -362,7 +362,7 @@ const BearerCard: Component<BearerCardProps> = props => {
               <button
                 type="button"
                 class="bearer-badge-btn bearer-script"
-                title="This note's secret reveals a Tapscript leaf, not a plain signature - click to preview it"
+                title="Das Geheimnis dieses Scheins enthält ein Tapscript – antippen zur Vorschau"
                 onClick={() => setShowScriptPreview(true)}
               >
                 <IoCodeSlashSharp />
@@ -372,19 +372,19 @@ const BearerCard: Component<BearerCardProps> = props => {
             <Show when={props.bearer.deviceId}>
               <span
                 class="bearer-device"
-                title="This note's secret lives on your paired vault, not this browser"
+                title="Das Geheimnis dieses Scheins liegt auf deinem Tresor, nicht in diesem Browser"
               >
                 <IoHardwareChipSharp />
-                &nbsp;on device
+                &nbsp;auf dem Tresor
               </span>
             </Show>
             <Show when={isSpent()}>
               <span
                 class="bearer-spent"
-                title="Locked as spent - rotate and split (in the toolbar above) are disabled so this copy can't be reused by accident."
+                title="Als ausgegeben gesperrt – Erneuern und Teilen sind aus, damit diese Kopie nicht versehentlich wieder benutzt wird."
               >
                 <IoBanSharp />
-                &nbsp;spent
+                &nbsp;ausgegeben
               </span>
             </Show>
           </div>
@@ -396,14 +396,14 @@ const BearerCard: Component<BearerCardProps> = props => {
           <div class="bearer-actions">
             <button
               class="icon-btn"
-              title="Unspend - unlock this note again"
+              title="Markierung aufheben – Schein wieder freigeben"
               onClick={() => setConfirmUnspend(true)}
             >
               <IoArrowUndoSharp />
             </button>
             <button
               class="icon-btn"
-              title="Clear spent note from wallet"
+              title="Ausgegebenen Schein entfernen"
               onClick={() => setConfirmDelete(true)}
             >
               <IoTrashSharp />
@@ -419,14 +419,14 @@ const BearerCard: Component<BearerCardProps> = props => {
               <div class="bearer-actions">
                 <button
                   class="icon-btn"
-                  title="Unveil to hand over"
+                  title="Aufdecken zum Übergeben"
                   onClick={startUnveil}
                 >
                   <IoEyeSharp />
                 </button>
                 <button
                   class="icon-btn"
-                  title="Copy this note to clipboard"
+                  title="Schein in die Zwischenablage kopieren"
                   onClick={() =>
                     copyToClipboard(toBech32Lnurl(props.bearer.url))
                   }
@@ -436,7 +436,7 @@ const BearerCard: Component<BearerCardProps> = props => {
                 <button
                   class="icon-btn bearer-action-right"
                   disabled={refreshing()}
-                  title="Rotate - fetches the current value by note hash first"
+                  title="Erneuern – fragt zuerst den aktuellen Wert ab"
                   onClick={e => {
                     // refreshThisNote flips refreshing() synchronously,
                     // which swaps this button's own icon (see the Show
@@ -460,7 +460,7 @@ const BearerCard: Component<BearerCardProps> = props => {
                   <button
                     class="icon-btn"
                     disabled={upgrading()}
-                    title="Upgrade to a recoverable pub/sig secret"
+                    title="Auf ein wiederherstellbares Geheimnis umstellen"
                     onClick={e => {
                       // same detached-node concern refreshThisNote's own
                       // click handler documents - stop the click before
@@ -489,7 +489,7 @@ const BearerCard: Component<BearerCardProps> = props => {
               <button
                 type="button"
                 classList={{active: handoverEncoding() === 'bech32'}}
-                title="LNURL1... - this wallet's usual QR/copy encoding"
+                title="LNURL1… – die übliche Form für QR und Kopie"
                 onClick={() => setHandoverEncoding('bech32')}
               >
                 Bech32
@@ -497,7 +497,7 @@ const BearerCard: Component<BearerCardProps> = props => {
               <button
                 type="button"
                 classList={{active: handoverEncoding() === 'lud17'}}
-                title="lnurlw://... - LUD-17's shorter, human-readable scheme link"
+                title="lnurlw://… – kürzere, lesbare Form (LUD-17)"
                 onClick={() => setHandoverEncoding('lud17')}
               >
                 lnurlw://
@@ -535,7 +535,7 @@ const BearerCard: Component<BearerCardProps> = props => {
                       <Show when={!qrRevealed()}>
                         <button
                           class="qr-overlay"
-                          title="Show QR code - it IS the bearer note, anyone who scans it can spend it"
+                          title="QR-Code zeigen – er IST der Schein, wer ihn scannt, kann ihn ausgeben"
                           onClick={() => setQrRevealed(true)}
                         >
                           <IoEyeSharp />
@@ -559,7 +559,7 @@ const BearerCard: Component<BearerCardProps> = props => {
                             setStripSignature(!e.currentTarget.checked)
                           }
                         />
-                        &nbsp;Offline verified
+                        &nbsp;offline geprüft
                       </label>
                     </div>
                     <div class="btns">
@@ -569,11 +569,11 @@ const BearerCard: Component<BearerCardProps> = props => {
                         }
                       >
                         <IoCopySharp />
-                        &nbsp;Copy note
+                        &nbsp;Schein kopieren
                       </button>
                       <button onClick={markHandedOver}>
                         <IoCheckmarkSharp />
-                        &nbsp;Mark done
+                        &nbsp;Erledigt
                       </button>
                     </div>
                   </>
@@ -585,22 +585,16 @@ const BearerCard: Component<BearerCardProps> = props => {
       </Show>
       <Show when={confirmUnspend()}>
         <p class="warning">
-          This note may already be gone for good - if it was melted, or handed
-          to someone who's since redeemed it, unspending it here won't bring it
-          back (this is a local flag, not a check with the service). And if you
-          handed it over and this wallet spends or rotates it again before the
-          recipient does, their copy gets invalidated instead of yours. Unspend
-          anyway?
+          Dieser Schein ist vielleicht schon endgültig weg – wurde er bezahlt oder vom Empfänger eingelöst, bringt das Aufheben ihn nicht zurück (es ist nur eine Markierung hier, keine Abfrage). Und hast du ihn weitergegeben und diese Wallet gibt ihn vor dem Empfänger aus oder erneuert ihn, wird dessen Kopie wertlos statt deiner. Trotzdem aufheben?
         </p>
         <div class="btns">
-          <button onClick={unspend}>Unspend anyway</button>
-          <button onClick={() => setConfirmUnspend(false)}>Cancel</button>
+          <button onClick={unspend}>Trotzdem aufheben</button>
+          <button onClick={() => setConfirmUnspend(false)}>Abbrechen</button>
         </div>
       </Show>
       <Show when={confirmDelete()}>
         <p class="warning">
-          Clear this spent note from the wallet? If it turns out it wasn't
-          actually spent, the sats are gone unless you saved the note elsewhere.
+          Diesen ausgegebenen Schein aus der Wallet entfernen? War er doch nicht ausgegeben, sind die Sats weg, außer du hast ihn anderswo gesichert.
         </p>
         <div class="btns">
           <button
@@ -608,15 +602,15 @@ const BearerCard: Component<BearerCardProps> = props => {
               removeBearer(props.bearer.id)
               logActivity(
                 'deleted',
-                `Cleared a spent ${msatToSats(props.bearer.amount)} sat note from ${serverOf(props.bearer.url)}.`,
+                `Ausgegebenen Schein über ${msatToSats(props.bearer.amount)} Sats von ${serverOf(props.bearer.url)} entfernt.`,
                 props.bearer.label
               )
-              notify('Spent note cleared.', NotifyKind.SUCCESS)
+              notify('Ausgegebener Schein entfernt.', NotifyKind.SUCCESS)
             }}
           >
-            Clear
+            Entfernen
           </button>
-          <button onClick={() => setConfirmDelete(false)}>Cancel</button>
+          <button onClick={() => setConfirmDelete(false)}>Abbrechen</button>
         </div>
       </Show>
       <Show when={showScriptPreview()}>

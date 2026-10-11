@@ -186,10 +186,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       }
       logActivity(
         'melt',
-        `Melted ${msatToSats(note.amount)} sats from ${serverOf(note.url)} to pay an invoice. Verify: ${url}.`,
+        `${msatToSats(note.amount)} Sats von ${serverOf(note.url)} – Rechnung bezahlt. Prüfen: ${url}.`,
         note.label
       )
-      notify('Payment confirmed - the note is gone.', NotifyKind.SUCCESS)
+      notify('Zahlung bestätigt – der Schein ist ausgegeben.', NotifyKind.SUCCESS)
       props.onClose()
     } catch {
       // a single failed check isn't fatal - the next tick tries again
@@ -240,7 +240,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
   const lookupLnAddress = async (address: string) => {
     const url = resolveMintInput(address)
     if (!url) {
-      notify('Not a valid Lightning Address.', NotifyKind.ERROR)
+      notify('Keine gültige Lightning-Adresse.', NotifyKind.ERROR)
       return
     }
     setFetchingInvoice(true)
@@ -271,7 +271,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       setValue('')
       return
     }
-    notify('Not a valid bolt11 invoice or Lightning Address.', NotifyKind.ERROR)
+    notify('Keine gültige Lightning-Rechnung und keine Lightning-Adresse.', NotifyKind.ERROR)
   }
 
   const handle = () => {
@@ -301,12 +301,12 @@ const MeltDialog: Component<MeltDialogProps> = props => {
     if (!info) return
     const msat = satsToMsat(lnAddressAmountSats())
     if (!lnAddressAmountSats() || !Number.isFinite(msat) || msat <= 0) {
-      notify('Enter an amount in sats.', NotifyKind.ERROR)
+      notify('Bitte einen Betrag in Sats eingeben.', NotifyKind.ERROR)
       return
     }
     if (msat < info.minSendable || msat > info.maxSendable) {
       notify(
-        `Amount must be between ${msatToSats(info.minSendable)} and ${msatToSats(info.maxSendable)} sats.`,
+        `Der Betrag muss zwischen ${msatToSats(info.minSendable)} und ${msatToSats(info.maxSendable)} Sats liegen.`,
         NotifyKind.ERROR
       )
       return
@@ -377,7 +377,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
     if (!info || !hint) return
     const msat = satsToMsat(lnAddressAmountSats())
     if (!lnAddressAmountSats() || !Number.isFinite(msat) || msat <= 0) {
-      notify('Enter an amount in sats.', NotifyKind.ERROR)
+      notify('Bitte einen Betrag in Sats eingeben.', NotifyKind.ERROR)
       return
     }
     // minSendable/maxSendable are LUD-06 bounds on what the callback will
@@ -392,7 +392,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
     const total = picked.reduce((sum, b) => sum + b.amount, 0)
     if (total < msat || picked.length === 0) {
       notify(
-        `Not enough notes at ${serverOf(info.callback)} to cover this with an internal transfer.`,
+        `Bei ${serverOf(info.callback)} liegen nicht genug Scheine für eine interne Übertragung.`,
         NotifyKind.ERROR
       )
       return
@@ -435,10 +435,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             })
           }
           throw new Error(
-            'The internal transfer may have gone through but could not be confirmed - ' +
+            'Die interne Übertragung ist vielleicht angekommen, aber nicht bestätigt – ' +
               (err.newSecrets.length > 0
-                ? 'the possible change is stored unverified alongside your originals. Refresh it to reconcile before trying again.'
-                : 'the input notes are still shown as unspent. Refresh them before trying again.')
+                ? 'das mögliche Wechselgeld liegt ungeprüft neben den alten Scheinen. Vor einem neuen Versuch erneuern.'
+                : 'die eingesetzten Scheine stehen noch als nicht ausgegeben da. Vor einem neuen Versuch erneuern.')
           )
         }
         // 'gone': the burn landed - any carried secret is the only money left
@@ -476,7 +476,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           })
         } catch (err) {
           notify(
-            `Sent, but settling the change note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+            `Gesendet, aber der Wechselgeld-Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; erneuern repariert ihn.`,
             NotifyKind.ERROR
           )
         }
@@ -485,10 +485,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       }
       logActivity(
         'melt',
-        `Sent ${msatToSats(msat)} sats to ${lnAddressText() || serverOf(info.callback)} via an internal transfer at ${serverOf(info.callback)}.`
+        `${msatToSats(msat)} Sats an ${lnAddressText() || serverOf(info.callback)} intern übertragen (bei ${serverOf(info.callback)}).`
       )
       notify(
-        `Sent ${msatToSats(msat)} sats via internal transfer.`,
+        `${msatToSats(msat)} Sats intern übertragen.`,
         NotifyKind.SUCCESS
       )
       setLnAddressPayRequest(null)
@@ -563,7 +563,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
     return amount === null || selectedTotal() === amount
   })
 
-  // covers the invoice but isn't an exact note - Split and pay carves off
+  // covers the invoice but isn't an exact note - Teilen und bezahlen carves off
   // exact change (keeping the remainder as a fresh note) before melting
   const selectionNeedsSplit = createMemo(() => {
     if (!selectionValid()) return false
@@ -655,7 +655,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
         verified = true
       } catch (err) {
         notify(
-          `Merged, but settling the new note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it with the vault connected to repair.`,
+          `Zusammengelegt, aber der neue Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; mit verbundenem Tresor erneuern repariert ihn.`,
           NotifyKind.ERROR
         )
       }
@@ -695,7 +695,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           mintPubkey: base.mintPubkey
         })
         throw new Error(
-          'The merge may have gone through but could not be confirmed - the possible combined note is stored unverified alongside your originals. Refresh them to reconcile before paying.'
+          'Das Zusammenlegen ist vielleicht angekommen, aber nicht bestätigt – der mögliche neue Schein liegt ungeprüft neben den alten. Vor dem Bezahlen erneuern.'
         )
       }
       // 'gone': the burn landed - the carried secret is the only money left
@@ -742,7 +742,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       }
     } catch (err) {
       notify(
-        `Merged, but settling the new note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+        `Zusammengelegt, aber der neue Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; erneuern repariert ihn.`,
         NotifyKind.ERROR
       )
     }
@@ -760,7 +760,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
   const finishMelt = async (note: Bearer, result: {verify?: string}) => {
     if (result.verify) {
       notify(
-        'Payment requested and the note is locked as spent - confirming...',
+        'Zahlung angefordert, der Schein ist als ausgegeben gesperrt – wird bestätigt …',
         NotifyKind.LOADING
       )
       startPolling(note, result.verify)
@@ -776,7 +776,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
     // refresh with the vault connected reconciles it
     logActivity(
       'melt',
-      `Melted ${msatToSats(note.amount)} sats from ${serverOf(note.url)} to pay an invoice.`,
+      `${msatToSats(note.amount)} Sats von ${serverOf(note.url)} – Rechnung bezahlt.`,
       note.label
     )
     notify(
@@ -824,7 +824,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           await updateBearer(current.id, {spent: true})
           logActivity(
             'spent',
-            `${serverOf(current.url)} reports ${msatToSats(current.amount)} sats as already spent - marked spent locally.`,
+            `${serverOf(current.url)} meldet ${msatToSats(current.amount)} Sats als schon ausgegeben – hier markiert.`,
             current.label
           )
         }
@@ -880,7 +880,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           changeVerified = true
         } catch (err) {
           notify(
-            `Split succeeded, but settling the change note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it with the vault connected to repair.`,
+            `Geteilt, aber der Wechselgeld-Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; mit verbundenem Tresor erneuern repariert ihn.`,
             NotifyKind.ERROR
           )
         }
@@ -916,7 +916,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             await updateBearer(spend.id, {spent: true})
             logActivity(
               'spent',
-              `${serverOf(spend.url)} reports ${msatToSats(spend.amount)} sats as already spent - marked spent locally.`
+              `${serverOf(spend.url)} meldet ${msatToSats(spend.amount)} Sats als schon ausgegeben – hier markiert.`
             )
           }
           throw err
@@ -966,7 +966,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             mintPubkey: base.mintPubkey
           })
           throw new Error(
-            'The split may have gone through but could not be confirmed - the possible outputs are stored unverified alongside your originals. Refresh them to reconcile before paying.'
+            'Das Teilen ist vielleicht angekommen, aber nicht bestätigt – die möglichen neuen Scheine liegen ungeprüft neben den alten. Vor dem Bezahlen erneuern.'
           )
         }
         // 'gone': the burn landed - the carried secrets are the only money
@@ -1016,7 +1016,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
         })
       } catch (err) {
         notify(
-          `Split succeeded, but settling the change note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+          `Geteilt, aber der Wechselgeld-Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; erneuern repariert ihn.`,
           NotifyKind.ERROR
         )
       }
@@ -1032,7 +1032,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           await updateBearer(spend.id, {spent: true})
           logActivity(
             'spent',
-            `${serverOf(spend.url)} reports ${msatToSats(spend.amount)} sats as already spent - marked spent locally.`
+            `${serverOf(spend.url)} meldet ${msatToSats(spend.amount)} Sats als schon ausgegeben – hier markiert.`
           )
         }
         throw err
@@ -1050,7 +1050,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
   return (
     <Dialog onClose={props.onClose}>
       <figure class="paste-widget">
-        <figcaption>Melt - pay an invoice with a bearer note</figcaption>
+        <figcaption>Bezahlen – eine Rechnung mit einem Schein begleichen</figcaption>
         {/* hidden once a destination has actually resolved (a pasted
         invoice, or a looked-up Lightning Address's payRequest) - it used
         to stay rendered the whole time, cleared back to empty rather than
@@ -1069,7 +1069,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             <button
               type="button"
               class="icon-btn paste-icon-btn"
-              title="Paste from clipboard"
+              title="Aus der Zwischenablage einfügen"
               onClick={paste}
             >
               <IoClipboardSharp />
@@ -1077,7 +1077,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             <button
               type="button"
               class="icon-btn paste-keyboard-btn"
-              title="Type instead"
+              title="Stattdessen eintippen"
               onClick={() => setShowKeyboard(v => !v)}
             >
               <MdSharpKeyboard />
@@ -1091,7 +1091,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                 type="text"
                 class="paste-input"
                 classList={{invalid: value() !== '' && !isValid()}}
-                placeholder="lnbc1... or user@example.com"
+                placeholder="lnbc1… oder name@beispiel.at"
                 value={value()}
                 onInput={e => setValue(e.currentTarget.value)}
                 onKeyDown={onKeydown}
@@ -1129,7 +1129,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           </div>
           <Show when={value() !== '' && !isValid()}>
             <p class="warning">
-              Not a valid bolt11 invoice or Lightning Address.
+              Keine gültige Lightning-Rechnung und keine Lightning-Adresse.
             </p>
           </Show>
         </Show>
@@ -1150,7 +1150,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
               <input
                 type="number"
                 min="1"
-                placeholder="amount in sats"
+                placeholder="Betrag in Sats"
                 value={lnAddressAmountSats()}
                 onInput={e => setLnAddressAmountSats(e.currentTarget.value)}
                 onKeyDown={e => {
@@ -1184,7 +1184,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                         <IoRefreshSharp class="spin" />
                         &nbsp;
                       </Show>
-                      Get invoice
+                      Rechnung holen
                     </button>
                     <Show
                       when={
@@ -1200,10 +1200,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                         }
                         onClick={() => setConfirmingTransfer(true)}
                       >
-                        Pay via internal transfer
+                        Intern übertragen
                       </button>
                     </Show>
-                    <button onClick={clearLnAddress}>Change address</button>
+                    <button onClick={clearLnAddress}>Andere Adresse</button>
                   </div>
                 }
               >
@@ -1222,13 +1222,13 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                       <IoRefreshSharp class="spin" />
                       &nbsp;
                     </Show>
-                    Yes, send it
+                    Ja, senden
                   </button>
                   <button
                     disabled={transferring()}
                     onClick={() => setConfirmingTransfer(false)}
                   >
-                    Cancel
+                    Abbrechen
                   </button>
                 </div>
               </Show>
@@ -1237,11 +1237,9 @@ const MeltDialog: Component<MeltDialogProps> = props => {
         </Show>
       </figure>
       <Show when={storeableMeltAddresses().length > 0}>
-        <h4>Your saved addresses</h4>
+        <h4>Deine gespeicherten Adressen</h4>
         <p>
-          These said their own address is meant to be reused, not a one-time
-          link (LUD-11) - saved here for a one-click return trip. Melt
-          destinations only, kept separate from the mints on the Mint page.
+          Diese Adressen sind zum Wiederverwenden gedacht (LUD-11) – hier gespeichert, damit du sie mit einem Tipp wieder bezahlen kannst. Nur Zahlungsziele, getrennt von den Ausgabestellen.
         </p>
         <div class="mint-picker">
           <For each={storeableMeltAddresses()}>
@@ -1255,15 +1253,15 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                   <Show when={link.internalTransfer}>
                     <span
                       class="mint-picker-transfer-badge"
-                      title="This address advertised LUD-25 internal transfer support last time it was looked up - paying it can skip Lightning entirely if you still hold notes at its mint"
+                      title="Diese Adresse unterstützte zuletzt die interne Übertragung (LUD-25) – hast du Scheine ihrer Ausgabestelle, geht die Zahlung ganz ohne Lightning"
                     >
-                      &nbsp;· internal transfer
+                      &nbsp;· interne Übertragung
                     </span>
                   </Show>
                 </button>
                 <button
                   class="icon-btn"
-                  title="Forget this address"
+                  title="Adresse vergessen"
                   onClick={() => removeStoreableMeltAddress(link.address)}
                 >
                   <IoTrashSharp />
@@ -1278,11 +1276,9 @@ const MeltDialog: Component<MeltDialogProps> = props => {
           when={!pendingNote()}
           fallback={
             <>
-              <h4>Confirming payment</h4>
+              <h4>Zahlung wird bestätigt</h4>
               <p class="bearer-hint">
-                Checking the mint's own melt proof (LUD-25) for this payment -
-                once it reports the outgoing payment settled, the note is
-                confirmed gone for good.
+                Die Wallet prüft den Zahlungsnachweis der Ausgabestelle (LUD-25) – meldet sie die Zahlung als durchgegangen, ist der Schein endgültig ausgegeben.
               </p>
               <div class="btns">
                 <button
@@ -1301,27 +1297,22 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             </>
           }
         >
-          <h4>Pay with your bearer notes</h4>
+          <h4>Mit deinen Scheinen bezahlen</h4>
           <Show
             when={invoiceAmountMsat() !== null}
             fallback={
               <p class="bearer-hint">
-                Couldn't read an amount from this invoice - select note(s) from
-                one mint and the service will judge whether they cover it.
+                Aus dieser Rechnung ließ sich kein Betrag lesen – wähle Scheine einer Ausgabestelle, sie prüft, ob es reicht.
               </p>
             }
           >
             <p class="bearer-hint">
-              Wants {msatToSats(invoiceAmountMsat()!)} sats
-              <FiatValue msat={invoiceAmountMsat()!} /> - select note(s) from
-              one mint worth at least that. Melt only spends a note of exactly
-              the invoice amount, so an exact match pays directly and anything
-              over it needs Split and pay first.
+              Verlangt {msatToSats(invoiceAmountMsat()!)} Sats <FiatValue msat={invoiceAmountMsat()!} /> – wähle Scheine einer Ausgabestelle, die mindestens so viel wert sind. Bezahlt wird mit einem Schein über genau den Rechnungsbetrag: passt einer genau, geht es sofort, sonst zuerst „Teilen und bezahlen“.
             </p>
           </Show>
           <Show
             when={unspentBearers().length > 0}
-            fallback={<p>No bearer notes to pay with yet.</p>}
+            fallback={<p>Noch keine Scheine zum Bezahlen.</p>}
           >
             <div class="bearer-list">
               <For each={unspentBearers()}>
@@ -1365,7 +1356,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                             {msatToSats(bearer.amount)} sats
                           </span>
                           <Show when={!bearer.callback}>
-                            <span class="bearer-pending">unverified</span>
+                            <span class="bearer-pending">ungeprüft</span>
                           </Show>
                           <span class="bearer-server">
                             {serverOf(bearer.url)}
@@ -1400,7 +1391,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                       }
                       onClick={() => setConfirming('pay')}
                     >
-                      Pay invoice
+                      Rechnung bezahlen
                     </button>
                   }
                 >
@@ -1408,10 +1399,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                     disabled={paying() || offlineMode()}
                     onClick={() => setConfirming('split')}
                   >
-                    Split and pay
+                    Teilen und bezahlen
                   </button>
                 </Show>
-                <button onClick={clearInvoice}>Clear</button>
+                <button onClick={clearInvoice}>Leeren</button>
               </div>
             }
           >
@@ -1434,10 +1425,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
                   <IoRefreshSharp class="spin" />
                   &nbsp;
                 </Show>
-                Yes, pay it
+                Ja, bezahlen
               </button>
               <button disabled={paying()} onClick={() => setConfirming(null)}>
-                Cancel
+                Abbrechen
               </button>
             </div>
           </Show>

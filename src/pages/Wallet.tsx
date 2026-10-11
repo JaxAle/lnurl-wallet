@@ -93,6 +93,7 @@ import Zaehlwerk from '../roehren/Zaehlwerk'
 import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
 import {eingang, setEingang} from '../roehren/uebergabe'
+import {aufDeutsch} from '../roehren/fehler'
 
 const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
@@ -316,7 +317,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         deviceClient: deviceClient()
       })
     } catch (err) {
-      notify((err as Error).message, NotifyKind.ERROR)
+      notify(aufDeutsch(err), NotifyKind.ERROR)
     } finally {
       setHeroReceiving(false)
     }
@@ -709,7 +710,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         })
         logActivity(
           'refresh',
-          `Refreshed ${msatToSats(result.amountMsat)} sats from ${serverOf(result.url)} (on device).`,
+          `${msatToSats(result.amountMsat)} Sats von ${serverOf(result.url)} erneuert (auf dem Tresor).`,
           bearer.label
         )
         notify('Schein erneuert.', NotifyKind.SUCCESS)
@@ -735,7 +736,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         })
         logActivity(
           'refresh',
-          `Refreshed ${msatToSats(info.maxWithdrawable)} sats from ${serverOf(migrated.url)} - moved onto your vault.`,
+          `${msatToSats(info.maxWithdrawable)} Sats von ${serverOf(migrated.url)} erneuert – auf den Tresor verschoben.`,
           bearer.label
         )
         notify('Schein erneuert und auf den Tresor verschoben.', NotifyKind.SUCCESS)
@@ -794,8 +795,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       })
       logActivity(
         'refresh',
-        `Refreshed ${msatToSats(info.maxWithdrawable)} sats from ${serverOf(url)}.` +
-          (rotationError ? ` Could not rotate (${rotationError}).` : ''),
+        `${msatToSats(info.maxWithdrawable)} Sats von ${serverOf(url)} erneuert.` +
+          (rotationError ? ` Erneuern ging nicht (${rotationError}).` : ''),
         bearer.label
       )
       // the GET this refresh is nominally "about" is only ever a means to
@@ -820,7 +821,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         await updateBearer(bearer.id, {spent: true})
         logActivity(
           'spent',
-          `${serverOf(bearer.url)} reports ${msatToSats(bearer.amount)} sats as already spent - marked spent locally.`,
+          `${serverOf(bearer.url)} meldet ${msatToSats(bearer.amount)} Sats als schon ausgegeben – hier markiert.`,
           bearer.label
         )
       }
@@ -954,7 +955,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       }
       logActivity(
         'spent',
-        `Marked ${msatToSats(bearer.amount)} sats from ${serverOf(bearer.url)} as spent.`,
+        `${msatToSats(bearer.amount)} Sats von ${serverOf(bearer.url)} als ausgegeben markiert.`,
         bearer.label
       )
     }
@@ -1051,7 +1052,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           : ''
       logActivity(
         'split',
-        `Split off ${times} note${times === 1 ? '' : 's'} of ${msatToSats(msat)} sats each from ${serverOf(bearer.url)}.${feeNote}`,
+        `${times} Schein${times === 1 ? '' : 'e'} zu je ${msatToSats(msat)} Sats von ${serverOf(bearer.url)} abgeteilt.${feeNote}`,
         bearer.label
       )
       notify(

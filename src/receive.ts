@@ -30,7 +30,7 @@ export const receiveNote = async (
 ): Promise<NewBearer> => {
   const url = resolveNoteInput(input)
   if (!url) {
-    throw new Error('Not an LNURLcash bearer note (needs a k1).')
+    throw new Error('Das ist kein LNURLcash-Schein (es fehlt das k1).')
   }
   const k1 = noteK1(url)
   if (
@@ -38,7 +38,7 @@ export const receiveNote = async (
       b => noteK1(b.url) === k1 && serverOf(b.url) === serverOf(url)
     )
   ) {
-    throw new Error('This note is already in your wallet.')
+    throw new Error('Dieser Schein ist schon in deiner Wallet.')
   }
   try {
     const info = await fetchNoteInfo(url)
@@ -82,7 +82,7 @@ export const secureReceivedNote = async (note: {
 }): Promise<string> => {
   const k1 = noteK1(note.url)
   if (!k1 || !note.callback) {
-    throw new Error('Note has no callback to rotate against yet.')
+    throw new Error('Der Schein hat noch keine Adresse zum Erneuern.')
   }
   const result = await rotateNote(note.callback, k1)
   return withNewK1(note.url, result.k1, note.amount, result.signature)
@@ -118,7 +118,7 @@ export const receiveIntoWallet = async (
   const bearer = await ctx.addBearer(received)
   if (!received.verified) {
     notify(
-      'Note stored, but its service could not be reached - refresh it later.',
+      'Schein gespeichert, aber die Ausgabestelle war nicht erreichbar – später erneuern.',
       NotifyKind.LOADING
     )
     return
@@ -148,7 +148,7 @@ export const receiveIntoWallet = async (
     }
     ctx.logActivity(
       'receive',
-      `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)}.`
+      `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)}.`
     )
     // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
   } catch (err) {
@@ -162,7 +162,7 @@ export const receiveIntoWallet = async (
         await ctx.updateBearer(bearer.id, {url})
         ctx.logActivity(
           'receive',
-          `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)} (rotated - confirmed on re-check after an uncertain response).`
+          `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)} (erneuert – nach unklarer Antwort bestätigt).`
         )
         // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
         return
@@ -179,10 +179,10 @@ export const receiveIntoWallet = async (
         })
         ctx.logActivity(
           'receive',
-          `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)} (rotation outcome uncertain - the possible rotated copy is stored unverified).`
+          `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)} (Erneuern unklar – mögliche Kopie ungeprüft gespeichert).`
         )
         notify(
-          `Received ${msatToSats(received.amount)} sats, but the rotation's outcome is uncertain - the possible new copy is stored unverified alongside the original; refresh both to reconcile.`,
+          `${msatToSats(received.amount)} Sats empfangen, aber ob das Erneuern ankam, ist unklar – die mögliche neue Kopie liegt ungeprüft daneben; beide erneuern, um es zu klären.`,
           NotifyKind.ERROR
         )
         return
@@ -199,12 +199,12 @@ export const receiveIntoWallet = async (
     const pending = err instanceof PendingNoteError
     ctx.logActivity(
       'receive',
-      `Received ${msatToSats(received.amount)} sats from ${serverOf(received.url)} (${pending ? 'rotate pending - will retry on next refresh' : 'not rotated - sender may still hold a copy'}).`
+      `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)} (${pending ? 'Erneuern ausstehend – beim nächsten Mal' : 'nicht erneuert – Absender hat vielleicht noch eine Kopie'}).`
     )
     notify(
       pending
-        ? `Received ${msatToSats(received.amount)} sats, but couldn't rotate yet - this note has another operation in progress on the service. It'll rotate automatically next time you refresh it.`
-        : `Received ${msatToSats(received.amount)} sats, but the service refused to rotate - the sender may still hold a spendable copy.`,
+        ? `${msatToSats(received.amount)} Sats empfangen, aber noch nicht erneuert – bei der Ausgabestelle läuft gerade ein anderer Vorgang. Beim nächsten Erneuern geschieht es von selbst.`
+        : `${msatToSats(received.amount)} Sats empfangen, aber die Ausgabestelle verweigerte das Erneuern – der Absender hat vielleicht noch eine gültige Kopie.`,
       NotifyKind.ERROR
     )
   }

@@ -115,14 +115,14 @@ const Activity: Component = () => {
         {/* Fork: was unterwegs ist, steht oben im Verlauf (Prototyp) */}
         <UnterwegsListe />
         <div class="activity-header">
-          <A href="/wallet" class="icon-btn" title="Back to wallet">
+          <A href="/wallet" class="icon-btn" title="Zurück zur Wallet">
             <IoArrowBackSharp />
           </A>
-          <h2>Activity log</h2>
+          <h2>Verlauf</h2>
           <Show when={activity().length > 0}>
             <button
               class="icon-btn activity-clear-btn"
-              title="Clear the activity log"
+              title="Verlauf löschen"
               onClick={() => setConfirmClear(true)}
             >
               <IoTrashSharp />
@@ -131,20 +131,18 @@ const Activity: Component = () => {
         </div>
         <Show when={confirmClear()}>
           <p class="warning">
-            Clear the whole activity log? This only removes the log itself -
-            your notes and their history with each mint are unaffected.
+            Den ganzen Verlauf löschen? Gelöscht wird nur diese Liste – deine Scheine bleiben unberührt.
           </p>
           <div class="btns">
-            <button onClick={clear}>Clear log</button>
-            <button onClick={() => setConfirmClear(false)}>Cancel</button>
+            <button onClick={clear}>Verlauf löschen</button>
+            <button onClick={() => setConfirmClear(false)}>Abbrechen</button>
           </div>
         </Show>
         <Show
           when={activity().length > 0}
           fallback={
             <p class="bearer-hint">
-              Nothing logged yet - minting, splitting, combining, melting, and
-              transferring notes all show up here.
+              Noch nichts geschehen – Aufladen, Teilen, Zusammenlegen, Bezahlen und Umziehen erscheinen hier.
             </p>
           }
         >
@@ -167,11 +165,11 @@ const Activity: Component = () => {
                             <button
                               type="button"
                               class="activity-verify-link"
-                              title="Check whether this payment settled"
+                              title="Prüfen, ob diese Zahlung durchging"
                               onClick={() => openVerify(url())}
                             >
                               <IoOpenSharp />
-                              &nbsp;Verify
+                              &nbsp;Prüfen
                             </button>
                           )}
                         </Show>
@@ -195,11 +193,11 @@ const Activity: Component = () => {
       </div>
       <Show when={verifyDialogUrl()}>
         <Dialog onClose={closeVerify}>
-          <h4>Payment verification</h4>
+          <h4>Zahlung prüfen</h4>
           <Show when={verifying()}>
             <p>
               <IoRefreshSharp class="spin" />
-              &nbsp;Checking...
+              &nbsp;Wird geprüft …
             </p>
           </Show>
           <Show when={verifyError()}>
@@ -213,7 +211,7 @@ const Activity: Component = () => {
                     ? 'Settled - the service reports this payment went through.'
                     : 'Not settled yet.'}
                 </p>
-                <label>Invoice</label>
+                <label>Rechnung</label>
                 <p class="mint-pubkey">{result().pr}</p>
                 <div class="btns">
                   <button
@@ -221,7 +219,7 @@ const Activity: Component = () => {
                     onClick={() => copyToClipboard(result().pr)}
                   >
                     <IoCopySharp />
-                    &nbsp;Copy invoice
+                    &nbsp;Rechnung kopieren
                   </button>
                 </div>
                 <Show when={result().settled}>
@@ -229,9 +227,7 @@ const Activity: Component = () => {
                     when={result().preimage}
                     fallback={
                       <p class="warning">
-                        Settled, but the service did not disclose a preimage -
-                        this is only the service's own claim, not independently
-                        checkable.
+                        Bezahlt, aber die Ausgabestelle hat kein Preimage genannt – das ist nur ihre eigene Angabe, nicht unabhängig prüfbar.
                       </p>
                     }
                   >
@@ -240,16 +236,13 @@ const Activity: Component = () => {
                         when={verifyMeltPreimage(result().pr, preimage())}
                         fallback={
                           <p class="warning">
-                            The disclosed preimage does NOT hash to this
-                            invoice's payment hash - this is not valid proof of
-                            payment.
+                            Das genannte Preimage passt NICHT zum Zahlungs-Hash dieser Rechnung – das ist kein gültiger Zahlungsbeleg.
                           </p>
                         }
                       >
                         <p>
                           <IoCheckmarkCircleSharp />
-                          &nbsp;Preimage verified - it hashes to exactly this
-                          invoice's payment hash.
+                          &nbsp;Preimage geprüft – es passt genau zum Zahlungs-Hash dieser Rechnung.
                         </p>
                       </Show>
                     )}

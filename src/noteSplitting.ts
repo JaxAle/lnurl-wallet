@@ -186,7 +186,7 @@ export const splitBearerIntoAmounts = async (
         await updateBearer(remainderId, {spent: true})
         logActivity(
           'spent',
-          `${serverOf(currentUrl)} reports ${msatToSats(currentAmount)} sats as already spent - marked spent locally.`,
+          `${serverOf(currentUrl)} meldet ${msatToSats(currentAmount)} Sats als schon ausgegeben – hier markiert.`,
           bearer.label
         )
         throw splitError
