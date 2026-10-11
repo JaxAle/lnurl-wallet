@@ -3,3 +3,4 @@
 
 // injected by vite.config.ts's `define`, from the nearest git tag
 declare const __APP_VERSION__: string
+declare const __BAU_ZEIT__: string

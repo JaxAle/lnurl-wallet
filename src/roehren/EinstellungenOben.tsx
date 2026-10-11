@@ -9,6 +9,15 @@ import {enabledAddonIds} from '../addons/enabled'
 import {trustedMints} from '../trustedMints'
 import {vaultEnabled} from '../vaultFeature'
 
+
+// Bauzeit in Ortszeit, z. B. „11.10.2026, 21:40“ — daran erkennt man am Gerät, ob „Neu laden“ gegriffen hat
+const FASSUNG = new Date(__BAU_ZEIT__).toLocaleString('de-AT', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})
 const host = (origin: string): string => {
   try {
     return new URL(origin).host
@@ -66,8 +75,11 @@ const EinstellungenOben: Component = () => {
       <div class="setup-card">
         <h4>Über diese Wallet</h4>
         <p>
-          Die LNURLwallet von dni mit eigener Oberfläche — ein Fork (JaxAle/lnurl-wallet,
-          {__APP_VERSION__}). Die Schlüssel verlassen diesen Browser nie.
+          Die LNURLwallet von dni mit eigener Oberfläche — ein Fork (JaxAle/lnurl-wallet). Die
+          Schlüssel verlassen diesen Browser nie.
+        </p>
+        <p class="rz-fassung">
+          Fassung vom {FASSUNG} <span class="rz-matt">· {__APP_VERSION__}</span>
         </p>
         <div class="btns">
           <A href="/docs" class="link-btn">

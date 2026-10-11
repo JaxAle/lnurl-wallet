@@ -113,6 +113,8 @@ export default defineConfig({
   // pushing a tag. 'dev' only surfaces outside a git checkout entirely
   // (e.g. a downloaded source archive with no .git directory)
   define: {
-    __APP_VERSION__: JSON.stringify(gitVersion('dev'))
+    __APP_VERSION__: JSON.stringify(gitVersion('dev')),
+    // Fork: Bauzeit, damit man am Gerät sieht, welche Fassung läuft (EinstellungenOben)
+    __BAU_ZEIT__: JSON.stringify(new Date().toISOString())
   }
 })

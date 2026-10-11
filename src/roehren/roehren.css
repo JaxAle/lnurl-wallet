@@ -673,3 +673,9 @@ body:has(.rz-reiter) {
     animation: none;
   }
 }
+
+/* Fassung in den Einstellungen: eigene Zeile, damit man sie findet */
+.rz-fassung {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
