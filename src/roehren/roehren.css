@@ -503,6 +503,11 @@ body:has(.rz-reiter) {
   color: #ead8bf;
 }
 .rz-zurueck {
+  /* auch als button (Aufladen: zurück bricht die Rechnung ab) — ohne Knopfkleid des Originals */
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
   display: grid;
   place-items: center;
   width: 44px;
@@ -869,4 +874,29 @@ select {
 /* Sprung aus dem Bedienfeld (?teil=…): Abschnitt nicht unter der Kopfleiste */
 #settings [id] {
   scroll-margin-top: 72px;
+}
+
+/* Aufladen (Prototyp topup-Fuß: „bei <Stelle> · ändern“, leise unter dem Betrag) */
+.rz-stelle {
+  margin: 0;
+  font-size: 14px;
+  color: #a3907c;
+  text-align: center;
+}
+.rz-stelle b {
+  font-weight: 400;
+  color: #f4ebdf;
+}
+.rz-aendern {
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: rgba(238, 152, 90, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.rz-duo-flach {
+  margin: 8px 0;
 }

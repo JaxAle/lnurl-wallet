@@ -117,6 +117,7 @@ import Dialog from '../components/Dialog'
 import FiatValue from '../components/FiatValue'
 import AddressDialog from '../components/AddressDialog'
 import RescanDialog from '../components/RescanDialog'
+import Aufladen from '../roehren/Aufladen'
 
 // LUD-21 auto-poll interval, in seconds - both the countdown shown on the
 // button and the cadence of the automatic check
@@ -146,7 +147,7 @@ const mintAddressFor = (server: string): string =>
 // without a network connection - only the minting half below is gated on
 // both (see RequireWallet, and the individual offlineMode() checks on its
 // own controls).
-const Mint: Component = () => {
+const Mint: Component<{aufladen?: boolean}> = props => {
   const {state, bearers, addBearer, logActivity} = useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
@@ -1212,6 +1213,35 @@ const Mint: Component = () => {
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     }
+  }
+
+  // Fork: /aufladen zeigt eigenes Bild (roehren/Aufladen.tsx), Rechnung und Abholen bleiben hier
+  if (props.aufladen) {
+    return (
+      <Aufladen
+        motor={{
+          payRequest,
+          invoice,
+          busy,
+          pruefbar: () => !!verifyUrl(),
+          abholbar: () => !!mintSecret() && !verifyUrl(),
+          aufteilung: amountBreakdown,
+          ausgabestelle: async adresse => {
+            setMintInput(adresse)
+            await lookup()
+          },
+          betrag: sats => setAmountSats(sats > 0 ? String(sats) : ''),
+          rechnung: getInvoice,
+          pruefen: manualCheck,
+          abholen: () => {
+            const secret = mintSecret()
+            if (secret) void claim(secret, invoicedMsat(), invoicedGrossMsat())
+          },
+          abbrechen: closeMintDialog,
+          adresseFuer: mintAddressFor
+        }}
+      />
+    )
   }
 
   return (

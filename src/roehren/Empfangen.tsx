@@ -106,7 +106,7 @@ const Empfangen: Component = () => {
           </div>
         </Show>
 
-        <A href="/mint" class="rz-option">
+        <A href="/aufladen" class="rz-option">
           <span class="ic">
             <Symbol name="bolt" />
           </span>

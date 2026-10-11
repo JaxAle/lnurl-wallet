@@ -98,6 +98,7 @@ const cleanup = render(
       <Route path="/empfangen" component={Empfangen} />
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={Mint} />
+      <Route path="/aufladen" component={() => <Mint aufladen />} />
       {/* /mints merged into /mint (trusted-mint management now lives at
       the bottom of that page) - kept as a redirect so old links/bookmarks
       still land somewhere useful instead of 404ing */}

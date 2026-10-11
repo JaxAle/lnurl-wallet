@@ -1440,7 +1440,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                   Deine Wallet ist bereit, aber leer. Lade bei einer Ausgabestelle auf, oder scanne bzw. füge einen Schein ein, den dir jemand gegeben hat.
                 </p>
                 <div class="hero-actions">
-                  <A href="/mint" class="hero-btn hero-btn-primary">
+                  <A href="/aufladen" class="hero-btn hero-btn-primary">
                     <IoAddCircleSharp />
                     &nbsp;Aufladen
                   </A>
@@ -1684,7 +1684,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                 </div>
                     <Show when={blatt() === 'empfangen'}>
                       <div class="rz-abschnitt">
-                        <A href="/mint" class="link-btn wallet-hero-btn">
+                        <A href="/aufladen" class="link-btn wallet-hero-btn">
                           <IoAddCircleSharp />
                           &nbsp;Aufladen per Lightning
                         </A>
