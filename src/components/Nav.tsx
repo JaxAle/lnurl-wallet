@@ -52,7 +52,7 @@ const Nav = () => {
   }
 
   return (
-    <nav>
+    <nav classList={{'rz-kopf': leiste()}}>
       {/* Fork: kein Menü, solange die Reiterleiste steht — wie im Prototyp nur Titel und
       Netzschalter (Steve, 2026-10-11). Gesperrt/ohne Wallet bleibt es: dort liegt der Weg zu
       „Sicherung einspielen“ in den Einstellungen. */}
@@ -65,10 +65,13 @@ const Nav = () => {
         {menuOpen() ? <IoCloseSharp /> : <IoMenuSharp />}
       </button>
       </Show>
-      {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift */}
-      <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
-        Wallet
-      </A>
+      {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift — nur ohne Reiterleiste
+      (gesperrt, Einrichtung); mit Leiste sagt der helle Reiter, wo man ist (Steve, 2026-10-11) */}
+      <Show when={!leiste()}>
+        <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
+          Wallet
+        </A>
+      </Show>
       {/* Fork: Netzschalter — Ausschalten ist überall eine Berührung (Prototyp). Nur mit
       Passwort: ohne entsperrt die Wallet von selbst, ein Schalter wäre eine leere Geste */}
       <Show when={state() === 'unlocked' && encrypted()}>

@@ -309,6 +309,11 @@
   display: flex;
   align-items: center;
 }
+/* Kopfleiste mit Reiterleiste: nur der Netzschalter, Höhe wie im Prototyp (.topbar 58 px) */
+nav.rz-kopf {
+  min-height: 58px;
+}
+
 /* Netzschalter: kein Kästchen, matter Draht, glimmt unter dem Daumen (Prototyp .powerbtn) */
 .rz-netzschalter {
   order: 10;
