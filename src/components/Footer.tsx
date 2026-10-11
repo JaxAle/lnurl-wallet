@@ -7,7 +7,7 @@ const Footer = () => {
   // Fork: nicht auf jeder Seite — auf der Startseite war sie das Hellste und sagte dem
   // Teilnehmer nichts; Version, Herkunft (dni) und Datenschutz stehen unter Einstellungen
   const ort = useLocation()
-  const zeigen = () => ['/settings', '/docs'].some(p => ort.pathname.startsWith(p))
+  const zeigen = () => ort.pathname.startsWith('/docs') // Einstellungen: „Über diese Wallet“
   return (
     <Show when={zeigen()}>
     <footer class="footer">

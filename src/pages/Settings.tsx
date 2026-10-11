@@ -22,6 +22,7 @@ import {
 import {useWallet} from '../WalletContext'
 import {offlineMode, setOfflineMode} from '../offlineMode'
 import {profi, setProfi} from '../roehren/profi'
+import EinstellungenOben from '../roehren/EinstellungenOben'
 import {currency, setCurrency, CURRENCY_LABEL} from '../currency'
 import type {Currency} from '../currency'
 import {
@@ -346,6 +347,8 @@ const Settings: Component = () => {
   return (
     <div id="settings" class="page">
       <h2>Settings</h2>
+      {/* Fork: was im Menü oben links lag, wohnt jetzt hier (Prototyp, Steve 2026-10-11) */}
+      <EinstellungenOben />
       <div class="two-columns">
         <div class="two-col">
           <div class="setup-card">

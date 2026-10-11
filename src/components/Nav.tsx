@@ -53,6 +53,10 @@ const Nav = () => {
 
   return (
     <nav>
+      {/* Fork: kein Menü, solange die Reiterleiste steht — wie im Prototyp nur Titel und
+      Netzschalter (Steve, 2026-10-11). Gesperrt/ohne Wallet bleibt es: dort liegt der Weg zu
+      „Sicherung einspielen“ in den Einstellungen. */}
+      <Show when={!leiste()}>
       <button
         class="nav-toggle"
         title={menuOpen() ? 'Close menu' : 'Open menu'}
@@ -60,6 +64,7 @@ const Nav = () => {
       >
         {menuOpen() ? <IoCloseSharp /> : <IoMenuSharp />}
       </button>
+      </Show>
       {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift */}
       <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
         Wallet
@@ -90,6 +95,7 @@ const Nav = () => {
       {/* wraps both groups so they collapse into one dropdown on mobile -
       Docs always renders regardless of wallet state, so this is never
       empty when opened (see .nav-menu in style.scss) */}
+      <Show when={!leiste()}>
       <div class="nav-menu" classList={{open: menuOpen()}} onClick={closeMenu}>
         <div class="nav-links">
           {/* shown whenever there's a wallet on this device, even locked -
@@ -211,6 +217,7 @@ const Nav = () => {
           </Show>
         </div>
       </div>
+      </Show>
     </nav>
   )
 }
