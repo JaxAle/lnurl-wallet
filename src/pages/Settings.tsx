@@ -1,6 +1,6 @@
 import type {Component} from 'solid-js'
-import {For, Show, Switch, Match, createSignal} from 'solid-js'
-import {A, useNavigate} from '@solidjs/router'
+import {For, Show, Switch, Match, createSignal, onMount} from 'solid-js'
+import {A, useNavigate, useSearchParams} from '@solidjs/router'
 import {
   IoCashSharp,
   IoCloudOfflineSharp,
@@ -21,7 +21,6 @@ import {
 
 import {useWallet} from '../WalletContext'
 import {offlineMode, setOfflineMode} from '../offlineMode'
-import EinstellungenOben from '../roehren/EinstellungenOben'
 import {currency, setCurrency, CURRENCY_LABEL} from '../currency'
 import type {Currency} from '../currency'
 import {
@@ -343,11 +342,23 @@ const Settings: Component = () => {
     navigate('/')
   }
 
+  // Fork: aus dem Bedienfeld kommt man mit ?teil=… direkt zum gemeinten Abschnitt
+  const [suche] = useSearchParams()
+  onMount(() => {
+    const teil = suche.teil
+    if (typeof teil === 'string') document.getElementById(teil)?.scrollIntoView({block: 'start'})
+  })
+
   return (
     <div id="settings" class="page">
-      <h2>Einstellungen</h2>
-      {/* Fork: was im Menü oben links lag, wohnt jetzt hier (Prototyp, Steve 2026-10-11) */}
-      <EinstellungenOben />
+      {/* Fork: die Einstellungen selbst sind jetzt das Bedienfeld (roehren/Einstellungen.tsx);
+          hier bleibt das Original als „Erweitert“, erreichbar über dessen Zeilen */}
+      <div class="rz-seitenkopf">
+        <A href="/settings" class="rz-zurueck" aria-label="Zurück zu den Einstellungen">
+          ‹
+        </A>
+        <h2>Erweitert</h2>
+      </div>
       <div class="two-columns">
         <div class="two-col">
           <div class="setup-card">
@@ -496,7 +507,7 @@ const Settings: Component = () => {
             </div>
           </Show>
           <Show when={state() === 'unlocked' && !encryptionUpgraded()}>
-            <div class="setup-card">
+            <div class="setup-card" id="verschluesselung">
               <h4>Verschlüsselung erneuern</h4>
               <p>
                 Deine Scheine sind noch mit einem Schlüssel aus einer älteren Fassung verschlüsselt. Gibst du hier deine zwölf Wörter ein, verschlüsselt die Wallet alle Scheine und den Verlauf mit einem einfacher abgeleiteten Schlüssel neu. Deine Wörter und deine Scheine bleiben dieselben.
@@ -551,7 +562,7 @@ const Settings: Component = () => {
               </div>
             </div>
           </Show>
-          <div class="setup-card">
+          <div class="setup-card" id="einspielen">
             <h4>
               <IoFolderOpenSharp />
               &nbsp;Sicherung einspielen
@@ -648,7 +659,7 @@ const Settings: Component = () => {
             </div>
           </Show>
         </div>
-        <div class="two-col">
+        <div class="two-col" id="extras">
           <h3>Addons</h3>
           <p>
             Optional features, off by default. Each one only gets the

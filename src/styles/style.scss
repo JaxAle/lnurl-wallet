@@ -7,7 +7,8 @@ $accent-base: #3d2408;
 $transparency: 0.6;
 $font-color: #ff9d3f;
 $font-size: 16px;
-$font: 'Noto Sans', sans-serif;
+// Fork: Jost wie im Prototyp — eine Schrift für die ganze App (roehren.css)
+$font: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
 
 * {
   box-sizing: border-box;

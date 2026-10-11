@@ -8,8 +8,10 @@ import {registerSW} from 'virtual:pwa-register'
 import {WalletProvider} from './WalletContext'
 import {DeviceProvider} from './DeviceContext'
 import {notify, NotifyKind} from './helpers'
-import '@fontsource/noto-sans/400.css'
-import '@fontsource/noto-sans/700.css'
+import '@fontsource/jost/300.css'
+import '@fontsource/jost/400.css'
+import '@fontsource/jost/500.css'
+import '@fontsource/jost/600.css'
 import './styles/style.scss'
 import './styles/background.scss'
 
@@ -28,6 +30,7 @@ import Docs from './pages/Docs'
 import Vault from './pages/Vault'
 import Claim from './pages/Claim'
 import Settings from './pages/Settings'
+import Einstellungen from './roehren/Einstellungen'
 import AddonRun from './pages/AddonRun'
 
 const root = document.getElementById('root')
@@ -110,7 +113,8 @@ const cleanup = render(
       so old links/bookmarks still land somewhere useful instead of 404ing */}
       <Route path="/backup" component={() => <Navigate href="/settings" />} />
       <Route path="/docs" component={Docs} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/settings" component={Einstellungen} />
+      <Route path="/settings/erweitert" component={Settings} />
       <Route path="/addons/:addonId" component={AddonRun} />
       <Route path="/vault" component={Vault} />
       <Route path="/claim" component={Claim} />

@@ -677,7 +677,7 @@ const AddonRenderError: Component<{
           Try again
         </button>
         <Show when={props.mode === 'run'}>
-          <A href="/settings" class="hero-btn">
+          <A href="/settings/erweitert?teil=extras" class="hero-btn">
             Back to Settings
           </A>
         </Show>

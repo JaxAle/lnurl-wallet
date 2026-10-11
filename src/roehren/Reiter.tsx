@@ -63,7 +63,7 @@ const Reiter: Component = () => {
             <A
               href={pfad}
               class="rz-tab"
-              aria-current={ort.pathname === pfad ? 'page' : undefined}
+              aria-current={ort.pathname === pfad || ort.pathname.startsWith(pfad + '/') ? 'page' : undefined}
             >
               <Show when={pfad === '/activity' && lampe()}>
                 <span class="rz-lampe" />

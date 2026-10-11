@@ -674,8 +674,199 @@ body:has(.rz-reiter) {
   }
 }
 
-/* Fassung in den Einstellungen: eigene Zeile, damit man sie findet */
-.rz-fassung {
+
+/* Ganze App in Jost (Prototyp --font-body: „eine für die ganze App“). Die Grundschrift selbst stellt
+   style.scss ($font); hier nur, was das Original fett setzt: Jost geht im Prototyp nie über 600. */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 500;
+}
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Einstellungen als Bedienfeld (Prototyp .group/.setting/.switch/details.adv) */
+.rz-titel {
+  margin: 0 0 4px;
+  font: 300 22px/1.2 'Jost', 'Futura', system-ui, sans-serif;
+  transform: scaleX(0.9);
+  transform-origin: left center;
+  color: #ead8bf;
+}
+.rz-gruppe {
+  margin-top: 20px;
+}
+.rz-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #a3907c;
+}
+.rz-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 0;
+  text-align: left;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid #2f2218;
+  border-radius: 0;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rz-setting .sl {
+  display: block;
+  font-weight: 300;
+  font-size: 19px;
+  line-height: 1.3;
+  transform: scaleX(0.9);
+  transform-origin: left center;
+  color: #ead8bf;
+}
+.rz-setting .s {
+  display: block;
+  margin-top: 1px;
+  font-size: 13px;
+  color: #a3907c;
+}
+.rz-setting .val {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(238, 152, 90, 0.72);
+  text-align: right;
+}
+.rz-setting .val svg,
+.rz-erweitert summary svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.rz-setting:active .sl,
+.rz-setting:active .val {
+  color: #ffefc4;
+  text-shadow: 0 0 3px #ffd27a, 0 0 8px #ff9a22;
+}
+.rz-setting.gefahr .sl,
+.rz-setting.gefahr .val {
+  color: #ff8a5c;
+}
+.rz-setting.gefahr .sl::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  vertical-align: 2px;
+  border-radius: 50%;
+  background: #ff6232;
+  box-shadow: 0 0 4px #ff8a5c, 0 0 9px rgba(255, 60, 20, 0.55);
+}
+.rz-switch {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 28px;
+  border-radius: 999px;
+  background: #2f2218;
+  transition: background 0.2s;
+}
+.rz-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(238, 152, 90, 0.55);
+  transition: transform 0.2s;
+}
+.rz-switch.on {
+  background: #2a1a10;
+  box-shadow: inset 0 0 0 1px rgba(255, 239, 196, 0.4);
+}
+.rz-switch.on::after {
+  background: #ffefc4;
+  transform: translateX(18px);
+}
+.rz-erweitert summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 0;
+  color: #a3907c;
+  cursor: pointer;
+  list-style: none;
+}
+.rz-erweitert summary::-webkit-details-marker {
+  display: none;
+}
+.rz-erweitert summary svg {
+  transition: transform 0.2s;
+}
+.rz-erweitert[open] summary svg {
+  transform: rotate(90deg);
+}
+.rz-rueckfrage {
+  padding: 14px 0 4px;
+}
+.rz-rueckfrage p {
+  margin: 0;
+  color: #f4ebdf;
+}
+.rz-rueckfrage .rz-duo {
+  margin: 14px 0 0;
+}
+.rz-rueckfrage button {
+  min-height: 48px;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.rz-knopf-gefahr {
+  border: 1px solid rgba(255, 98, 50, 0.6);
+  background: none;
+  color: #ff8a5c;
+}
+.rz-rueckfrage .rz-knopf {
+  display: block;
+  min-height: 48px;
+  padding: 0;
+  font-size: 17px;
+  color: #ffefc4;
+}
+.rz-fuss {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #a3907c;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+}
+.rz-fuss-klein {
+  display: block;
+  font-size: 11px;
+  opacity: 0.7;
+}
+/* Sprung aus dem Bedienfeld (?teil=…): Abschnitt nicht unter der Kopfleiste */
+#settings [id] {
+  scroll-margin-top: 72px;
 }
