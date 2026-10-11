@@ -1,7 +1,7 @@
 import type {Component} from 'solid-js'
 import {Show, For, createSignal, createMemo, createEffect, on, onMount, onCleanup} from 'solid-js'
 import {render} from 'solid-js/web'
-import {A, useNavigate} from '@solidjs/router'
+import {A, useNavigate, useSearchParams} from '@solidjs/router'
 import {QRCodeSVG, ErrorCorrectionLevel} from 'solid-qr-code'
 import {
   IoAddCircleSharp,
@@ -253,6 +253,14 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   // Es schließt sich, sobald eine Rechnung zum Zahlen weitergereicht ist oder ein Schein
   // fertig empfangen wurde — dann übernimmt der Dialog bzw. zählt das Zählwerk.
   const [blatt, setBlatt] = createSignal<'senden' | 'empfangen' | null>(null)
+  // vom Senden-Bildschirm: „Rechnung oder Adresse bekommen? bezahlen ›“
+  const [suche, setSuche] = useSearchParams()
+  onMount(() => {
+    if (suche.bezahlen) {
+      setBlatt('senden')
+      setSuche({bezahlen: undefined})
+    }
+  })
   // Verbergen heißt nicht verschweigen: was unterwegs ist, steht als eine Zeile da (Prototyp)
   const unterwegsScheine = createMemo(() => {
     const ids = new Set(unterwegs())
@@ -1566,7 +1574,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                 onSenden={() =>
                   spendableTotal() === 0
                     ? notify('Noch nichts zu senden — zuerst empfangen oder aufladen.')
-                    : setBlatt('senden')
+                    : navigate('/senden')
                 }
                 onEmpfangen={() => setBlatt('empfangen')}
               />
@@ -1584,10 +1592,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         </>
                       }
                     >
-                      <h3>Senden</h3>
+                      <h3>Bezahlen</h3>
                       <p class="rz-hinweis">
-                        Rechnung oder Lightning-Adresse scannen oder einfügen — oder unten
-                        einen Schein übergeben.
+                        Rechnung oder Lightning-Adresse scannen oder einfügen.
                       </p>
                     </Show>
                 <div class="paste-widget hero-paste-widget">
@@ -1667,27 +1674,6 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           <IoAddCircleSharp />
                           &nbsp;Aufladen per Lightning
                         </A>
-                      </div>
-                    </Show>
-                    <Show when={blatt() === 'senden' && spendableBearers().length > 0}>
-                      <div class="rz-abschnitt">
-                        <h4>Schein übergeben</h4>
-                        <p class="rz-hinweis">
-                          Auge antippen, QR zeigen — die Wallet merkt selbst, wenn er eingelöst ist.
-                        </p>
-                        <div class="bearer-list">
-                          <For each={spendableBearers()}>
-                            {bearer => (
-                              <BearerCard
-                                bearer={bearer}
-                                selected={false}
-                                onSelect={() => {}}
-                                onRefresh={refreshOneBearer}
-                                onUpgrade={upgradeOneBearer}
-                              />
-                            )}
-                          </For>
-                        </div>
                       </div>
                     </Show>
                   </div>

@@ -68,10 +68,16 @@ export const zeigeGebuehr = (sats: number): void => {
   gebuehrUhr = setTimeout(() => setGebuehr(null), 7000)
 }
 
-const Zaehlwerk: Component<{sats: number; children?: JSX.Element}> = props => {
-  const [angezeigt, setAngezeigtRoh] = createSignal(zuletzt ?? props.sats)
+// sofort: ohne Hinab-/Hinaufzählen (Eingabe beim Senden) · kalt: Röhren glimmen nur (Prototyp .cold)
+const Zaehlwerk: Component<{
+  sats: number
+  children?: JSX.Element
+  sofort?: boolean
+  kalt?: boolean
+}> = props => {
+  const [angezeigt, setAngezeigtRoh] = createSignal(props.sofort ? props.sats : (zuletzt ?? props.sats))
   const setAngezeigt = (wert: number) => {
-    zuletzt = wert
+    if (!props.sofort) zuletzt = wert
     setAngezeigtRoh(wert)
   }
   let uhr: ReturnType<typeof setTimeout> | undefined
@@ -85,7 +91,7 @@ const Zaehlwerk: Component<{sats: number; children?: JSX.Element}> = props => {
       ziel => {
         halt()
         const von = angezeigt()
-        if (ziel === von) {
+        if (ziel === von || props.sofort) {
           setAngezeigt(ziel)
           return
         }
@@ -119,11 +125,12 @@ const Zaehlwerk: Component<{sats: number; children?: JSX.Element}> = props => {
         {s => (
           <div
             class="bal-tubes"
-            classList={{cold: s.sats === 0}}
+            classList={{cold: s.sats === 0 || !!props.kalt}}
             role="img"
             aria-label={`Guthaben ${anzeige()} Sats`}
           >
-            <For each={zellen(s.sats, s.vorher)}>
+            {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
+            <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
               {zelle =>
                 zelle.art === 'punkt' ? (
                   <span class="dot" classList={{unlit: !zelle.an}} />
