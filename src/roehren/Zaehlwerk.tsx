@@ -76,6 +76,11 @@ const Zaehlwerk: Component<{
   kalt?: boolean
   // frei vor den Röhren, z. B. „−“ beim Abschluss des Sendens: eine Bewegung, kein Stand
   vorzeichen?: string
+  // Eingabe beim Senden: Zeile antippen = dort tippen (Prototyp 'cur-set'); die gewählte Zeile ist
+  // hervorgehoben, in Euro glimmen die Röhren nur und zeigen weiter die Sats
+  wahl?: 'sats' | 'eur'
+  onWahl?: (w: 'sats' | 'eur') => void
+  euroAnzeige?: string
 }> = props => {
   const [angezeigt, setAngezeigtRoh] = createSignal(props.sofort ? props.sats : (zuletzt ?? props.sats))
   const setAngezeigt = (wert: number) => {
@@ -122,12 +127,23 @@ const Zaehlwerk: Component<{
   return (
     <div class="roehren-zaehlwerk">
       {/* keyed: bei jedem neuen Stand neu aufbauen, damit das Aufglühen erneut abläuft */}
-      <div class="rz-inrow">
+      <div
+        class="rz-inrow"
+        classList={{waehlbar: !!props.onWahl, aktiv: props.wahl === 'sats'}}
+        role={props.onWahl ? 'button' : undefined}
+        aria-label={props.onWahl ? 'In Sats eingeben' : undefined}
+        aria-pressed={props.onWahl ? props.wahl === 'sats' : undefined}
+        onClick={() => props.onWahl?.('sats')}
+      >
       <Show when={stand()} keyed>
         {s => (
           <div
             class="bal-tubes"
-            classList={{cold: s.sats === 0 || !!props.kalt, signed: !!props.vorzeichen}}
+            classList={{
+              cold: s.sats === 0 || !!props.kalt,
+              signed: !!props.vorzeichen,
+              idle: props.wahl === 'eur'
+            }}
             role="img"
             aria-label={`Guthaben ${anzeige()} Sats`}
           >
@@ -160,13 +176,20 @@ const Zaehlwerk: Component<{
         )}
       </Show>
       </div>
-      <div class="rz-eurrow">
+      <div
+        class="rz-eurrow"
+        classList={{waehlbar: !!props.onWahl, aktiv: props.wahl === 'eur'}}
+        role={props.onWahl ? 'button' : undefined}
+        aria-label={props.onWahl ? 'In Euro eingeben' : undefined}
+        aria-pressed={props.onWahl ? props.wahl === 'eur' : undefined}
+        onClick={() => props.onWahl?.('eur')}
+      >
       <Show
         when={gebuehr()}
         fallback={
-          <Show when={fiat()}>
+          <Show when={props.euroAnzeige ?? fiat()}>
             <div>
-              <span class="rz-euro">{fiat()}</span>
+              <span class="rz-euro">{props.euroAnzeige ?? fiat()}</span>
             </div>
           </Show>
         }

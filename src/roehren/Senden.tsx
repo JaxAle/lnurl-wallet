@@ -3,7 +3,8 @@
 // Ausgabestelle geht vom Rest ab, nicht vom übergebenen Betrag), dann der QR. Das Einlösen erkennt
 // die Einlöse-Wache; das Zählwerk zählt danach auf der Startseite herunter.
 //
-// Noch nicht hier (spätere Schleife): Eingabe in Euro, „Als Link teilen“, „Geschenkkarte“.
+// Euro-Eingabe: Zeile antippen = dort tippen (Prototyp 'cur-set'/'key'). Noch nicht hier: „Als Link
+// teilen“, „Geschenkkarte“.
 import type {Component} from 'solid-js'
 import {createMemo, createSignal, For, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
@@ -12,6 +13,7 @@ import Qr from '../components/Qr'
 import RequireWallet from '../components/RequireWallet'
 import {useDevice} from '../DeviceContext'
 import {requireDeviceClient} from '../deviceOrchestration'
+import {rates} from '../currency'
 import {notify, NotifyKind} from '../helpers'
 import {toBech32Lnurl} from '../lnurlcash'
 import {splitBearerIntoAmounts} from '../noteSplitting'
@@ -23,6 +25,7 @@ import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
 const TASTEN = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'del'] as const
+type Taste = (typeof TASTEN)[number] | ','
 const HOECHSTENS = 9_999_999 // sieben Röhren
 
 const Senden: Component = () => {
@@ -33,8 +36,18 @@ const Senden: Component = () => {
   const [eingabe, setEingabe] = createSignal('')
   const [arbeitet, setArbeitet] = createSignal(false)
   const [schein, setSchein] = createSignal<Bearer | null>(null)
+  // Euro: eigene Zeichenkette mit Komma; die Sats rechnet der Kurs aus, den die Wallet ohnehin lädt
+  const [wahl, setWahl] = createSignal<'sats' | 'eur'>('sats')
+  const [euroText, setEuroText] = createSignal('')
+  const [frisch, setFrisch] = createSignal(false)
+  const kurs = () => rates()?.eur ?? null // Euro je Bitcoin
+  const satsAusEuro = (t: string) => {
+    const k = kurs()
+    const eur = parseFloat(t.replace(',', '.')) || 0
+    return k ? Math.floor((eur / k) * 100_000_000) : 0
+  }
 
-  const betrag = () => Number(eingabe() || '0')
+  const betrag = () => (wahl() === 'eur' ? satsAusEuro(euroText()) : Number(eingabe() || '0'))
   // nur Scheine, deren Geheimnis in diesem Browser liegt (kein Vault) — die lassen sich spalten
   const verfuegbar = createMemo(() => bearers().filter(b => !b.spent && !b.deviceId))
   const guthaben = () => Math.floor(verfuegbar().reduce((a, b) => a + b.amount, 0) / 1000)
@@ -46,11 +59,38 @@ const Senden: Component = () => {
       ? `Mehr als dein Guthaben (${guthaben().toLocaleString('de-AT')})`
       : `Kein einzelner Schein hat so viel — höchstens ${groesster().toLocaleString('de-AT')}`
 
-  const taste = (t: (typeof TASTEN)[number]) => {
-    if (t === 'del') return setEingabe(e => e.slice(0, -1))
-    const neu = (eingabe() + t).replace(/^0+/, '')
+  // wie im Prototyp: die erste Ziffer nach dem Umschalten ersetzt den umgerechneten Wert
+  const taste = (t: Taste) => {
+    const neuAnfang = frisch() && t !== 'del'
+    setFrisch(false)
+    if (wahl() === 'eur') {
+      let x = neuAnfang ? '' : euroText()
+      if (t === 'del') x = x.slice(0, -1)
+      else if (t === ',') {
+        if (!x.includes(',')) x = (x || '0') + ','
+      } else if (!(x.includes(',') && x.split(',')[1].length >= 2) && x.replace(',', '').length < 9) {
+        x = (x === '0' ? '' : x) + t
+      }
+      if (satsAusEuro(x) <= HOECHSTENS) setEuroText(x) // passt sonst nicht mehr auf sieben Röhren
+      return
+    }
+    if (t === 'del') return setEingabe(e => (neuAnfang ? '' : e).slice(0, -1))
+    const neu = ((neuAnfang ? '' : eingabe()) + t).replace(/^0+/, '')
     if (Number(neu || '0') <= HOECHSTENS) setEingabe(neu)
   }
+  const waehle = (w: 'sats' | 'eur') => {
+    if (w === wahl() || (w === 'eur' && !kurs())) return
+    if (w === 'eur') {
+      const k = kurs()!
+      setEuroText(betrag() ? ((betrag() / 100_000_000) * k).toFixed(2).replace('.', ',') : '')
+    } else {
+      setEingabe(betrag() ? String(betrag()) : '')
+    }
+    setWahl(w)
+    setFrisch(true)
+  }
+  const euroAnzeige = () =>
+    wahl() === 'eur' ? `${euroText() || '0'} €` : undefined
 
   // genau passender Schein, sonst der kleinste, von dem sich der Betrag abspalten lässt
   // (Spalten verlangt einen Rest: Betrag < Schein)
@@ -126,7 +166,14 @@ const Senden: Component = () => {
               </A>
               <h2>Senden</h2>
             </div>
-            <Zaehlwerk sats={betrag()} sofort kalt={!betrag() || zuViel()}>
+            <Zaehlwerk
+              sats={betrag()}
+              sofort
+              kalt={!betrag() || zuViel()}
+              wahl={wahl()}
+              onWahl={kurs() ? waehle : undefined}
+              euroAnzeige={euroAnzeige()}
+            >
               <Show when={betrag() > 0 && zuViel()}>
                 <div class="rz-ueber">
                   <span>{grund()}</span>
@@ -135,7 +182,10 @@ const Senden: Component = () => {
                   <button
                     type="button"
                     class="rz-leise"
-                    onClick={() => setEingabe(String(groesster()))}
+                    onClick={() => {
+                      setWahl('sats')
+                      setEingabe(String(groesster()))
+                    }}
                   >
                     {groesster().toLocaleString('de-AT')} senden
                   </button>
@@ -144,18 +194,22 @@ const Senden: Component = () => {
             </Zaehlwerk>
             <div class="rz-tastatur">
               <For each={TASTEN}>
-                {t => (
-                  <button
-                    type="button"
-                    class="rz-taste"
-                    aria-label={t === 'del' ? 'Löschen' : t}
-                    onClick={() => taste(t)}
-                  >
-                    <Show when={t !== 'del'} fallback={<span class="w">⌫</span>}>
-                      <span class="w">{t}</span>
-                    </Show>
-                  </button>
-                )}
+                {t => {
+                  // in Euro wird „000“ zum Komma (Prototyp)
+                  const echt = (): Taste => (t === '000' && wahl() === 'eur' ? ',' : t)
+                  return (
+                    <button
+                      type="button"
+                      class="rz-taste"
+                      aria-label={echt() === 'del' ? 'Löschen' : echt()}
+                      onClick={() => taste(echt())}
+                    >
+                      <Show when={t !== 'del'} fallback={<span class="w">⌫</span>}>
+                        <span class="w">{echt()}</span>
+                      </Show>
+                    </button>
+                  )
+                }}
               </For>
             </div>
             <button
