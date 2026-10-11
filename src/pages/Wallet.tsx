@@ -92,6 +92,7 @@ import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
 import EinloeseWache from '../roehren/EinloeseWache'
 import Knoepfe from '../roehren/Knoepfe'
+import {unterwegs} from '../roehren/einloesen'
 
 const Wallet: Component = () => {
   const {
@@ -250,6 +251,31 @@ const Wallet: Component = () => {
   // Es schließt sich, sobald eine Rechnung zum Zahlen weitergereicht ist oder ein Schein
   // fertig empfangen wurde — dann übernimmt der Dialog bzw. zählt das Zählwerk.
   const [blatt, setBlatt] = createSignal<'senden' | 'empfangen' | null>(null)
+  // Fork: die Scheine sind Profi-Sache (Prototyp: eigener Reiter im Profi-Modus) — auf der
+  // Startseite stehen sie nur, wenn man sie aufklappt; gemerkt je Gerät
+  const SCHEINE_ZEIGEN = 'fork_scheine_zeigen'
+  const [zeigeScheine, setZeigeScheineRoh] = createSignal(
+    (() => {
+      try {
+        return localStorage.getItem(SCHEINE_ZEIGEN) === '1'
+      } catch {
+        return false
+      }
+    })()
+  )
+  const setZeigeScheine = (an: boolean) => {
+    setZeigeScheineRoh(an)
+    try {
+      localStorage.setItem(SCHEINE_ZEIGEN, an ? '1' : '0')
+    } catch {
+      // nur eine Bequemlichkeit
+    }
+  }
+  // Verbergen heißt nicht verschweigen: was unterwegs ist, steht als eine Zeile da (Prototyp)
+  const unterwegsScheine = createMemo(() => {
+    const ids = new Set(unterwegs())
+    return bearers().filter(b => ids.has(b.id) && !b.spent)
+  })
   createEffect(on(openDialog, d => d === 'melt' && setBlatt(null), {defer: true}))
   createEffect(
     on(heroReceiving, (jetzt, vorher) => vorher && !jetzt && setBlatt(null), {defer: true})
@@ -1661,6 +1687,33 @@ const Wallet: Component = () => {
                   </div>
                 </Dialog>
               </Show>
+              <Show when={unterwegsScheine().length > 0}>
+                <button
+                  type="button"
+                  class="rz-hinweiszeile"
+                  onClick={() => setZeigeScheine(true)}
+                >
+                  {unterwegsScheine().length === 1
+                    ? '1 Schein unterwegs'
+                    : `${unterwegsScheine().length} Scheine unterwegs`}
+                  {' · '}
+                  {Math.floor(
+                    unterwegsScheine().reduce((a, b) => a + b.amount, 0) / 1000
+                  ).toLocaleString('de-AT')}{' '}
+                  Sats ›
+                </button>
+              </Show>
+              <Show when={spendableBearers().length > 0}>
+                <button
+                  type="button"
+                  class="rz-leise"
+                  onClick={() => setZeigeScheine(!zeigeScheine())}
+                >
+                  {zeigeScheine()
+                    ? 'Scheine ausblenden'
+                    : `Alle Scheine (${spendableBearers().length}) ›`}
+                </button>
+              </Show>
             </section>
             <Show when={showMelt()}>
               <MeltDialog
@@ -1671,6 +1724,8 @@ const Wallet: Component = () => {
             </Show>
             {savedAddressPicker()}
 
+            {/* Fork: Werkzeugleiste und Scheine nur aufgeklappt (Steve, 2026-10-11) */}
+            <Show when={zeigeScheine()}>
             <section class="list-controls">
               <div class="list-controls-row">
                 <Show
@@ -2330,6 +2385,7 @@ const Wallet: Component = () => {
                   </section>
                 )}
               </For>
+            </Show>
             </Show>
           </div>
         </Show>

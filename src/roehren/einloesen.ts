@@ -5,6 +5,8 @@
 // probeBurnedNote → fetchNoteInfo), nie mit "Refresh": Refresh rotiert und würde dem
 // Empfänger einen noch nicht eingelösten Schein ungültig machen (VORBILD.md).
 // Nur solange die App offen und sichtbar ist — kein Hintergrunddienst.
+import {createSignal} from 'solid-js'
+
 import {probeBurnedNote} from '../lib/request'
 
 const SCHLUESSEL = 'fork_unterwegs'
@@ -23,7 +25,12 @@ const lies = (): Unterwegs => {
   }
 }
 
+// reaktiv für die Hinweiszeile auf der Startseite ("1 Schein unterwegs")
+const [unterwegs, setUnterwegs] = createSignal<string[]>(Object.keys(lies()))
+export {unterwegs}
+
 const schreib = (u: Unterwegs): void => {
+  setUnterwegs(Object.keys(u))
   try {
     localStorage.setItem(SCHLUESSEL, JSON.stringify(u))
   } catch {
