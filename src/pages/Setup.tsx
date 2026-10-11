@@ -57,13 +57,13 @@ const Setup: Component = () => {
   const finishSetup = async (phrase: string) => {
     if (encrypt() && setupPassword().length < MIN_PASSWORD_LENGTH) {
       notify(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+        `Das Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`,
         NotifyKind.ERROR
       )
       return
     }
     if (encrypt() && setupPassword() !== confirmPassword()) {
-      notify('Passwords do not match.', NotifyKind.ERROR)
+      notify('Die Passwörter stimmen nicht überein.', NotifyKind.ERROR)
       return
     }
     setBusy(true)
@@ -73,7 +73,7 @@ const Setup: Component = () => {
         encrypt() ? setupPassword() : undefined,
         tab() === 'create'
       )
-      notify('Wallet ready.', NotifyKind.SUCCESS)
+      notify('Wallet bereit.', NotifyKind.SUCCESS)
       // a restored seed may have notes at mints this device doesn't know
       // about yet - offer to scan for them before landing in an empty
       // wallet. A freshly generated seed has nothing to recover, so
@@ -92,7 +92,7 @@ const Setup: Component = () => {
 
   const restore = async () => {
     if (!isValidSeedPhrase(restorePhrase())) {
-      notify('Not a valid BIP39 seed phrase.', NotifyKind.ERROR)
+      notify('Das sind keine gültigen zwölf Wörter (BIP39).', NotifyKind.ERROR)
       return
     }
     await finishSetup(restorePhrase().trim().toLowerCase())
@@ -104,13 +104,10 @@ const Setup: Component = () => {
       fallback={<MintRecovery onDone={() => navigate('/wallet')} />}
     >
       <div id="setup" class="page">
-        <h2>Set up your wallet</h2>
+        <h2>Wallet einrichten</h2>
         <Show when={state() !== 'none'}>
           <p class="warning">
-            A wallet already exists on this device - setting up a new one
-            replaces its linking key. Stored bearer tokens encrypted with the
-            old key will stay in local storage but become unreadable until that
-            seed is restored again.
+            Auf diesem Gerät gibt es schon eine Wallet – eine neue ersetzt ihren Schlüssel. Mit dem alten Schlüssel verschlüsselte Scheine bleiben gespeichert, sind aber unlesbar, bis die alten zwölf Wörter wieder eingespielt werden.
           </p>
         </Show>
         <div class="tabs">
@@ -118,13 +115,13 @@ const Setup: Component = () => {
             classList={{active: tab() === 'create'}}
             onClick={() => setTab('create')}
           >
-            Create new
+            Neu anlegen
           </button>
           <button
             classList={{active: tab() === 'restore'}}
             onClick={() => setTab('restore')}
           >
-            Restore from seed
+            Mit zwölf Wörtern wiederherstellen
           </button>
         </div>
         <div class="setup-card">
@@ -134,18 +131,16 @@ const Setup: Component = () => {
               fallback={
                 <>
                   <p>
-                    A fresh seed phrase is generated in your browser - it is the
-                    master key to your wallet and the only way to recover your
-                    encrypted bearer tokens on another device.
+                    Im Browser entstehen zwölf neue Wörter – sie sind der Hauptschlüssel deiner Wallet und der einzige Weg, deine Scheine auf einem anderen Gerät wiederherzustellen.
                   </p>
                   <div class="btns">
-                    <button onClick={generate}>Generate seed phrase</button>
+                    <button onClick={generate}>Zwölf Wörter erzeugen</button>
                   </div>
                 </>
               }
             >
               <label>
-                Your seed phrase - write it down, it is never stored anywhere:
+                Deine zwölf Wörter – schreib sie auf, gespeichert werden sie nirgends:
               </label>
               <pre>{seedPhrase()}</pre>
               <label>
@@ -154,7 +149,7 @@ const Setup: Component = () => {
                   checked={confirmed()}
                   onChange={e => setConfirmed(e.currentTarget.checked)}
                 />
-                &nbsp;I have saved my seed phrase somewhere safe
+                &nbsp;Ich habe meine zwölf Wörter sicher aufbewahrt
               </label>
               <EncryptChoice
                 encrypt={encrypt()}
@@ -173,17 +168,17 @@ const Setup: Component = () => {
                     <IoRefreshSharp class="spin" />
                     &nbsp;
                   </Show>
-                  Continue
+                  Weiter
                 </button>
-                <button onClick={() => setSeedPhrase(null)}>Cancel</button>
+                <button onClick={() => setSeedPhrase(null)}>Abbrechen</button>
               </div>
             </Show>
           </Show>
           <Show when={tab() === 'restore'}>
-            <label>Your 12-word BIP39 seed phrase</label>
+            <label>Deine zwölf Wörter (BIP39)</label>
             <textarea
               rows="3"
-              placeholder="twelve words separated by spaces"
+              placeholder="zwölf Wörter, durch Leerzeichen getrennt"
               autocomplete="off"
               autocapitalize="off"
               spellcheck={false}
@@ -209,14 +204,12 @@ const Setup: Component = () => {
                   <IoRefreshSharp class="spin" />
                   &nbsp;
                 </Show>
-                Restore wallet
+                Wallet wiederherstellen
               </button>
             </div>
           </Show>
           <p>
-            Restoring straight from a backup file instead - no seed phrase
-            needed, as long as you still know its password - happens on the{' '}
-            <A href="/settings">Settings</A> page.
+            Wiederherstellen aus einer Sicherungsdatei – ohne die zwölf Wörter, solange du ihr Passwort kennst – geht in den{' '} <A href="/settings">Einstellungen</A>.
           </p>
         </div>
       </div>
@@ -239,20 +232,19 @@ const EncryptChoice: Component<{
         checked={props.encrypt}
         onChange={e => props.setEncrypt(e.currentTarget.checked)}
       />
-      &nbsp;Store my linking key encrypted, with a password (recommended)
+      &nbsp;Schlüssel mit Passwort schützen (empfohlen)
     </label>
     <Show
       when={props.encrypt}
       fallback={
         <p class="warning">
-          Without a password the linking key sits in local storage in plaintext
-          - anyone using this browser profile can spend your LNURLcash.
+          Ohne Passwort liegt der Schlüssel offen im Browser – wer dieses Browserprofil benutzt, kann deine Scheine ausgeben.
         </p>
       }
     >
       <input
         type="password"
-        placeholder="Password to encrypt the linking key"
+        placeholder="Passwort für den Schlüssel"
         autocomplete="new-password"
         autocapitalize="off"
         spellcheck={false}
@@ -261,7 +253,7 @@ const EncryptChoice: Component<{
       />
       <input
         type="password"
-        placeholder="Confirm password"
+        placeholder="Passwort wiederholen"
         autocomplete="new-password"
         autocapitalize="off"
         spellcheck={false}
@@ -275,14 +267,13 @@ const EncryptChoice: Component<{
         }
       >
         <p class="warning">
-          At least {MIN_PASSWORD_LENGTH} characters - this password is the only
-          thing standing between an offline brute-force and your notes.
+          Mindestens {MIN_PASSWORD_LENGTH} Zeichen – dieses Passwort ist das Einzige, was deine Scheine vor einem Durchprobieren schützt.
         </p>
       </Show>
       <Show
         when={props.confirmPassword && props.password !== props.confirmPassword}
       >
-        <p class="warning">Passwords do not match.</p>
+        <p class="warning">Die Passwörter stimmen nicht überein.</p>
       </Show>
     </Show>
   </>
@@ -324,7 +315,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
     const value = customInput().trim()
     if (!value) return
     if (!resolveMintInput(value)) {
-      notify('Not a recognizable mint address or LNURL.', NotifyKind.ERROR)
+      notify('Keine erkennbare Adresse einer Ausgabestelle und kein LNURL.', NotifyKind.ERROR)
       return
     }
     if (!customMints().includes(value)) {
@@ -401,7 +392,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
 
   return (
     <div id="setup" class="page">
-      <h2>Recover notes</h2>
+      <h2>Scheine wiederfinden</h2>
       <div class="setup-card">
         <p>
           Re-derives every key-path note key (LUD-25) this wallet would have
@@ -418,7 +409,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
           using; nothing is lost by skipping one now, the same seed can scan it
           again later.
         </p>
-        <label>Public mints</label>
+        <label>Öffentliche Ausgabestellen</label>
         <div class="form-item">
           <For each={PUBLIC_MINTS}>
             {address => (
@@ -433,7 +424,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
             )}
           </For>
         </div>
-        <label>Add by address</label>
+        <label>Per Adresse hinzufügen</label>
         <div class="paste-input-row">
           <div class="paste-input-wrapper">
             <input
@@ -445,7 +436,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
             />
           </div>
           <button type="button" onClick={addCustomMint}>
-            Add
+            Hinzufügen
           </button>
         </div>
         <Show when={customMints().length > 0}>
@@ -457,7 +448,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
                   <button
                     type="button"
                     class="icon-btn"
-                    title="Remove"
+                    title="Entfernen"
                     onClick={() => removeCustomMint(mint)}
                   >
                     <IoTrashSharp />
@@ -506,7 +497,7 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
             <Show when={scanning()} fallback={<IoSearchSharp />}>
               <IoRefreshSharp class="spin" />
             </Show>
-            &nbsp;Scan
+            &nbsp;Suchen
           </button>
           <button disabled={scanning()} onClick={props.onDone}>
             {Object.keys(results()).length > 0 ? 'Continue to wallet' : 'Skip'}

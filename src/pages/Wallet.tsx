@@ -343,7 +343,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       return
     }
     notify(
-      'Not a bearer note, invoice, or Lightning Address.',
+      'Das ist kein Schein, keine Rechnung und keine Lightning-Adresse.',
       NotifyKind.ERROR
     )
   }
@@ -378,7 +378,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     <Show when={showSavedAddresses()}>
       <Dialog onClose={() => setShowSavedAddresses(false)}>
         <>
-          <h4>Pay a saved address</h4>
+          <h4>Gespeicherte Adresse bezahlen</h4>
           <div class="mint-picker">
             <For each={storeableMeltAddresses()}>
               {link => (
@@ -388,9 +388,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <Show when={link.internalTransfer}>
                       <span
                         class="mint-picker-transfer-badge"
-                        title="This address advertised LUD-25 internal transfer support last time it was looked up - paying it can skip Lightning entirely if you still hold notes at its mint"
+                        title="Diese Adresse unterstützte zuletzt die interne Übertragung (LUD-25) – hast du Scheine ihrer Ausgabestelle, geht die Zahlung ganz ohne Lightning"
                       >
-                        &nbsp;· internal transfer
+                        &nbsp;· interne Übertragung
                       </span>
                     </Show>
                   </button>
@@ -575,7 +575,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       await unlock(password())
       setPassword('')
     } catch {
-      notify('Incorrect password.', NotifyKind.ERROR)
+      notify('Falsches Passwort.', NotifyKind.ERROR)
     } finally {
       setUnlocking(false)
     }
@@ -586,7 +586,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     for (const bearer of spent) removeBearer(bearer.id)
     setConfirmClearSpent(false)
     notify(
-      `Cleared ${spent.length} spent note${spent.length === 1 ? '' : 's'}.`,
+      `${spent.length} ausgegebene${spent.length === 1 ? 'n Schein' : ' Scheine'} entfernt.`,
       NotifyKind.SUCCESS
     )
   }
@@ -611,7 +611,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     a.click()
     URL.revokeObjectURL(url)
     notify(
-      `Exported ${picked.length} note${picked.length === 1 ? '' : 's'} to a text file.`,
+      `${picked.length} Schein${picked.length === 1 ? '' : 'e'} in eine Textdatei exportiert.`,
       NotifyKind.SUCCESS
     )
   }
@@ -665,7 +665,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       downloaded++
     }
     notify(
-      `Downloaded ${downloaded} QR code${downloaded === 1 ? '' : 's'} as SVG.`,
+      `${downloaded} QR-Code${downloaded === 1 ? '' : 's'} als SVG heruntergeladen.`,
       NotifyKind.SUCCESS
     )
   }
@@ -712,7 +712,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           `Refreshed ${msatToSats(result.amountMsat)} sats from ${serverOf(result.url)} (on device).`,
           bearer.label
         )
-        notify('Note refreshed.', NotifyKind.SUCCESS)
+        notify('Schein erneuert.', NotifyKind.SUCCESS)
         return
       }
 
@@ -738,7 +738,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           `Refreshed ${msatToSats(info.maxWithdrawable)} sats from ${serverOf(migrated.url)} - moved onto your vault.`,
           bearer.label
         )
-        notify('Note refreshed and moved onto your vault.', NotifyKind.SUCCESS)
+        notify('Schein erneuert und auf den Tresor verschoben.', NotifyKind.SUCCESS)
         return
       }
 
@@ -805,11 +805,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       // "refreshed" success alongside it
       if (rotationError) {
         notify(
-          `Could not rotate after refresh (${rotationError}) - your secret was just transmitted, treat old copies of this note as exposed.`,
+          `Erneuern nach der Abfrage ging nicht (${rotationError}) – das Geheimnis wurde eben übertragen; alte Kopien dieses Scheins gelten als offengelegt.`,
           NotifyKind.ERROR
         )
       } else {
-        notify('Note refreshed.', NotifyKind.SUCCESS)
+        notify('Schein erneuert.', NotifyKind.SUCCESS)
       }
     } catch (err) {
       // the service just told us - unambiguously, this GET named exactly
@@ -841,7 +841,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
   const upgradeOneBearer = async (bearer: Bearer) => {
     if (bearer.deviceId) {
       notify(
-        'A vault-backed note cannot be upgraded yet - key-path notes are browser-only for now.',
+        'Ein Schein auf dem Tresor lässt sich noch nicht umstellen – das geht vorerst nur im Browser.',
         NotifyKind.ERROR
       )
       return
@@ -865,7 +865,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         bearer.label
       )
       notify(
-        'Note upgraded to a recoverable pub/sig secret.',
+        'Schein auf ein wiederherstellbares Geheimnis (pub/sig) umgestellt.',
         NotifyKind.SUCCESS
       )
     } catch (err) {
@@ -882,7 +882,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
             bearer.label
           )
           notify(
-            'Note upgraded to a recoverable pub/sig secret.',
+            'Schein auf ein wiederherstellbares Geheimnis (pub/sig) umgestellt.',
             NotifyKind.SUCCESS
           )
           return
@@ -898,7 +898,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
             mintPubkey: bearer.mintPubkey
           })
           notify(
-            `${(err as Error).message} The upgrade may still have gone through - the possible new copy is stored unverified alongside this one; refresh both to reconcile.`,
+            `${(err as Error).message} Die Umstellung kann trotzdem angekommen sein – die mögliche neue Kopie liegt ungeprüft daneben; beide erneuern, um es zu klären.`,
             NotifyKind.ERROR
           )
           return
@@ -960,7 +960,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     }
     setSelected(new Set<string>())
     notify(
-      `Marked ${picked.length} note${picked.length === 1 ? '' : 's'} as spent - split and refresh are locked until unspent.`,
+      `${picked.length} Schein${picked.length === 1 ? '' : 'e'} als ausgegeben markiert – Teilen und Erneuern sind gesperrt, bis die Markierung aufgehoben ist.`,
       NotifyKind.SUCCESS
     )
   }
@@ -988,7 +988,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     setLabelInputValue('')
     setSelected(new Set<string>())
     notify(
-      `Labeled ${picked.length} note${picked.length === 1 ? '' : 's'}.`,
+      `${picked.length} Schein${picked.length === 1 ? '' : 'e'} bezeichnet.`,
       NotifyKind.SUCCESS
     )
   }
@@ -1013,16 +1013,16 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     const msat = sats * 1000
     const times = parseInt(splitSingleTimes(), 10)
     if (!splitSingleSats() || !Number.isFinite(sats) || sats <= 0) {
-      notify('Enter a whole number of sats.', NotifyKind.ERROR)
+      notify('Bitte eine ganze Zahl Sats eingeben.', NotifyKind.ERROR)
       return
     }
     if (!Number.isFinite(times) || times < 1) {
-      notify('Enter how many times to split (1 or more).', NotifyKind.ERROR)
+      notify('Bitte eingeben, wie oft geteilt wird (1 oder mehr).', NotifyKind.ERROR)
       return
     }
     if (msat * times >= bearer.amount) {
       notify(
-        'Total split amount must be below the note value.',
+        'Die Summe muss kleiner sein als der Schein.',
         NotifyKind.ERROR
       )
       return
@@ -1046,8 +1046,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       const feeNote =
         totalFeeMsat > 0
           ? times > 1
-            ? ` ${msatToSats(perSplitFeeMsat)} sats fee deducted per split (${msatToSats(totalFeeMsat)} sats total).`
-            : ` ${msatToSats(totalFeeMsat)} sats fee deducted from the remainder.`
+            ? ` ${msatToSats(perSplitFeeMsat)} Sats Gebühr je Teilung abgezogen (insgesamt ${msatToSats(totalFeeMsat)} Sats).`
+            : ` ${msatToSats(totalFeeMsat)} Sats Gebühr vom Rest abgezogen.`
           : ''
       logActivity(
         'split',
@@ -1055,7 +1055,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         bearer.label
       )
       notify(
-        `Split off ${times} note${times === 1 ? '' : 's'} of ${msatToSats(msat)} sats each.${feeNote}`,
+        `${times} Schein${times === 1 ? '' : 'e'} zu je ${msatToSats(msat)} Sats abgeteilt.${feeNote}`,
         NotifyKind.SUCCESS
       )
       setSelected(new Set<string>())
@@ -1130,7 +1130,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
               mintPubkey: base.mintPubkey
             })
             throw new Error(
-              'The combine may have gone through but could not be confirmed - the possible combined note is stored unverified alongside your originals; refresh them to reconcile.'
+              'Das Zusammenlegen ist vielleicht angekommen, aber nicht bestätigt – der mögliche neue Schein liegt ungeprüft neben den alten; erneuern, um es zu klären.'
             )
           }
           // 'gone': the burn landed - the carried secret is the only money
@@ -1177,7 +1177,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           })
         } catch (err) {
           notify(
-            `Combined, but settling the new note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+            `Zusammengelegt, aber der neue Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; erneuern repariert ihn.`,
             NotifyKind.ERROR
           )
         }
@@ -1192,16 +1192,16 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       const creditNote =
         creditMsat > 0
           ? picked.length > 2
-            ? ` ${msatToSats(perNoteCreditMsat)} sats fee credited per extra note (${msatToSats(creditMsat)} sats total).`
-            : ` ${msatToSats(creditMsat)} sats fee credited back.`
+            ? ` ${msatToSats(perNoteCreditMsat)} Sats Gebühr je zusätzlichem Schein gutgeschrieben (insgesamt ${msatToSats(creditMsat)} Sats).`
+            : ` ${msatToSats(creditMsat)} Sats Gebühr gutgeschrieben.`
           : ''
       logActivity(
         'combine',
-        `Combined ${picked.length} notes from ${server} into ${msatToSats(actualAmount)} sats.${creditNote}`,
+        `${picked.length} Scheine von ${server} zu ${msatToSats(actualAmount)} Sats zusammengelegt.${creditNote}`,
         base.label
       )
       notify(
-        `Combined ${picked.length} notes into one.${creditNote}`,
+        `${picked.length} Scheine zu einem zusammengelegt.${creditNote}`,
         NotifyKind.SUCCESS
       )
     } catch (err) {
@@ -1220,12 +1220,12 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
     const sats = Math.trunc(Number(splitSats()))
     const msat = sats * 1000
     if (!splitSats() || !Number.isFinite(sats) || sats <= 0) {
-      notify('Enter a whole number of sats.', NotifyKind.ERROR)
+      notify('Bitte eine ganze Zahl Sats eingeben.', NotifyKind.ERROR)
       return
     }
     const sum = picked.reduce((s, b) => s + b.amount, 0)
     if (msat >= sum) {
-      notify('Split amount must be below the combined value.', NotifyKind.ERROR)
+      notify('Der abgeteilte Betrag muss kleiner sein als die Summe.', NotifyKind.ERROR)
       return
     }
     setSplitting(true)
@@ -1305,7 +1305,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
               mintPubkey: base.mintPubkey
             })
             throw new Error(
-              'The split may have gone through but could not be confirmed - the possible outputs are stored unverified alongside your originals; refresh them to reconcile.'
+              'Das Teilen ist vielleicht angekommen, aber nicht bestätigt – die möglichen neuen Scheine liegen ungeprüft neben den alten; erneuern, um es zu klären.'
             )
           }
           partK1 = splitError.newSecrets[0]
@@ -1349,7 +1349,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           })
         } catch (err) {
           notify(
-            `Split succeeded, but settling the change note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+            `Geteilt, aber der Wechselgeld-Schein ist nicht fertig bestätigt (${(err as Error).message}) – er steht ungeprüft da; erneuern repariert ihn.`,
             NotifyKind.ERROR
           )
         }
@@ -1358,15 +1358,15 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       const feeMsat = sum - msat - changeAmount
       const feeNote =
         feeMsat > 0
-          ? ` ${msatToSats(feeMsat)} sats fee deducted from the change.`
+          ? ` ${msatToSats(feeMsat)} Sats Gebühr vom Wechselgeld abgezogen.`
           : ''
       logActivity(
         'split',
-        `Combined ${picked.length} notes from ${server} and split into ${msatToSats(targetAmount)} + ${msatToSats(changeAmount)} sats.${feeNote}`,
+        `${picked.length} Scheine von ${server} zusammengelegt und geteilt in ${msatToSats(targetAmount)} + ${msatToSats(changeAmount)} Sats.${feeNote}`,
         base.label
       )
       notify(
-        `Split into ${msatToSats(targetAmount)} sats and ${msatToSats(changeAmount)} sats change.${feeNote}`,
+        `Geteilt in ${msatToSats(targetAmount)} Sats und ${msatToSats(changeAmount)} Sats Wechselgeld.${feeNote}`,
         NotifyKind.SUCCESS
       )
       setShowSplitInput(false)
@@ -1384,11 +1384,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
       fallback={
         <div id="wallet" class="page">
           <div class="setup-card">
-            <h2>No wallet on this device yet</h2>
-            <p>Create one, or restore a seed phrase you already have.</p>
+            <h2>Auf diesem Gerät gibt es noch keine Wallet</h2>
+            <p>Leg eine an oder stell sie mit deinen zwölf Wörtern wieder her.</p>
             <div class="btns">
               <A href="/setup" class="hero-btn hero-btn-primary">
-                Create wallet
+                Wallet anlegen
               </A>
             </div>
           </div>
@@ -1400,11 +1400,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
         fallback={
           <div id="unlock" class="page">
             <div class="setup-card">
-              <h2>Unlock your wallet</h2>
+              <h2>Wallet entsperren</h2>
               <form onSubmit={unlockWallet}>
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder="Passwort"
                   autocomplete="current-password"
                   autocapitalize="off"
                   spellcheck={false}
@@ -1416,12 +1416,12 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <Show when={unlocking()} fallback={<IoLockOpenSharp />}>
                       <IoRefreshSharp class="spin" />
                     </Show>
-                    &nbsp;Unlock
+                    &nbsp;Entsperren
                   </button>
                 </div>
               </form>
               <p>
-                <A href="/setup?tab=restore">Forgot password?</A>
+                <A href="/setup?tab=restore">Passwort vergessen?</A>
               </p>
             </div>
           </div>
@@ -1434,16 +1434,14 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           fallback={
             <div id="wallet" class="page">
               <section class="hero-intro">
-                <h1>No LNURLcash yet</h1>
+                <h1>Noch keine Scheine</h1>
                 <p class="hero-subtitle">
-                  Your wallet is ready but empty. Mint a fresh bearer note from
-                  any LNURLcash mint, or bring one in by scanning or pasting a
-                  note someone handed you.
+                  Deine Wallet ist bereit, aber leer. Lade bei einer Ausgabestelle auf, oder scanne bzw. füge einen Schein ein, den dir jemand gegeben hat.
                 </p>
                 <div class="hero-actions">
                   <A href="/mint" class="hero-btn hero-btn-primary">
                     <IoAddCircleSharp />
-                    &nbsp;Mint
+                    &nbsp;Aufladen
                   </A>
                   <figure class="paste-widget hero-paste-widget">
                     <div class="paste-input-row">
@@ -1458,7 +1456,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       <button
                         type="button"
                         class="icon-btn paste-icon-btn"
-                        title="Paste from clipboard"
+                        title="Aus der Zwischenablage einfügen"
                         onClick={pasteHero}
                       >
                         <IoClipboardSharp />
@@ -1467,7 +1465,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         <button
                           type="button"
                           class="icon-btn paste-at-btn"
-                          title="Pay a saved address"
+                          title="Gespeicherte Adresse bezahlen"
                           onClick={() => setShowSavedAddresses(true)}
                         >
                           <IoAtCircleSharp />
@@ -1476,7 +1474,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       <button
                         type="button"
                         class="icon-btn paste-keyboard-btn"
-                        title="Type instead"
+                        title="Stattdessen eintippen"
                         onClick={() => setShowHeroKeyboard(v => !v)}
                       >
                         <MdSharpKeyboard />
@@ -1489,7 +1487,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           ref={el => (heroPasteRef = el)}
                           type="text"
                           class="paste-input"
-                          placeholder="Note, invoice, or Lightning Address..."
+                          placeholder="Schein, Rechnung oder Lightning-Adresse …"
                           value={heroValue()}
                           onInput={e => setHeroValue(e.currentTarget.value)}
                           onKeyDown={e => e.key === 'Enter' && handleHero()}
@@ -1498,7 +1496,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           <button
                             type="button"
                             class="icon-btn paste-clear-btn"
-                            title="Clear"
+                            title="Leeren"
                             onClick={() => setHeroValue('')}
                           >
                             <IoCloseSharp />
@@ -1509,7 +1507,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         type="button"
                         class="icon-btn paste-confirm-btn"
                         classList={{'mobile-open': showHeroKeyboard()}}
-                        title="Receive a note, or pay an invoice/address"
+                        title="Schein empfangen oder Rechnung/Adresse bezahlen"
                         disabled={heroValue() === '' || heroReceiving()}
                         onClick={handleHero}
                       >
@@ -1539,7 +1537,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
             <Show when={confirmClearSpent()}>
               <Dialog onClose={() => setConfirmClearSpent(false)}>
                 <>
-                  <h4>Remove all spent notes</h4>
+                  <h4>Alle ausgegebenen Scheine entfernen</h4>
                   <p class="warning">
                     Clear all {spentCount()} spent note
                     {spentCount() === 1 ? '' : 's'} from the wallet? If any of
@@ -1547,9 +1545,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     are gone unless you saved them elsewhere.
                   </p>
                   <div class="btns">
-                    <button onClick={clearAllSpent}>Clear all</button>
+                    <button onClick={clearAllSpent}>Alle entfernen</button>
                     <button onClick={() => setConfirmClearSpent(false)}>
-                      Cancel
+                      Abbrechen
                     </button>
                   </div>
                 </>
@@ -1619,7 +1617,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <button
                       type="button"
                       class="icon-btn paste-icon-btn"
-                      title="Paste from clipboard"
+                      title="Aus der Zwischenablage einfügen"
                       onClick={pasteHero}
                     >
                       <IoClipboardSharp />
@@ -1628,7 +1626,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       <button
                         type="button"
                         class="icon-btn paste-at-btn"
-                        title="Pay a saved address"
+                        title="Gespeicherte Adresse bezahlen"
                         onClick={() => setShowSavedAddresses(true)}
                       >
                         <IoAtCircleSharp />
@@ -1637,7 +1635,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <button
                       type="button"
                       class="icon-btn paste-keyboard-btn"
-                      title="Type instead"
+                      title="Stattdessen eintippen"
                       onClick={() => setShowHeroKeyboard(v => !v)}
                     >
                       <MdSharpKeyboard />
@@ -1650,7 +1648,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         ref={el => (heroPasteRef = el)}
                         type="text"
                         class="paste-input"
-                        placeholder="Note, invoice, or Lightning Address..."
+                        placeholder="Schein, Rechnung oder Lightning-Adresse …"
                         value={heroValue()}
                         onInput={e => setHeroValue(e.currentTarget.value)}
                         onKeyDown={e => e.key === 'Enter' && handleHero()}
@@ -1659,7 +1657,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         <button
                           type="button"
                           class="icon-btn paste-clear-btn"
-                          title="Clear"
+                          title="Leeren"
                           onClick={() => setHeroValue('')}
                         >
                           <IoCloseSharp />
@@ -1670,7 +1668,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       type="button"
                       class="icon-btn paste-confirm-btn"
                       classList={{'mobile-open': showHeroKeyboard()}}
-                      title="Receive a note, or pay an invoice/address"
+                      title="Schein empfangen oder Rechnung/Adresse bezahlen"
                       disabled={heroValue() === '' || heroReceiving()}
                       onClick={handleHero}
                     >
@@ -1715,11 +1713,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <button
                       type="button"
                       class="search-toggle-btn"
-                      title="Search notes by mint or amount"
+                      title="Scheine nach Ausgabestelle oder Betrag suchen"
                       onClick={() => setShowSearch(true)}
                     >
                       <IoSearchSharp />
-                      <span class="btn-label">&nbsp;Search</span>
+                      <span class="btn-label">&nbsp;Suchen</span>
                     </button>
                   }
                 >
@@ -1732,7 +1730,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       }}
                       type="text"
                       class="search-input"
-                      placeholder="Search by mint or amount..."
+                      placeholder="Ausgabestelle oder Betrag …"
                       value={searchQuery()}
                       onInput={e => setSearchQuery(e.currentTarget.value)}
                     />
@@ -1740,7 +1738,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       <button
                         type="button"
                         class="icon-btn"
-                        title="Clear search"
+                        title="Suche leeren"
                         onClick={() => {
                           setSearchQuery('')
                           searchInputRef?.focus()
@@ -1752,7 +1750,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <button
                       type="button"
                       class="icon-btn"
-                      title="Close search"
+                      title="Suche schließen"
                       onClick={() => {
                         setShowSearch(false)
                         setSearchQuery('')
@@ -1786,7 +1784,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           setShowSortMenu(false)
                         }}
                       >
-                        Amount
+                        Betrag
                         <Show when={sortKey() === 'amount'}>
                           &nbsp;
                           <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
@@ -1802,7 +1800,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           setShowSortMenu(false)
                         }}
                       >
-                        Updated
+                        Zuletzt
                         <Show when={sortKey() === 'updated'}>
                           &nbsp;
                           <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
@@ -1818,11 +1816,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     type="button"
                     class="spent-btn"
                     classList={{active: showSpent()}}
-                    title="Spent notes are locally locked (melted, or marked by hand) - this just shows or hides them, it doesn't change anything about them"
+                    title="Ausgegebene Scheine sind hier gesperrt (bezahlt oder von Hand markiert) – das blendet sie nur ein oder aus, an ihnen ändert sich nichts"
                     onClick={() => setShowSpent(v => !v)}
                   >
                     <IoBanSharp />
-                    <span class="btn-label">&nbsp;Spent</span>
+                    <span class="btn-label">&nbsp;Ausgegeben</span>
                     <Show when={!showSpent()}>&nbsp;({spentCount()})</Show>
                   </button>
                 </Show>
@@ -1830,11 +1828,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                   type="button"
                   class="group-btn"
                   classList={{active: groupByMint()}}
-                  title="Show notes grouped under their issuing mint instead of one flat list"
+                  title="Scheine nach Ausgabestelle gruppieren statt als eine Liste"
                   onClick={() => setGroupByMint(!groupByMint())}
                 >
                   <IoLayersSharp />
-                  <span class="btn-label">&nbsp;Group</span>
+                  <span class="btn-label">&nbsp;Gruppieren</span>
                 </button>
                 <Show when={availableTags().length > 0}>
                   <div class="more-menu" ref={el => (tagMenuRef = el)}>
@@ -1845,7 +1843,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       title={
                         selectedTags().size > 0
                           ? `Filtering by ${selectedTags().size} tag${selectedTags().size === 1 ? '' : 's'} - click to change`
-                          : 'Filter by tag'
+                          : 'Nach Markierung filtern'
                       }
                       onClick={() => setShowTagMenu(v => !v)}
                     >
@@ -1872,7 +1870,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                   <button
                     type="button"
                     class="icon-btn list-more-btn"
-                    title="More actions - rotate all, remove all spent"
+                    title="Weitere Aktionen – alle erneuern, ausgegebene entfernen"
                     onClick={() => setShowListMoreMenu(v => !v)}
                   >
                     <IoEllipsisVerticalSharp />
@@ -1888,8 +1886,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         }
                         title={
                           offlineMode()
-                            ? 'Offline mode is on'
-                            : 'Rotate every unspent note in the wallet, one at a time'
+                            ? 'Offline-Modus ist an'
+                            : 'Alle nicht ausgegebenen Scheine nacheinander erneuern'
                         }
                         onClick={() => {
                           refreshAllNotes()
@@ -1902,7 +1900,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                         >
                           <IoRefreshSharp class="spin" />
                         </Show>
-                        &nbsp;Rotate all
+                        &nbsp;Alle erneuern
                       </button>
                       <Show when={spentCount() > 0}>
                         <button
@@ -1914,7 +1912,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           }}
                         >
                           <IoTrashSharp />
-                          &nbsp;Remove all spent
+                          &nbsp;Ausgegebene entfernen
                         </button>
                       </Show>
                     </div>
@@ -1933,10 +1931,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     }
                     title={
                       offlineMode()
-                        ? 'Offline mode is on'
+                        ? 'Offline-Modus ist an'
                         : canRefreshSelected()
-                          ? 'Fetch the current value from the service, then rotate (this GET puts k1 on the wire) - one at a time for every selected note'
-                          : 'Select notes to rotate'
+                          ? 'Aktuellen Wert bei der Ausgabestelle abfragen, dann erneuern – nacheinander für jeden ausgewählten Schein'
+                          : 'Scheine zum Erneuern auswählen'
                     }
                     onClick={refreshSelected}
                   >
@@ -1944,7 +1942,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       <IoRefreshSharp class="spin" />
                     </Show>
                     <span class="btn-label">
-                      &nbsp;Rotate
+                      &nbsp;Erneuern
                       <Show when={selectedBearers().length > 1}>
                         &nbsp;({selectedBearers().length})
                       </Show>
@@ -1955,81 +1953,81 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     disabled={!canSplitSingle() || offlineMode()}
                     title={
                       offlineMode()
-                        ? 'Offline mode is on'
+                        ? 'Offline-Modus ist an'
                         : canSplitSingle()
-                          ? 'Split the selected note into two'
-                          : 'Select exactly 1 verified, unspent note to split'
+                          ? 'Ausgewählten Schein in zwei teilen'
+                          : 'Genau 1 geprüften, nicht ausgegebenen Schein zum Teilen auswählen'
                     }
                     onClick={() => setShowSplitSingleInput(v => !v)}
                   >
                     <IoGitBranchSharp />
-                    <span class="btn-label">&nbsp;Split</span>
+                    <span class="btn-label">&nbsp;Teilen</span>
                   </button>
                   <button
                     class="icon-btn combine-btn"
                     disabled={!canCombine() || combining() || offlineMode()}
                     title={
                       offlineMode()
-                        ? 'Offline mode is on'
+                        ? 'Offline-Modus ist an'
                         : canCombine()
-                          ? 'Combine the selected notes into one. If this mint charges a fee, combining refunds part of what was already withheld when these notes were minted - you get back all but one base fee.'
-                          : 'Select 2+ verified, unspent notes from the same mint to combine'
+                          ? 'Ausgewählte Scheine zu einem zusammenlegen. Verlangt die Ausgabestelle Gebühren, bekommst du beim Zusammenlegen alle bis auf eine Grundgebühr zurück.'
+                          : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
                     }
                     onClick={combineSelected}
                   >
                     <Show when={combining()} fallback={<IoGitMergeSharp />}>
                       <IoRefreshSharp class="spin" />
                     </Show>
-                    <span class="btn-label">&nbsp;Combine</span>
+                    <span class="btn-label">&nbsp;Zusammenlegen</span>
                   </button>
                   <button
                     class="icon-btn split-btn"
                     disabled={!canCombine() || splitting() || offlineMode()}
                     title={
                       offlineMode()
-                        ? 'Offline mode is on'
+                        ? 'Offline-Modus ist an'
                         : canCombine()
-                          ? 'Combine the selected notes and split off an amount, leaving the rest as change. If this mint charges a fee, combining refunds part of what was already withheld when these notes were minted - you get back all but one base fee.'
-                          : 'Select 2+ verified, unspent notes from the same mint to combine & split'
+                          ? 'Ausgewählte Scheine zusammenlegen und einen Betrag abteilen, der Rest bleibt als Wechselgeld. Verlangt die Ausgabestelle Gebühren, bekommst du alle bis auf eine Grundgebühr zurück.'
+                          : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
                     }
                     onClick={() => setShowSplitInput(v => !v)}
                   >
                     <Show when={splitting()} fallback={<IoGitBranchSharp />}>
                       <IoRefreshSharp class="spin" />
                     </Show>
-                    <span class="btn-label">&nbsp;Combine &amp; split</span>
+                    <span class="btn-label">&nbsp;Zusammenlegen &amp; teilen</span>
                   </button>
                   <label
                     class="plain-secret-toggle"
-                    title="Split/combine into plain random bearer secrets, sent as their 64-hex short-form hash, instead of seed-derived keys - not recoverable from your seed"
+                    title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
                   >
                     <input
                       type="checkbox"
                       checked={plainSecret()}
                       onChange={e => setPlainSecret(e.currentTarget.checked)}
                     />
-                    &nbsp;Plain secret
+                    &nbsp;Zufallsgeheimnis
                   </label>
                   <button
                     class="icon-btn transfer-btn"
                     disabled={!canTransfer() || offlineMode()}
                     title={
                       offlineMode()
-                        ? 'Offline mode is on'
+                        ? 'Offline-Modus ist an'
                         : canTransfer()
-                          ? 'Transfer the selected note to a different mint'
-                          : 'Select exactly 1 note to transfer'
+                          ? 'Ausgewählten Schein zu einer anderen Ausgabestelle umziehen'
+                          : 'Genau 1 Schein zum Umziehen auswählen'
                     }
                     onClick={() => setTransferSource(selectedEligible()[0])}
                   >
                     <IoSwapHorizontalSharp />
-                    <span class="btn-label">&nbsp;Transfer</span>
+                    <span class="btn-label">&nbsp;Umziehen</span>
                   </button>
                   <div class="more-menu" ref={el => (moreMenuRef = el)}>
                     <button
                       type="button"
                       class="icon-btn more-btn"
-                      title="More actions - label, mark spent, export"
+                      title="Weitere Aktionen – Bezeichnung, als ausgegeben markieren, exportieren"
                       onClick={() => setShowMoreMenu(v => !v)}
                     >
                       <IoEllipsisVerticalSharp />
@@ -2041,10 +2039,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           disabled={!canSendToPubkey() || offlineMode()}
                           title={
                             offlineMode()
-                              ? 'Offline mode is on'
+                              ? 'Offline-Modus ist an'
                               : canSendToPubkey()
-                                ? 'Combine and/or split the selected notes into one owned by a cp1 pubkey you paste in'
-                                : 'Select 1+ verified, unspent, non-vault notes from the same mint to send to a pubkey'
+                                ? 'Ausgewählte Scheine zusammenlegen und/oder teilen – zu einem Schein für einen eingefügten cp1-Pubkey'
+                                : 'Mindestens 1 geprüften, nicht ausgegebenen Schein (nicht auf dem Tresor) derselben Ausgabestelle auswählen'
                           }
                           onClick={() => {
                             setSendToPubkeySource(selectedEligible())
@@ -2052,7 +2050,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           }}
                         >
                           <IoKeySharp />
-                          &nbsp;Send to pubkey
+                          &nbsp;An Pubkey senden
                           <Show when={selectedEligible().length > 1}>
                             &nbsp;({selectedEligible().length})
                           </Show>
@@ -2062,8 +2060,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           disabled={!canLabelSelected()}
                           title={
                             canLabelSelected()
-                              ? 'Set a label on every selected note (private, for your own reference)'
-                              : 'Select notes to label'
+                              ? 'Ausgewählten Scheinen eine Bezeichnung geben (nur für dich)'
+                              : 'Scheine zum Bezeichnen auswählen'
                           }
                           onClick={() => {
                             openLabelInput()
@@ -2071,7 +2069,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           }}
                         >
                           <IoPencilSharp />
-                          &nbsp;Label
+                          &nbsp;Bezeichnung
                           <Show when={selectedBearers().length > 1}>
                             &nbsp;({selectedBearers().length})
                           </Show>
@@ -2081,8 +2079,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           disabled={!canMarkSpentSelected()}
                           title={
                             canMarkSpentSelected()
-                              ? 'Mark every selected note as spent - locks them without removing them, e.g. if you already handed them out some other way'
-                              : 'Select notes to mark as spent'
+                              ? 'Ausgewählte Scheine als ausgegeben markieren – sperrt sie, ohne sie zu löschen, z. B. wenn du sie anders weitergegeben hast'
+                              : 'Scheine zum Markieren auswählen'
                           }
                           onClick={() => {
                             markSpentSelected()
@@ -2090,7 +2088,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           }}
                         >
                           <IoBanSharp />
-                          &nbsp;Mark spent
+                          &nbsp;Als ausgegeben markieren
                           <Show when={selectedBearers().length > 1}>
                             &nbsp;({selectedBearers().length})
                           </Show>
@@ -2100,8 +2098,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           disabled={selected().size === 0}
                           title={
                             selected().size === 0
-                              ? 'Select notes to export'
-                              : 'Download the selected notes as a text file (bech32-encoded, one per line)'
+                              ? 'Scheine zum Exportieren auswählen'
+                              : 'Ausgewählte Scheine als Textdatei herunterladen (bech32, einer je Zeile)'
                           }
                           onClick={() => {
                             exportSelected()
@@ -2109,7 +2107,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           }}
                         >
                           <IoDownloadSharp />
-                          &nbsp;Export
+                          &nbsp;Exportieren
                           <Show when={selected().size > 0}>
                             &nbsp;({selected().size})
                           </Show>
@@ -2119,8 +2117,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           disabled={selected().size === 0}
                           title={
                             selected().size === 0
-                              ? 'Select notes to download as QR codes'
-                              : 'Download an SVG QR code for each selected note'
+                              ? 'Scheine für QR-Codes auswählen'
+                              : 'Für jeden ausgewählten Schein einen QR-Code (SVG) herunterladen'
                           }
                           onClick={() => {
                             downloadQrSelected()
@@ -2140,11 +2138,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     <button
                       type="button"
                       class="icon-btn clear-selection-btn"
-                      title="Clear selection"
+                      title="Auswahl aufheben"
                       onClick={() => setSelected(new Set<string>())}
                     >
                       <IoCloseCircleSharp />
-                      <span class="btn-label">&nbsp;Clear selection</span>
+                      <span class="btn-label">&nbsp;Auswahl aufheben</span>
                       &nbsp;({selected().size})
                     </button>
                   </Show>
@@ -2156,7 +2154,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       setSplitSats('')
                     }}
                   >
-                    <h4>Combine &amp; split</h4>
+                    <h4>Zusammenlegen &amp; teilen</h4>
                     <label>
                       Split off (sats, of{' '}
                       {msatToSats(
@@ -2168,7 +2166,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       type="number"
                       min="1"
                       step="1"
-                      placeholder="amount in sats"
+                      placeholder="Betrag in Sats"
                       value={splitSats()}
                       onInput={e => setSplitSats(e.currentTarget.value)}
                     />
@@ -2180,14 +2178,14 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     </p>
                     <label
                       class="plain-secret-toggle"
-                      title="Split/combine into plain random bearer secrets, sent as their 64-hex short-form hash, instead of seed-derived keys - not recoverable from your seed"
+                      title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
                     >
                       <input
                         type="checkbox"
                         checked={plainSecret()}
                         onChange={e => setPlainSecret(e.currentTarget.checked)}
                       />
-                      &nbsp;Plain secret
+                      &nbsp;Zufallsgeheimnis
                     </label>
                     <div class="btns">
                       <button
@@ -2198,7 +2196,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           <IoRefreshSharp class="spin" />
                           &nbsp;
                         </Show>
-                        Split
+                        Teilen
                       </button>
                       <button
                         onClick={() => {
@@ -2206,7 +2204,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           setSplitSats('')
                         }}
                       >
-                        Cancel
+                        Abbrechen
                       </button>
                     </div>
                   </Dialog>
@@ -2218,7 +2216,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       setLabelInputValue('')
                     }}
                   >
-                    <h4>Label</h4>
+                    <h4>Bezeichnung</h4>
                     <label>
                       Label {selectedBearers().length} note
                       {selectedBearers().length === 1 ? '' : 's'} (private, for
@@ -2226,20 +2224,20 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. rent, gift for Alex"
+                      placeholder="z. B. Miete, Geschenk für Alex"
                       value={labelInputValue()}
                       onInput={e => setLabelInputValue(e.currentTarget.value)}
                       onKeyDown={e => e.key === 'Enter' && saveLabelSelected()}
                     />
                     <div class="btns">
-                      <button onClick={saveLabelSelected}>Save</button>
+                      <button onClick={saveLabelSelected}>Speichern</button>
                       <button
                         onClick={() => {
                           setShowLabelInput(false)
                           setLabelInputValue('')
                         }}
                       >
-                        Cancel
+                        Abbrechen
                       </button>
                     </div>
                   </Dialog>
@@ -2252,7 +2250,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       setSplitSingleTimes('1')
                     }}
                   >
-                    <h4>Split</h4>
+                    <h4>Teilen</h4>
                     <label>
                       Split off (sats, of{' '}
                       {msatToSats(selectedBearers()[0].amount)})
@@ -2261,11 +2259,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       type="number"
                       min="1"
                       step="1"
-                      placeholder="amount in sats"
+                      placeholder="Betrag in Sats"
                       value={splitSingleSats()}
                       onInput={e => setSplitSingleSats(e.currentTarget.value)}
                     />
-                    <label>How many times</label>
+                    <label>Wie oft</label>
                     <input
                       type="number"
                       min="1"
@@ -2275,9 +2273,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                       onInput={e => setSplitSingleTimes(e.currentTarget.value)}
                     />
                     <p class="bearer-hint">
-                      If this mint charges a fee, it's deducted from the
-                      remainder, not the amount split off - splitting fails if
-                      too little would be left over to cover it.
+                      Verlangt die Ausgabestelle eine Gebühr, geht sie vom Rest ab, nicht vom abgeteilten Betrag – bleibt dafür zu wenig übrig, schlägt das Teilen fehl.
                     </p>
                     <Show when={Number(splitSingleTimes()) > 1}>
                       <p class="bearer-hint">
@@ -2289,14 +2285,14 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     </Show>
                     <label
                       class="plain-secret-toggle"
-                      title="Split/combine into plain random bearer secrets, sent as their 64-hex short-form hash, instead of seed-derived keys - not recoverable from your seed"
+                      title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
                     >
                       <input
                         type="checkbox"
                         checked={plainSecret()}
                         onChange={e => setPlainSecret(e.currentTarget.checked)}
                       />
-                      &nbsp;Plain secret
+                      &nbsp;Zufallsgeheimnis
                     </label>
                     <div class="btns">
                       <button
@@ -2307,7 +2303,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           <IoRefreshSharp class="spin" />
                           &nbsp;
                         </Show>
-                        Split
+                        Teilen
                       </button>
                       <button
                         onClick={() => {
@@ -2316,7 +2312,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                           setSplitSingleTimes('1')
                         }}
                       >
-                        Cancel
+                        Abbrechen
                       </button>
                     </div>
                   </Dialog>

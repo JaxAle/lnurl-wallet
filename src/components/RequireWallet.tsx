@@ -19,16 +19,16 @@ const RequireWallet: Component<{children: JSX.Element}> = props => {
               when={state() === 'locked'}
               fallback={
                 <>
-                  <p>No wallet on this device yet.</p>
+                  <p>Auf diesem Gerät gibt es noch keine Wallet.</p>
                   <A href="/setup" class="hero-btn hero-btn-primary">
-                    Create wallet
+                    Wallet anlegen
                   </A>
                 </>
               }
             >
-              <p>Your wallet is locked.</p>
+              <p>Deine Wallet ist gesperrt.</p>
               <A href="/wallet" class="hero-btn hero-btn-primary">
-                Unlock
+                Entsperren
               </A>
             </Show>
           </div>
