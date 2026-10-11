@@ -260,6 +260,41 @@
   border-color: #4a2e18;
 }
 
+/* Kopfzeile: "Wallet" matt in Drahtschrift statt fettem Markenschriftzug (Steve) */
+.nav-brand.rz-titel {
+  font-family: 'Jost', 'Futura', system-ui, sans-serif;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: rgba(238, 152, 90, 0.72);
+}
+/* Netzschalter: kein Kästchen, matter Draht, glimmt unter dem Daumen (Prototyp .powerbtn) */
+.rz-netzschalter {
+  order: 10;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: rgba(238, 152, 90, 0.62);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rz-netzschalter svg {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 0 2px rgba(255, 112, 30, 0.3));
+}
+.rz-netzschalter:active {
+  color: #ffd59a;
+}
+.rz-netzschalter:active svg {
+  filter: drop-shadow(0 0 3px #ff9a22) drop-shadow(0 0 8px #ff5a00);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .roehren-zaehlwerk .tube.up,
   .roehren-zaehlwerk .tube.up .glow,

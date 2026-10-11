@@ -1,9 +1,15 @@
 import {AiFillGithub} from 'solid-icons/ai'
 import {IoLockClosedSharp, IoGlobeSharp} from 'solid-icons/io'
-import {A} from '@solidjs/router'
+import {A, useLocation} from '@solidjs/router'
+import {Show} from 'solid-js'
 
 const Footer = () => {
+  // Fork: nicht auf jeder Seite — auf der Startseite war sie das Hellste und sagte dem
+  // Teilnehmer nichts; Version, Herkunft (dni) und Datenschutz stehen unter Einstellungen
+  const ort = useLocation()
+  const zeigen = () => ['/settings', '/docs'].some(p => ort.pathname.startsWith(p))
   return (
+    <Show when={zeigen()}>
     <footer class="footer">
       {/* grouped as one line even on mobile (where every top-level
       .footer-item otherwise gets its own line) - version/Website/Github
@@ -34,6 +40,7 @@ const Footer = () => {
         &nbsp;keys never leave your browser
       </A>
     </footer>
+    </Show>
   )
 }
 export default Footer

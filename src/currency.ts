@@ -26,6 +26,9 @@ const REFRESH_MS = 60_000
 const readStored = (): Currency => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
+    // Fork: ohne eigene Wahl Euro — die Teilnehmer denken in Euro, "509 Sats" allein sagt
+    // ihnen nichts (Steve, 2026-10-11). Wer "none" wählt, behält "none".
+    if (raw === null) return 'eur'
     return raw === 'usd' || raw === 'eur' || raw === 'gbp' ? raw : 'none'
   } catch {
     return 'none'

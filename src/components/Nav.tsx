@@ -1,3 +1,4 @@
+import '../roehren/roehren.css'
 import {Show, For, createSignal} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 import {
@@ -56,9 +57,33 @@ const Nav = () => {
       >
         {menuOpen() ? <IoCloseSharp /> : <IoMenuSharp />}
       </button>
-      <A href="/" class="nav-brand" onClick={closeMenu}>
-        LNURLwallet
+      {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift */}
+      <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
+        Wallet
       </A>
+      {/* Fork: Netzschalter — Ausschalten ist überall eine Berührung (Prototyp). Nur mit
+      Passwort: ohne entsperrt die Wallet von selbst, ein Schalter wäre eine leere Geste */}
+      <Show when={state() === 'unlocked' && encrypted()}>
+        <button
+          type="button"
+          class="rz-netzschalter"
+          title="Ausschalten – Wallet sperren"
+          aria-label="Ausschalten – Wallet sperren"
+          onClick={lock_action}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3.5v8" />
+            <path d="M6.6 7a7.5 7.5 0 1 0 10.8 0" />
+          </svg>
+        </button>
+      </Show>
       {/* wraps both groups so they collapse into one dropdown on mobile -
       Docs always renders regardless of wallet state, so this is never
       empty when opened (see .nav-menu in style.scss) */}
