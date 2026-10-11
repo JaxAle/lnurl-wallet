@@ -41,9 +41,9 @@ export const setAutoLockMinutes = (value: AutoLockMinutes): void => {
 export const AUTO_LOCK_OPTIONS: AutoLockMinutes[] = [1, 5, 15, 30, 0]
 
 export const AUTO_LOCK_LABEL: Record<AutoLockMinutes, string> = {
-  1: '1 minute',
-  5: '5 minutes',
-  15: '15 minutes',
-  30: '30 minutes',
-  0: 'Never'
+  1: '1 Minute',
+  5: '5 Minuten',
+  15: '15 Minuten',
+  30: '30 Minuten',
+  0: 'Nie'
 }

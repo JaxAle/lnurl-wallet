@@ -46,7 +46,7 @@ export const GAP_LIMIT_OPTIONS: GapLimit[] = [5, 10, 20, 50, 100]
 export const GAP_LIMIT_LABEL: Record<GapLimit, string> = {
   5: '5',
   10: '10',
-  20: '20 (default)',
+  20: '20 (Standard)',
   50: '50',
   100: '100'
 }

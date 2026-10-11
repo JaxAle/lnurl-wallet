@@ -206,8 +206,8 @@ export const WalletProvider = (props: {children: JSX.Element}) => {
     if (warningToastId) return
     warningToastId = toast.custom(
       <span>
-        Locking due to inactivity in {warningSecondsLeft()}s.&nbsp;
-        <button onClick={postponeLock}>Stay unlocked</button>
+        Die Wallet sperrt sich in {warningSecondsLeft()} s.&nbsp;
+        <button onClick={postponeLock}>Offen lassen</button>
       </span>,
       {duration: Infinity}
     )

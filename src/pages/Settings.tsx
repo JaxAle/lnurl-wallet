@@ -235,18 +235,18 @@ const Settings: Component = () => {
 
   const runUpgrade = async () => {
     if (!isValidSeedPhrase(upgradeSeed())) {
-      notify('Not a valid BIP39 seed phrase.', NotifyKind.ERROR)
+      notify('Das sind keine gültigen zwölf Wörter.', NotifyKind.ERROR)
       return
     }
     if (encrypted() && upgradePassword().length < MIN_PASSWORD_LENGTH) {
       notify(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+        `Das Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`,
         NotifyKind.ERROR
       )
       return
     }
     if (encrypted() && upgradePassword() !== upgradeConfirmPassword()) {
-      notify('Passwords do not match.', NotifyKind.ERROR)
+      notify('Die Passwörter stimmen nicht überein.', NotifyKind.ERROR)
       return
     }
     setUpgrading(true)
@@ -259,7 +259,7 @@ const Settings: Component = () => {
       setUpgradePassword('')
       setUpgradeConfirmPassword('')
       notify(
-        'Encryption upgraded - every note was re-encrypted under the new key.',
+        'Verschlüsselung erneuert.',
         NotifyKind.SUCCESS
       )
     } catch (err) {
@@ -271,7 +271,7 @@ const Settings: Component = () => {
 
   const download = () => {
     downloadBackupFile()
-    notify('Backup downloaded.', NotifyKind.SUCCESS)
+    notify('Sicherung heruntergeladen.', NotifyKind.SUCCESS)
   }
 
   const restore = async (e: Event) => {
@@ -284,7 +284,7 @@ const Settings: Component = () => {
     setKeyRestored(false)
     try {
       if (file.size > MAX_BACKUP_FILE_BYTES) {
-        throw new Error('That file is far too large to be a wallet backup.')
+        throw new Error('Diese Datei ist viel zu groß für eine Wallet-Sicherung.')
       }
       const data = JSON.parse(await file.text())
       const result = applyBackup(data)
@@ -298,15 +298,15 @@ const Settings: Component = () => {
       }
       if (result.linkingKeySkipped) setKeySkipped(true)
       notify(
-        `Restored ${result.added} bearer(s), skipped ${result.skipped}` +
+        `${result.added} Scheine eingespielt, ${result.skipped} übersprungen` +
           (result.trustedMintsAdded > 0
-            ? `, added ${result.trustedMintsAdded} trusted mint(s).`
+            ? `, ${result.trustedMintsAdded} Ausgabestellen dazu.`
             : '.') +
           (result.linkingKeySkipped
-            ? ' This device already has a wallet - see the warning below.'
+            ? ' Hier gibt es schon eine Wallet — siehe Hinweis unten.'
             : '') +
           (result.linkingKeyRestored
-            ? " The backup's linking key was installed - read the warning below before using it."
+            ? ' Der Schlüssel aus der Sicherung ist eingespielt — lies vorher den Hinweis unten.'
             : ''),
         result.linkingKeySkipped || result.linkingKeyRestored
           ? NotifyKind.ERROR
@@ -326,7 +326,7 @@ const Settings: Component = () => {
     try {
       await unlock()
       setKeyRestored(false)
-      notify('Restored wallet activated.', NotifyKind.SUCCESS)
+      notify('Wallet wiederhergestellt.', NotifyKind.SUCCESS)
       navigate('/wallet')
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
@@ -337,7 +337,7 @@ const Settings: Component = () => {
     forgetWallet()
     setConfirmForget(false)
     notify(
-      'Wallet forgotten - the linking key and every bearer note were removed from this device.',
+      'Wallet von diesem Gerät gelöscht.',
       NotifyKind.SUCCESS
     )
     navigate('/')
@@ -353,15 +353,13 @@ const Settings: Component = () => {
           <div class="setup-card">
             <h4>
               <IoTimeSharp />
-              &nbsp;Auto-lock
+              &nbsp;Automatisch sperren
             </h4>
             <p>
-              Locks the wallet after this long with no activity in the tab, with
-              a 30-second warning first.
+              Sperrt die Wallet, wenn so lange nichts passiert — mit einer Warnung 30 Sekunden vorher.
               <Show when={!encrypted()}>
                 {' '}
-                Only takes effect once the wallet is set up with a password - an
-                unencrypted key would just silently unlock itself again anyway.
+                Wirkt erst, wenn die Wallet ein Passwort hat — ohne Passwort würde sie sich sowieso gleich wieder entsperren.
               </Show>
             </p>
             <div class="btns">
@@ -381,16 +379,10 @@ const Settings: Component = () => {
           <div class="setup-card">
             <h4>
               <IoSearchSharp />
-              &nbsp;Recovery scan gap limit
+              &nbsp;Suchtiefe beim Wiederherstellen
             </h4>
             <p>
-              How many consecutive unused indices to check before giving up on a
-              mint or registered address (Setup's "Recover notes", and a trusted
-              mint's own "@" address dialog on the Mint page) - the same
-              gap-limit convention HD wallets use for address recovery. Higher
-              finds notes further out at the cost of more requests per empty
-              mint; lower finishes faster but could miss a note past a long
-              unused stretch.
+              Wie viele leere Stellen hintereinander die Wallet bei einer Ausgabestelle prüft, bevor sie aufhört, nach eigenen Scheinen zu suchen (beim Wiederherstellen aus den zwölf Wörtern). Höher findet mehr, braucht aber mehr Anfragen; niedriger ist schneller, kann aber einen Schein übersehen.
             </p>
             <div class="btns">
               <For each={GAP_LIMIT_OPTIONS}>
@@ -409,12 +401,10 @@ const Settings: Component = () => {
           <div class="setup-card">
             <h4>
               <IoCashSharp />
-              &nbsp;Currency
+              &nbsp;Währung
             </h4>
             <p>
-              Show a fiat estimate alongside sats, using price.lnbits.com.
-              Purely cosmetic - every amount is still held and moved in sats
-              underneath.
+              Zeigt neben den Sats einen ungefähren Betrag in Landeswährung (Kurs von price.lnbits.com). Nur zur Anzeige — gehalten und bewegt wird immer in Sats.
             </p>
             <div class="btns">
               <For each={CURRENCY_OPTIONS}>
@@ -424,7 +414,7 @@ const Settings: Component = () => {
                     classList={{active: currency() === option}}
                     onClick={() => setCurrency(option)}
                   >
-                    {option === 'none' ? 'Disabled' : CURRENCY_LABEL[option]}
+                    {option === 'none' ? 'Aus' : CURRENCY_LABEL[option]}
                   </button>
                 )}
               </For>
@@ -433,12 +423,10 @@ const Settings: Component = () => {
           <div class="setup-card">
             <h4>
               <IoCloudOfflineSharp />
-              &nbsp;Offline mode
+              &nbsp;Offline-Betrieb
             </h4>
             <p>
-              Blocks rotate, melt, split, merge and every other request to a
-              service - notes already in the wallet stay readable, nothing new
-              reaches the network until this is off again.
+              Die Wallet spricht mit keiner Ausgabestelle mehr: kein Senden, Teilen, Zusammenlegen oder Bezahlen. Deine Scheine bleiben sichtbar; erst wenn du das wieder ausschaltest, geht etwas ins Netz.
             </p>
             <div class="btns">
               <button
@@ -448,8 +436,8 @@ const Settings: Component = () => {
               >
                 <IoCloudOfflineSharp />
                 &nbsp;
-                <Show when={offlineMode()} fallback="Turn on">
-                  Turn off
+                <Show when={offlineMode()} fallback="Einschalten">
+                  Ausschalten
                 </Show>
               </button>
             </div>
@@ -472,8 +460,8 @@ const Settings: Component = () => {
               >
                 <IoHardwareChipSharp />
                 &nbsp;
-                <Show when={vaultEnabled()} fallback="Turn on">
-                  Turn off
+                <Show when={vaultEnabled()} fallback="Einschalten">
+                  Ausschalten
                 </Show>
               </button>
             </div>
@@ -482,53 +470,41 @@ const Settings: Component = () => {
             <div class="setup-card">
               <h4>
                 <IoDownloadSharp />
-                &nbsp;Download backup
+                &nbsp;Sicherung herunterladen
               </h4>
               <p>
-                One JSON file: your {bearers().length} bearer note(s)
-                (encrypted, never plaintext) and {trustedMints().length} trusted
-                mint(s). Notes marked "on device" are just a blank mirror -
-                recovering those needs the paired vault, not this file.
+                Eine Datei mit deinen {bearers().length} Scheinen (verschlüsselt, nie im Klartext) und {trustedMints().length} vertrauten Ausgabestellen.
                 <Show
                   when={encrypted()}
                   fallback={
                     <>
                       {' '}
-                      Your encryption key isn't password-protected, so it's{' '}
-                      <strong>not</strong> included - restoring elsewhere needs
-                      your seed phrase.
+                      Deine Wallet hat kein Passwort, deshalb ist dein Schlüssel{' '} <strong>nicht</strong> dabei — auf einem anderen Gerät brauchst du zusätzlich deine zwölf Wörter.
                     </>
                   }
                 >
                   {' '}
-                  Your password-encrypted key is included too, so this file plus
-                  your password is enough on a new device.
+                  Dein mit Passwort verschlüsselter Schlüssel ist dabei — auf einem neuen Gerät reichen diese Datei und dein Passwort.
                 </Show>
               </p>
               <div class="btns">
                 <button onClick={download}>
                   <IoDownloadSharp />
-                  &nbsp;Download backup
+                  &nbsp;Sicherung herunterladen
                 </button>
               </div>
             </div>
           </Show>
           <Show when={state() === 'unlocked' && !encryptionUpgraded()}>
             <div class="setup-card">
-              <h4>Upgrade encryption</h4>
+              <h4>Verschlüsselung erneuern</h4>
               <p>
-                Your notes are currently encrypted with a key derived through an
-                extra identity keypair this wallet never actually uses for
-                anything. Re-entering your seed phrase here switches to a
-                simpler key derived directly from it, and re-encrypts every note
-                and activity entry already stored under the new one. Nothing
-                about your seed phrase or your notes themselves changes - only
-                how the encryption key is derived.
+                Deine Scheine sind noch mit einem Schlüssel aus einer älteren Fassung verschlüsselt. Gibst du hier deine zwölf Wörter ein, verschlüsselt die Wallet alle Scheine und den Verlauf mit einem einfacher abgeleiteten Schlüssel neu. Deine Wörter und deine Scheine bleiben dieselben.
               </p>
-              <label>Your 12-word BIP39 seed phrase</label>
+              <label>Deine zwölf Wörter</label>
               <textarea
                 rows="3"
-                placeholder="twelve words separated by spaces"
+                placeholder="zwölf Wörter, mit Leerzeichen getrennt"
                 autocomplete="off"
                 autocapitalize="off"
                 spellcheck={false}
@@ -540,7 +516,7 @@ const Settings: Component = () => {
               <Show when={encrypted()}>
                 <input
                   type="password"
-                  placeholder="Password to encrypt the new key"
+                  placeholder="Passwort für den neuen Schlüssel"
                   autocomplete="new-password"
                   autocapitalize="off"
                   spellcheck={false}
@@ -549,7 +525,7 @@ const Settings: Component = () => {
                 />
                 <input
                   type="password"
-                  placeholder="Confirm password"
+                  placeholder="Passwort wiederholen"
                   autocomplete="new-password"
                   autocapitalize="off"
                   spellcheck={false}
@@ -570,7 +546,7 @@ const Settings: Component = () => {
                   >
                     <IoRefreshSharp class="spin" />
                   </Show>
-                  &nbsp;Upgrade encryption
+                  &nbsp;Verschlüsselung erneuern
                 </button>
               </div>
             </div>
@@ -578,21 +554,14 @@ const Settings: Component = () => {
           <div class="setup-card">
             <h4>
               <IoFolderOpenSharp />
-              &nbsp;Restore backup
+              &nbsp;Sicherung einspielen
             </h4>
             <p>
-              Notes from the file merge in (duplicates skipped), but only
-              decrypt under the key they were encrypted with.{' '}
-              <strong>Order matters</strong>: restore your seed first (see{' '}
-              <A href="/setup">Restore from seed</A>
-              ), or select this file while the device has no wallet yet, if it
-              carries its own encrypted key. Setting up a wallet here first and
-              importing after leaves the notes present but undecryptable.
+              Die Scheine aus der Datei kommen dazu (doppelte werden übersprungen), lesbar sind sie aber nur mit dem Schlüssel, mit dem sie verschlüsselt wurden.{' '} <strong>Die Reihenfolge zählt</strong>: zuerst die Wallet mit deinen zwölf Wörtern{' '} <A href="/setup">wiederherstellen</A> — oder die Datei auf einem Gerät ohne Wallet einspielen, wenn sie den Schlüssel mitbringt. Legst du hier zuerst eine neue Wallet an, sind die Scheine danach da, aber nicht lesbar.
             </p>
             <Show when={state() === 'none'}>
               <p>
-                No wallet here yet: a backup with its own encrypted key sets one
-                up automatically; otherwise restore your seed phrase first.
+                Hier gibt es noch keine Wallet: Bringt die Sicherung ihren Schlüssel mit, entsteht sie von selbst; sonst zuerst mit den zwölf Wörtern wiederherstellen.
               </p>
             </Show>
             <input
@@ -607,44 +576,36 @@ const Settings: Component = () => {
                 <Show when={busy()} fallback={<IoFolderOpenSharp />}>
                   <IoRefreshSharp class="spin" />
                 </Show>
-                &nbsp;Select backup file
+                &nbsp;Sicherungsdatei wählen
               </button>
             </div>
             <Show when={keyRestored()}>
               <p class="warning">
-                This backup's linking key is now installed. Whoever created the
-                file may know it - only continue if you trust its source;
-                otherwise forget this wallet below and set up fresh from your
-                own seed.
+                Der Schlüssel aus dieser Sicherung ist jetzt eingespielt. Wer die Datei erstellt hat, kann ihn kennen — mach nur weiter, wenn du ihr vertraust; sonst vergiss diese Wallet unten und richte sie mit deinen eigenen zwölf Wörtern neu ein.
               </p>
               <Show
                 when={encrypted()}
                 fallback={
                   <>
                     <p class="warning">
-                      This key wasn't password-encrypted, so it's now stored in
-                      plaintext. Confirm before activating it:
+                      Dieser Schlüssel hatte kein Passwort und liegt jetzt unverschlüsselt hier. Bestätige, bevor du ihn verwendest:
                     </p>
                     <div class="btns">
                       <button onClick={activateRestoredKey}>
-                        I trust this file - activate the restored wallet
+                        Ich vertraue der Datei — Wallet verwenden
                       </button>
                     </div>
                   </>
                 }
               >
                 <p class="warning">
-                  <A href="/wallet">Unlock the wallet</A> with the password the
-                  key was encrypted with.
+                  <A href="/wallet">Entsperre die Wallet</A> mit dem Passwort, das zur Sicherung gehört.
                 </p>
               </Show>
             </Show>
             <Show when={keySkipped()}>
               <p class="warning">
-                This device already has a wallet, so the backup's own key wasn't
-                applied - its notes won't show up here. If this isn't the right
-                wallet, forget it below (free if empty) and select the file
-                again on a wallet-less device.
+                Auf diesem Gerät gibt es schon eine Wallet, deshalb wurde der Schlüssel aus der Sicherung nicht übernommen — ihre Scheine erscheinen hier nicht. Ist das nicht die richtige Wallet, vergiss sie unten (gefahrlos, wenn sie leer ist) und spiel die Datei danach noch einmal ein.
               </p>
             </Show>
           </div>
@@ -652,18 +613,15 @@ const Settings: Component = () => {
             <div class="setup-card">
               <h4>
                 <IoTrashSharp />
-                &nbsp;Forget this wallet
+                &nbsp;Wallet von diesem Gerät löschen
               </h4>
               <p class="warning">
-                Removes <strong>everything</strong> from this device - key,
-                notes, trusted mints, saved links. Restoring the same seed
-                afterward won't bring the notes back; only a backup downloaded
-                first can.
+                Entfernt <strong>alles</strong> von diesem Gerät: Schlüssel, Scheine, Ausgabestellen. Die zwölf Wörter bringen die Scheine nicht zurück — nur eine vorher heruntergeladene Sicherung.
               </p>
               <div class="btns">
                 <button onClick={download}>
                   <IoDownloadSharp />
-                  &nbsp;Download backup first
+                  &nbsp;Zuerst Sicherung herunterladen
                 </button>
               </div>
               <Show
@@ -672,20 +630,18 @@ const Settings: Component = () => {
                   <div class="btns">
                     <button onClick={() => setConfirmForget(true)}>
                       <IoTrashSharp />
-                      &nbsp;Forget wallet
+                      &nbsp;Wallet löschen
                     </button>
                   </div>
                 }
               >
                 <p class="warning">
-                  Are you sure? This deletes the linking key and every bearer
-                  note from this device - only a backup downloaded beforehand
-                  can bring them back.
+                  Wirklich? Schlüssel und alle Scheine verschwinden von diesem Gerät — zurück bringt sie nur eine vorher heruntergeladene Sicherung.
                 </p>
                 <div class="btns">
-                  <button onClick={doForget}>Yes, forget everything</button>
+                  <button onClick={doForget}>Ja, alles löschen</button>
                   <button onClick={() => setConfirmForget(false)}>
-                    Cancel
+                    Abbrechen
                   </button>
                 </div>
               </Show>
@@ -854,7 +810,7 @@ const Settings: Component = () => {
                       type="button"
                       onClick={() => setConfirmDeleteAddon(null)}
                     >
-                      Cancel
+                      Abbrechen
                     </button>
                   </div>
                 </div>
@@ -1224,7 +1180,7 @@ const Settings: Component = () => {
                   Save
                 </button>
                 <button type="button" onClick={cancelEditAddon}>
-                  Cancel
+                  Abbrechen
                 </button>
               </div>
             </Dialog>
