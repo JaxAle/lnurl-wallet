@@ -309,6 +309,15 @@ const Mint: Component = () => {
 
   onCleanup(stopPolling)
 
+  // Fork: zurück aus der Bezahl-App (Zeus, Phoenix …) sofort nachfragen, statt auf den
+  // nächsten 5-s-Takt zu warten — im Hintergrund hält der Browser den Takt an, und am Pixel
+  // stand nach der Zahlung noch die Rechnung da (Gerhard, 2026-10-11)
+  const beiRueckkehr = () => {
+    if (!document.hidden && pollTimer) void checkVerify()
+  }
+  document.addEventListener('visibilitychange', beiRueckkehr)
+  onCleanup(() => document.removeEventListener('visibilitychange', beiRueckkehr))
+
   const proceedWithPayRequest = (info: PayRequestInfo) => {
     setPayRequest(info)
     setInvoice(null)

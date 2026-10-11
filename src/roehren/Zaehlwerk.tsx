@@ -47,13 +47,22 @@ const fiatText = (sats: number): string | null => {
   return c === 'eur' ? `≈ ${zahl} €` : `≈ ${zahl} ${c.toUpperCase()}`
 }
 
-// Sinkt das Guthaben, zählt das Werk hinunter statt zu springen — das ist die Bestätigung,
-// dass Geld gegangen ist (Prototyp: countOnWallet/runCountdown). Dauer wächst mit dem Betrag.
+// Ändert sich das Guthaben, zählt das Werk hinauf oder hinunter statt zu springen — das ist
+// die Bestätigung, dass Geld gekommen oder gegangen ist (Prototyp: countOnWallet/runCountdown).
+// Dauer wächst mit dem Betrag.
 const zaehlDauer = (differenz: number) =>
   Math.min(3200, 900 + 520 * Math.log10(Math.max(10, differenz)))
 
+// zuletzt gezeigter Stand über Seitenwechsel hinweg: kommt man vom Aufladen zurück, zählt
+// das Werk vom alten zum neuen Guthaben, statt es fertig hinzustellen (Gerhard am Pixel)
+let zuletzt: number | null = null
+
 const Zaehlwerk: Component<{sats: number}> = props => {
-  const [angezeigt, setAngezeigt] = createSignal(props.sats)
+  const [angezeigt, setAngezeigtRoh] = createSignal(zuletzt ?? props.sats)
+  const setAngezeigt = (wert: number) => {
+    zuletzt = wert
+    setAngezeigtRoh(wert)
+  }
   let uhr: ReturnType<typeof setTimeout> | undefined
   const halt = () => {
     if (uhr) clearTimeout(uhr)
@@ -62,14 +71,14 @@ const Zaehlwerk: Component<{sats: number}> = props => {
   createEffect(
     on(
       () => props.sats,
-      (ziel, vorher) => {
+      ziel => {
         halt()
-        if (vorher === undefined || ziel >= angezeigt()) {
+        const von = angezeigt()
+        if (ziel === von) {
           setAngezeigt(ziel)
           return
         }
-        const von = angezeigt()
-        const dauer = zaehlDauer(von - ziel)
+        const dauer = zaehlDauer(Math.abs(von - ziel))
         const start = Date.now() + 350 // kurz innehalten, dann zählt das Werk los
         const schritt = () => {
           const t = Math.min(1, Math.max(0, (Date.now() - start) / dauer))
