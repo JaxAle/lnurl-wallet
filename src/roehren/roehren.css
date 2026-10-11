@@ -170,6 +170,10 @@
 }
 .rz-knopf .lbl {
   display: inline-block;
+  /* Luft für den Lichthof: die Maske schneidet an der Box ab, ohne Polster stand am Pixel
+     ein dunkles Rechteck hinter „Senden“ (Gerhards Bild, 2026-10-11) */
+  padding: 8px 14px;
+  margin: -8px -14px;
   font-weight: 300;
   font-size: 27px;
   line-height: 1;
