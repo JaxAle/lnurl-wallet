@@ -1,0 +1,152 @@
+/* Röhren-Zählwerk — übernommen aus dem abgenommenen Prototyp (PROJEKTE/lnurlcash-wallet/prototyp.html,
+   Version 53). Eigene Datei, damit Updates des Originals ohne Konflikt nachgezogen werden können. */
+
+.roehren-zaehlwerk {
+  --rz-font: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  text-align: center;
+  padding: 18px 0 14px;
+}
+
+.roehren-zaehlwerk .bal-tubes {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.roehren-zaehlwerk .tube {
+  position: relative;
+  container-type: size;
+  overflow: hidden;
+  width: 35px;
+  height: 56px;
+  flex: none;
+  border-radius: 12%;
+  display: grid;
+  place-items: center;
+  background: #050403 url('./roehre.webp') center / 100% 100% no-repeat;
+}
+
+/* Innenleuchten: das Gitter wird orange ausgeleuchtet */
+.roehren-zaehlwerk .tube .glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(44% 36% at 50% 56%, rgba(255, 118, 22, 0.8), rgba(255, 72, 0, 0.38) 60%, transparent 84%),
+    radial-gradient(34% 9% at 50% 92%, rgba(255, 130, 40, 0.6), transparent 80%);
+}
+
+/* Glühdraht: dünne Linie, heller Kern, orangefarbener Hof, leicht unterbrochen */
+.roehren-zaehlwerk .tube .ch {
+  position: relative;
+  font-family: var(--rz-font);
+  font-weight: 300;
+  font-size: 26px;
+  font-size: min(58cqh, 92cqw);
+  line-height: 1;
+  transform: translateY(7%) scaleX(0.8);
+  color: #ffd59a;
+  text-shadow: 0 0 1px #fff3d6, 0 0 3px #ffb04a, 0 0 8px #ff7a10, 0 0 16px rgba(255, 70, 0, 0.55);
+  -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+  mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+}
+
+/* Null mit Punkt in der Mitte, wie im Vorbild */
+.roehren-zaehlwerk .tube .ch-0::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.11em;
+  height: 0.11em;
+  margin: -0.02em 0 0 -0.055em;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0.06em currentColor;
+}
+
+/* dunkle Röhre: Glas und Gitter, keine Ziffer */
+.roehren-zaehlwerk .tube.unlit {
+  filter: brightness(0.5);
+}
+.roehren-zaehlwerk .tube.unlit .glow {
+  opacity: 0;
+}
+
+/* Tausenderpunkt zwischen den Röhren */
+.roehren-zaehlwerk .dot {
+  width: 6px;
+  height: 6px;
+  margin: 0 1px 14px;
+  border-radius: 50%;
+  flex: none;
+  background: #ffcf8a;
+  box-shadow: 0 0 4px #ff9a2a, 0 0 10px rgba(255, 80, 0, 0.7);
+}
+.roehren-zaehlwerk .dot.unlit {
+  background: #2a1a10;
+  box-shadow: none;
+}
+
+/* Sats-Symbol rechts, um 13,88° geneigt (Gerhard) */
+.roehren-zaehlwerk .satsym {
+  align-self: center;
+  margin-left: 4px;
+  flex: none;
+}
+.roehren-zaehlwerk .satsym svg {
+  width: 16px;
+  height: 32px;
+  transform: rotate(13.88deg);
+  fill: none;
+  stroke: #ffd59a;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 1px #fff3d6) drop-shadow(0 0 3px #ffb04a) drop-shadow(0 0 7px rgba(255, 110, 16, 0.6));
+}
+
+/* Steigt das Guthaben, glühen die geänderten Röhren kurz auf */
+.roehren-zaehlwerk .tube.up {
+  animation: rz-tubehit 2.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.roehren-zaehlwerk .tube.up .glow {
+  animation: rz-glow 2.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.roehren-zaehlwerk .tube.up .ch {
+  animation: rz-chhit 2.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes rz-tubehit {
+  0% { filter: brightness(1.3) saturate(1.1); }
+}
+@keyframes rz-glow {
+  0% { opacity: 1; }
+  40% { opacity: 0.8; }
+}
+@keyframes rz-chhit {
+  0% { color: #fff3d6; text-shadow: 0 0 2px #fff, 0 0 6px #ffc070, 0 0 13px #ff7a00, 0 0 24px #ff5000, 0 0 44px rgba(255, 60, 0, 0.9); }
+  30% { color: #ffcf7a; text-shadow: 0 0 1px #ffe9c0, 0 0 4px #ffa22e, 0 0 10px #ff6a00, 0 0 20px rgba(255, 74, 0, 0.8), 0 0 34px rgba(255, 60, 0, 0.5); }
+}
+
+/* Euro darunter, in Drahtform wie im Prototyp (.eurin, ungewählt) */
+.roehren-zaehlwerk .rz-euro {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--rz-font);
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1.15;
+  transform: scaleX(0.86);
+  color: rgba(238, 152, 90, 0.62);
+  text-shadow: 0 0 2px rgba(255, 112, 30, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roehren-zaehlwerk .tube.up,
+  .roehren-zaehlwerk .tube.up .glow,
+  .roehren-zaehlwerk .tube.up .ch {
+    animation: none;
+  }
+}

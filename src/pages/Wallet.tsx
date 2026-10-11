@@ -89,6 +89,7 @@ import MeltDialog from '../components/MeltDialog'
 import ScanToggle from '../components/ScanToggle'
 import NfcToggle from '../components/NfcToggle'
 import FiatValue from '../components/FiatValue'
+import Zaehlwerk from '../roehren/Zaehlwerk'
 
 const Wallet: Component = () => {
   const {
@@ -1519,14 +1520,9 @@ const Wallet: Component = () => {
               </Dialog>
             </Show>
             <section class="wallet-hero">
+              {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
+              <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)} />
               <div class="wallet-stats">
-                <div class="wallet-stat">
-                  <span class="wallet-stat-value">
-                    {msatToSats(spendableTotal())} sats
-                    <FiatValue msat={spendableTotal()} />
-                  </span>
-                  <span class="wallet-stat-label">Total balance</span>
-                </div>
                 <div class="wallet-stat">
                   <span class="wallet-stat-value">
                     {spendableBearers().length}
