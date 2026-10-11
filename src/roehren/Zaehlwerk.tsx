@@ -117,7 +117,12 @@ const Zaehlwerk: Component<{sats: number; children?: JSX.Element}> = props => {
       <div class="rz-inrow">
       <Show when={stand()} keyed>
         {s => (
-          <div class="bal-tubes" role="img" aria-label={`Guthaben ${anzeige()} Sats`}>
+          <div
+            class="bal-tubes"
+            classList={{cold: s.sats === 0}}
+            role="img"
+            aria-label={`Guthaben ${anzeige()} Sats`}
+          >
             <For each={zellen(s.sats, s.vorher)}>
               {zelle =>
                 zelle.art === 'punkt' ? (

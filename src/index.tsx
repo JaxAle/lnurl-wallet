@@ -146,7 +146,6 @@ const updateSW = registerSW({
       {duration: Infinity}
     )
   },
-  onOfflineReady: () => {
-    notify('Ready to work offline.', NotifyKind.SUCCESS)
-  }
+  // Fork: keine Erfolgsmeldung beim ersten Start — sie sagt dem Teilnehmer nichts (Steve)
+  onOfflineReady: () => {}
 })

@@ -41,6 +41,9 @@ const Nav = () => {
   const [menuOpen, setMenuOpen] = createSignal(false)
 
   const closeMenu = () => setMenuOpen(false)
+  // Fork: steht die Reiterleiste (entsperrt), führt das Menü nur noch Seltenes — Wallet, Verlauf,
+  // Einstellungen und Sperren sind dann in der Leiste bzw. am Netzschalter (Steve, 2026-10-11)
+  const leiste = () => state() === 'unlocked'
 
   const lock_action = () => {
     closeMenu()
@@ -92,7 +95,7 @@ const Nav = () => {
           {/* shown whenever there's a wallet on this device, even locked -
           that's where the unlock form lives now that "/" is the landing
           page (see pages/Hero.tsx and pages/Wallet.tsx) */}
-          <Show when={state() !== 'none'}>
+          <Show when={state() !== 'none' && !leiste()}>
             <A href="/wallet" class="nav-link">
               <IoWalletSharp />
               &nbsp;Wallet
@@ -159,7 +162,7 @@ const Nav = () => {
             <IoBookSharp />
             <span class="nav-label">&nbsp;Docs</span>
           </A>
-          <Show when={state() !== 'none'}>
+          <Show when={state() !== 'none' && !leiste()}>
             <A
               href="/activity"
               title="Activity log - a history of every mint, split, combine, melt and transfer"
@@ -191,6 +194,7 @@ const Nav = () => {
               }}
             </For>
           </Show>
+          <Show when={!leiste()}>
           <A
             href="/settings"
             title="Settings - auto-lock, currency, offline mode, backup, restore &amp; addons"
@@ -198,7 +202,8 @@ const Nav = () => {
             <IoCogSharp />
             <span class="nav-label">&nbsp;Settings</span>
           </A>
-          <Show when={state() === 'unlocked' && encrypted()}>
+          </Show>
+          <Show when={state() === 'unlocked' && encrypted() && !leiste()}>
             <a href="#lock" title="Lock wallet" onClick={lock_action}>
               <IoLockClosedSharp />
               <span class="nav-label">&nbsp;Lock</span>

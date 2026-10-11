@@ -129,6 +129,22 @@
   filter: drop-shadow(0 0 1px #fff3d6) drop-shadow(0 0 3px #ffb04a) drop-shadow(0 0 7px rgba(255, 110, 16, 0.6));
 }
 
+/* kalt: nichts da — die Null steht, glüht aber nicht (Prototyp .bal-tubes.cold) */
+.roehren-zaehlwerk .bal-tubes.cold .tube {
+  filter: brightness(0.55);
+}
+.roehren-zaehlwerk .bal-tubes.cold .tube .glow {
+  opacity: 0;
+}
+.roehren-zaehlwerk .bal-tubes.cold .tube .ch {
+  color: rgba(238, 152, 90, 0.55);
+  text-shadow: 0 0 2px rgba(255, 112, 30, 0.3);
+}
+.roehren-zaehlwerk .bal-tubes.cold .satsym svg {
+  stroke: rgba(238, 152, 90, 0.5);
+  filter: none;
+}
+
 /* Steigt das Guthaben, glühen die geänderten Röhren kurz auf */
 .roehren-zaehlwerk .tube.up {
   animation: rz-tubehit 2.4s cubic-bezier(0.2, 0.7, 0.3, 1);

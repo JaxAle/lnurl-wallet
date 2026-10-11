@@ -20,13 +20,24 @@ const Pfeil: Component<{d: string}> = props => (
   </svg>
 )
 
-const Knoepfe: Component<{onSenden: () => void; onEmpfangen: () => void}> = props => (
+// leer: bei 0 Sats glüht Empfangen, Senden ist aus — man kann nur das eine tun (Steve)
+const Knoepfe: Component<{onSenden: () => void; onEmpfangen: () => void; leer?: boolean}> = props => (
   <div class="rz-duo">
-    <button type="button" class="rz-knopf" onClick={() => props.onEmpfangen()}>
+    <button
+      type="button"
+      class="rz-knopf"
+      classList={{an: !!props.leer}}
+      onClick={() => props.onEmpfangen()}
+    >
       <Pfeil d="M12 4v15M5 12l7 7 7-7" />
       <span class="lbl">Empfangen</span>
     </button>
-    <button type="button" class="rz-knopf an" onClick={() => props.onSenden()}>
+    <button
+      type="button"
+      class="rz-knopf"
+      classList={{an: !props.leer}}
+      onClick={() => props.onSenden()}
+    >
       <Pfeil d="M12 20V5M5 12l7-7 7 7" />
       <span class="lbl">Senden</span>
     </button>

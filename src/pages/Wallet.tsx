@@ -1411,8 +1411,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
           </div>
         }
       >
+        {/* Fork: auch die leere Wallet ist die Startseite — Zählwerk mit kalter Null, dieselben
+        Schalter (Steve, 2026-10-11). Das Plakat des Originals bleibt nur für den leeren Reiter Scheine. */}
         <Show
-          when={bearers().length > 0}
+          when={bearers().length > 0 || !scheineAnsicht()}
           fallback={
             <div id="wallet" class="page">
               <section class="hero-intro">
@@ -1560,7 +1562,12 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
               </Zaehlwerk>
               {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
               <Knoepfe
-                onSenden={() => setBlatt('senden')}
+                leer={spendableTotal() === 0}
+                onSenden={() =>
+                  spendableTotal() === 0
+                    ? notify('Noch nichts zu senden — zuerst empfangen oder aufladen.')
+                    : setBlatt('senden')
+                }
                 onEmpfangen={() => setBlatt('empfangen')}
               />
               <Show when={blatt()}>
