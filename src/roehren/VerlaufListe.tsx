@@ -78,7 +78,7 @@ const VerlaufListe: Component<{eintraege: ActivityEvent[]; onPruefen: (url: stri
                       <Show when={betrag !== null}>
                         <span class={`amt ${richtung}`}>
                           {richtung === 'in' ? '+' : richtung === 'out' ? '−' : ''}
-                          {betrag!.toLocaleString('de-AT')}
+                          {betrag!.toLocaleString('de-DE')}
                         </span>
                       </Show>
                     </button>

@@ -1577,7 +1577,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine'}> = props => {
                     {' · '}
                     {Math.floor(
                       unterwegsScheine().reduce((a, b) => a + b.amount, 0) / 1000
-                    ).toLocaleString('de-AT')}{' '}
+                    ).toLocaleString('de-DE')}{' '}
                     Sats ›
                   </button>
                 </Show>

@@ -42,8 +42,8 @@ const Senden: Component = () => {
   const zuViel = () => betrag() > groesster()
   const grund = () =>
     betrag() > guthaben()
-      ? `Mehr als dein Guthaben (${guthaben().toLocaleString('de-AT')})`
-      : `Kein einzelner Schein hat so viel — höchstens ${groesster().toLocaleString('de-AT')}`
+      ? `Mehr als dein Guthaben (${guthaben().toLocaleString('de-DE')})`
+      : `Kein einzelner Schein hat so viel — höchstens ${groesster().toLocaleString('de-DE')}`
 
   // genau passender Schein, sonst der kleinste, von dem sich der Betrag abspalten lässt
   // (Spalten verlangt einen Rest: Betrag < Schein)
@@ -137,7 +137,7 @@ const Senden: Component = () => {
                     class="rz-leise"
                     onClick={() => ein.setzeSats(groesster())}
                   >
-                    {groesster().toLocaleString('de-AT')} senden
+                    {groesster().toLocaleString('de-DE')} senden
                   </button>
                 </Show>
               </Show>

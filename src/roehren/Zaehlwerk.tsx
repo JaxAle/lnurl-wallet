@@ -122,7 +122,7 @@ const Zaehlwerk: Component<{
     undefined
   )
   const fiat = () => fiatText(angezeigt())
-  const anzeige = () => angezeigt().toLocaleString('de-AT')
+  const anzeige = () => angezeigt().toLocaleString('de-DE')
 
   return (
     <div class="roehren-zaehlwerk">
@@ -196,7 +196,7 @@ const Zaehlwerk: Component<{
       >
         <div>
           <span class="rz-euro">
-            {gebuehr()!.toLocaleString('de-AT')} {gebuehr() === 1 ? 'Sat' : 'Sats'} Gebühr
+            {gebuehr()!.toLocaleString('de-DE')} {gebuehr() === 1 ? 'Sat' : 'Sats'} Gebühr
           </span>
         </div>
       </Show>

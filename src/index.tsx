@@ -96,6 +96,8 @@ const cleanup = render(
       <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />
       <Route path="/senden" component={Senden} />
       <Route path="/empfangen" component={Empfangen} />
+      <Route path="/empfangen/scannen" component={() => <Empfangen weg="scannen" />} />
+      <Route path="/empfangen/einfuegen" component={() => <Empfangen weg="einfuegen" />} />
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={Mint} />
       <Route path="/aufladen" component={() => <Mint aufladen />} />

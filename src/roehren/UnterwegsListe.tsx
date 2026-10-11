@@ -48,7 +48,7 @@ const UnterwegsListe: Component = () => {
           {bearer => (
             <div class="rz-zeile">
               <span class="rz-lampe-klein" />
-              <span>{Math.floor(bearer.amount / 1000).toLocaleString('de-AT')} Sats</span>
+              <span>{Math.floor(bearer.amount / 1000).toLocaleString('de-DE')} Sats</span>
               <span class="rz-matt">{host(bearer.url)}</span>
               <button
                 type="button"

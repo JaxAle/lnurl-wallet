@@ -995,3 +995,40 @@ select {
 .rz-eintrag-text p {
   margin: 0 0 6px;
 }
+
+/* Empfangen › Schein einfügen (Prototyp screens.paste: Feld, Erkennung, Einlösen) */
+.rz-feldname {
+  display: block;
+  margin: 14px 0 6px;
+  font-size: 14px;
+  color: #a3907c;
+}
+.rz-feld {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #2f2218;
+  border-radius: 14px;
+  background: #17110c;
+  color: #f4ebdf;
+  font: 15px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  word-break: break-all;
+  resize: vertical;
+}
+.rz-feld:focus {
+  outline: none;
+  border-color: rgba(238, 152, 90, 0.6);
+}
+.rz-erkannt {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: rgba(238, 152, 90, 0.85);
+}
+.rz-erkannt.fremd {
+  color: #a3907c;
+}
+.rz-mitte {
+  text-align: center;
+}
+.rz-empfangen .rz-weiter {
+  margin-top: 18px;
+}

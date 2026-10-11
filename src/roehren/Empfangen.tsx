@@ -1,14 +1,17 @@
-// Empfangen wie im Prototyp (screens.receive): drei große Zeilen mit je einem Satz statt einer
-// Symbolreihe. Dahinter die Werkzeuge des Originals: Scanner, Einfügen aus der Zwischenablage,
-// Aufladen (/mint). Was ankommt, verarbeitet die Startseite (uebergabe.ts) — dort zählt das
-// Zählwerk hinauf. „Deine Adresse“ (Prototyp) folgt in einer späteren Schleife.
+// Empfangen wie im Prototyp (screens.receive / scan / paste): eine Weiche aus drei Zeilen, jede
+// führt auf einen eigenen Bildschirm mit ‹ zurück zur Weiche — Scannen (nur der Sucher),
+// Einfügen (Feld, Erkennung, Einlösen), Aufladen (/aufladen). Was ankommt, verarbeitet die
+// Startseite (uebergabe.ts) — dort zählt das Zählwerk hinauf. „Deine Adresse“ folgt später.
+//
+// Einfügen ist ein gewöhnliches Feld (lange drücken › Einfügen) statt der Zwischenablage-Berechtigung
+// des Browsers: die lehnte Chrome am Pixel still ab, „Schein einfügen“ tat nichts (Gerhard, 2026-10-11).
 import type {Component} from 'solid-js'
-import {createSignal, Show} from 'solid-js'
+import {createSignal, Match, Show, Switch} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
 import Scanner, {canScan} from '../components/Scanner'
-import {pasteFromClipboard} from '../helpers'
+import {decodeBolt11AmountMsat, isBolt11Invoice, isLightningAddress, noteDeclaredAmount, resolveNoteInput} from '../lnurlcash'
 import {setEingang} from './uebergabe'
 import './roehren.css'
 
@@ -32,11 +35,44 @@ const Symbol: Component<{name: string}> = props => (
   />
 )
 
-const Empfangen: Component = () => {
+type Erkannt =
+  | {art: 'schein'; sats: number | null}
+  | {art: 'rechnung'; sats: number | null}
+  | {art: 'adresse'}
+  | {art: 'unbekannt'}
+
+// nur am Text, ohne Netz: was ist das? (Prototyp: „Sieht aus wie ein Schein über 1.500 Sats“)
+const erkenne = (wert: string): Erkannt | null => {
+  const w = wert.trim()
+  if (!w) return null
+  const schein = resolveNoteInput(w)
+  if (schein) {
+    const msat = noteDeclaredAmount(schein)
+    return {art: 'schein', sats: msat === null ? null : Math.floor(msat / 1000)}
+  }
+  const rechnung = w.replace(/^lightning:/i, '')
+  if (isBolt11Invoice(rechnung)) {
+    const msat = decodeBolt11AmountMsat(rechnung)
+    return {art: 'rechnung', sats: msat === null ? null : Math.floor(msat / 1000)}
+  }
+  if (isLightningAddress(w)) return {art: 'adresse'}
+  return {art: 'unbekannt'}
+}
+const ueber = (sats: number | null) => (sats === null ? '' : ` über ${sats.toLocaleString('de-DE')} Sats`)
+
+const Kopf: Component<{titel: string; zurueck: string}> = props => (
+  <div class="rz-seitenkopf">
+    <A href={props.zurueck} class="rz-zurueck" aria-label="Zurück">
+      ‹
+    </A>
+    <h2>{props.titel}</h2>
+  </div>
+)
+
+const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
   const navigate = useNavigate()
-  const [scannt, setScannt] = createSignal(false)
-  const [tippt, setTippt] = createSignal(false)
   const [text, setText] = createSignal('')
+  const erkannt = () => erkenne(text())
 
   const uebernimm = (wert: string) => {
     const w = wert.trim()
@@ -45,77 +81,99 @@ const Empfangen: Component = () => {
     navigate('/wallet')
   }
 
-  const einfuegen = async () => {
-    const t = await pasteFromClipboard()
-    // ohne Erlaubnis für die Zwischenablage: Feld zum Hineinhalten
-    if (t === null) return setTippt(true)
-    uebernimm(t)
-  }
-
   return (
     <RequireWallet>
       <div class="page rz-empfangen">
-        <div class="rz-seitenkopf">
-          <A href="/wallet" class="rz-zurueck" aria-label="Zurück zur Wallet">
-            ‹
-          </A>
-          <h2>Empfangen</h2>
-        </div>
+        <Switch>
+          <Match when={props.weg === 'scannen'}>
+            <Kopf titel="Scannen" zurueck="/empfangen" />
+            <Show
+              when={canScan()}
+              fallback={<p class="rz-hinweis">Dieses Gerät kann hier nicht scannen — füge den Schein stattdessen ein.</p>}
+            >
+              <div class="rz-scanner">
+                <Scanner onScan={uebernimm} />
+              </div>
+              <p class="rz-hinweis rz-mitte">Schein oder Rechnung in den Rahmen halten — erkannt wird von selbst.</p>
+            </Show>
+          </Match>
 
-        <Show when={canScan()}>
-          <button type="button" class="rz-option" onClick={() => setScannt(v => !v)}>
-            <span class="ic">
-              <Symbol name="scan" />
-            </span>
-            <span>
-              <span class="t">Schein scannen</span>
-              <span class="s">Jemand zeigt dir einen QR-Code</span>
-            </span>
-            <Symbol name="chev" />
-          </button>
-          <Show when={scannt()}>
-            <div class="rz-scanner">
-              <Scanner onScan={uebernimm} />
-              <p class="rz-hinweis">QR-Code ins Bild halten — erkannt wird von selbst.</p>
-            </div>
-          </Show>
-        </Show>
-
-        <button type="button" class="rz-option" onClick={() => void einfuegen()}>
-          <span class="ic">
-            <Symbol name="paste" />
-          </span>
-          <span>
-            <span class="t">Schein einfügen</span>
-            <span class="s">Du hast einen Link oder Text bekommen</span>
-          </span>
-          <Symbol name="chev" />
-        </button>
-        <Show when={tippt()}>
-          <div class="rz-einfuegen">
-            <input
-              type="text"
-              placeholder="Schein, Rechnung oder Adresse"
+          <Match when={props.weg === 'einfuegen'}>
+            <Kopf titel="Schein einfügen" zurueck="/empfangen" />
+            <label class="rz-feldname" for="rz-einfuegen">
+              Link oder Text vom Absender
+            </label>
+            <textarea
+              id="rz-einfuegen"
+              class="rz-feld"
+              rows="4"
+              spellcheck={false}
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="Lange drücken › Einfügen"
               value={text()}
               onInput={e => setText(e.currentTarget.value)}
-              onKeyDown={e => e.key === 'Enter' && uebernimm(text())}
             />
-            <button type="button" class="rz-leise" onClick={() => uebernimm(text())}>
-              Übernehmen ›
+            <Show when={erkannt()}>
+              {e => (
+                <p class="rz-erkannt" classList={{fremd: e().art === 'unbekannt'}}>
+                  <Switch>
+                    <Match when={e().art === 'schein'}>Sieht aus wie ein Schein{ueber((e() as {sats: number | null}).sats)}</Match>
+                    <Match when={e().art === 'rechnung'}>
+                      Sieht aus wie eine Rechnung{ueber((e() as {sats: number | null}).sats)} — die würdest du bezahlen
+                    </Match>
+                    <Match when={e().art === 'adresse'}>Sieht aus wie eine Lightning-Adresse — dorthin würdest du zahlen</Match>
+                    <Match when={e().art === 'unbekannt'}>Das ist kein Schein, keine Rechnung und keine Adresse.</Match>
+                  </Switch>
+                </p>
+              )}
+            </Show>
+            <button
+              type="button"
+              class="rz-knopf an rz-weiter"
+              disabled={!erkannt() || erkannt()!.art === 'unbekannt'}
+              onClick={() => uebernimm(text())}
+            >
+              <span class="lbl">{erkannt()?.art === 'schein' || !erkannt() ? 'Einlösen' : 'Weiter zum Bezahlen'}</span>
             </button>
-          </div>
-        </Show>
+          </Match>
 
-        <A href="/aufladen" class="rz-option">
-          <span class="ic">
-            <Symbol name="bolt" />
-          </span>
-          <span>
-            <span class="t">Aufladen per Lightning</span>
-            <span class="s">Aus einer anderen Wallet Sats hierher holen</span>
-          </span>
-          <Symbol name="chev" />
-        </A>
+          <Match when={!props.weg}>
+            <Kopf titel="Empfangen" zurueck="/wallet" />
+            <Show when={canScan()}>
+              <A href="/empfangen/scannen" class="rz-option">
+                <span class="ic">
+                  <Symbol name="scan" />
+                </span>
+                <span>
+                  <span class="t">Schein scannen</span>
+                  <span class="s">Jemand zeigt dir einen QR-Code</span>
+                </span>
+                <Symbol name="chev" />
+              </A>
+            </Show>
+            <A href="/empfangen/einfuegen" class="rz-option">
+              <span class="ic">
+                <Symbol name="paste" />
+              </span>
+              <span>
+                <span class="t">Schein einfügen</span>
+                <span class="s">Du hast einen Link oder Text bekommen</span>
+              </span>
+              <Symbol name="chev" />
+            </A>
+            <A href="/aufladen" class="rz-option">
+              <span class="ic">
+                <Symbol name="bolt" />
+              </span>
+              <span>
+                <span class="t">Aufladen per Lightning</span>
+                <span class="s">Aus einer anderen Wallet Sats hierher holen</span>
+              </span>
+              <Symbol name="chev" />
+            </A>
+          </Match>
+        </Switch>
       </div>
     </RequireWallet>
   )

@@ -33,7 +33,7 @@ const EinloeseWache: Component = () => {
           }
           logActivity(
             'spent',
-            `${Math.floor(b.amount / 1000).toLocaleString('de-AT')} Sats gesendet — vom Empfänger eingelöst${stelle ? ` (${stelle})` : ''}.`,
+            `${Math.floor(b.amount / 1000).toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst${stelle ? ` (${stelle})` : ''}.`,
             b.label
           )
         }

@@ -85,7 +85,7 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
           fallback={
             <>
               <div class="rz-seitenkopf">
-                <A href="/wallet" class="rz-zurueck" aria-label="Zurück zur Wallet">
+                <A href="/empfangen" class="rz-zurueck" aria-label="Zurück zu Empfangen">
                   ‹
                 </A>
                 <h2>Aufladen</h2>
@@ -102,7 +102,7 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
             fallback={
               <>
                 <div class="rz-seitenkopf">
-                  <A href="/wallet" class="rz-zurueck" aria-label="Zurück zur Wallet">
+                  <A href="/empfangen" class="rz-zurueck" aria-label="Zurück zu Empfangen">
                     ‹
                   </A>
                   <h2>Aufladen</h2>
@@ -140,8 +140,8 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                   >
                     <div class="rz-ueber">
                       <span>
-                        Möglich sind {grenzen()!.min.toLocaleString('de-AT')} bis{' '}
-                        {grenzen()!.max.toLocaleString('de-AT')} Sats
+                        Möglich sind {grenzen()!.min.toLocaleString('de-DE')} bis{' '}
+                        {grenzen()!.max.toLocaleString('de-DE')} Sats
                       </span>
                     </div>
                   </Show>
@@ -172,7 +172,7 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                 <Zaehlwerk sats={ein.betrag()} sofort>
                   <Show when={gebuehr() > 0}>
                     <p class="rz-klein">
-                      Rechnung {sats(m.aufteilung()!.grossMsat).toLocaleString('de-AT')} Sats, davon{' '}
+                      Rechnung {sats(m.aufteilung()!.grossMsat).toLocaleString('de-DE')} Sats, davon{' '}
                       {gebuehr()} Gebühr
                     </p>
                   </Show>
