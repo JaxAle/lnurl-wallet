@@ -52,7 +52,9 @@ const Reiter: Component = () => {
   return (
     <Show when={state() === 'unlocked'}>
       <EinloeseWache />
-      <nav class="rz-reiter" aria-label="Hauptnavigation">
+      {/* div statt nav: style.scss hängt jedem nav "position: fixed; top: 0" an — zusammen mit
+      bottom: 0 streckte sich die Leiste über den ganzen Bildschirm und verdeckte alles (Pixel) */}
+      <div class="rz-reiter" role="navigation" aria-label="Hauptnavigation">
         <For each={reiter()}>
           {([pfad, name, symbol]) => (
             <A
@@ -68,7 +70,7 @@ const Reiter: Component = () => {
             </A>
           )}
         </For>
-      </nav>
+      </div>
     </Show>
   )
 }
