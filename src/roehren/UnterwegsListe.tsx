@@ -18,14 +18,14 @@ const host = (url: string): string => {
 }
 
 const UnterwegsListe: Component = () => {
-  const {bearers, addBearer, updateBearer, logActivity} = useWallet()
+  const {bearers, addBearer, updateBearer, removeBearer, logActivity} = useWallet()
   const [holt, setHolt] = createSignal<string | null>(null)
   const zurueckholen = async (id: string) => {
     const b = bearers().find(x => x.id === id)
     if (!b) return
     setHolt(id)
     try {
-      const e = await holeZurueck(b, {addBearer, updateBearer, logActivity})
+      const e = await holeZurueck(b, {addBearer, updateBearer, removeBearer, logActivity})
       notify(e === 'zurueck' ? 'Zurückgeholt — der gezeigte QR ist wertlos.' : 'Schon eingelöst.')
     } catch (err) {
       notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)

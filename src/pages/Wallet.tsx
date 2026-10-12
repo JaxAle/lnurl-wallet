@@ -1431,10 +1431,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     markieren: async schein => {
       nurDieser(schein.id)
       await markSpentSelected()
+      await updateBearer(schein.id, {spentGrund: 'markiert'})
     },
     ausgegebene: spentBearers,
     aufheben: schein => {
-      updateBearer(schein.id, {spent: false})
+      updateBearer(schein.id, {spent: false, spentGrund: undefined})
       logActivity(
         'unspent',
         `Markierung aufgehoben: ${msatToSats(schein.amount)} Sats von ${serverOf(schein.url)}.`,

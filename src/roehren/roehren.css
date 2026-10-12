@@ -1409,3 +1409,29 @@ select {
 .rz-schein-blatt .rz-erweitert summary {
   padding: 10px 0 4px;
 }
+
+/* Rückfrage als Blatt (Rueckfrage.tsx) */
+.rz-rueckfrage-blatt h3 {
+  margin: 4px 0 10px;
+  padding-right: 36px;
+  font: 300 22px/1.25 'Jost', system-ui, sans-serif;
+  color: #f4ebdf;
+  overflow-wrap: anywhere;
+}
+.rz-rueckfrage-text p {
+  margin: 0 0 6px;
+  color: #f4ebdf;
+}
+.rz-rueckfrage-blatt .rz-duo {
+  margin: 18px 0 4px;
+}
+.rz-rueckfrage-blatt button {
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 17px;
+}
+.rz-knopf-flach {
+  display: block;
+  padding: 0;
+  color: #ffefc4;
+}

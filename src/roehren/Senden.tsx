@@ -86,7 +86,11 @@ const Senden: Component = () => {
     const s = schein()
     return s ? (bearers().find(b => b.id === s.id) ?? s) : null
   }
-  const eingeloest = () => !!aktuell()?.spent
+  // eingelöst: die Wache entfernt den Schein (oder er steht noch als ausgegeben da)
+  const eingeloest = () => {
+    const s = schein()
+    return !!s && (!bearers().some(b => b.id === s.id) || !!aktuell()?.spent)
+  }
 
   // „Doch nicht senden“: Schein erneuern, der gezeigte QR wird wertlos (Gerhard am Pixel, 2026-10-11)
   const [holt, setHolt] = createSignal(false)
@@ -96,9 +100,9 @@ const Senden: Component = () => {
     if (!s) return
     setHolt(true)
     try {
-      const ergebnis = await holeZurueck(s, {addBearer, updateBearer, logActivity})
+      const ergebnis = await holeZurueck(s, {addBearer, updateBearer, removeBearer, logActivity})
       if (ergebnis === 'zurueck') setZurueck(true)
-      // 'schon-eingeloest': der Schein steht nun auf "spent", die Seite zeigt „eingelöst“
+      // 'schon-eingeloest': der Schein ist nun weg, die Seite zeigt „eingelöst“
     } catch (err) {
       notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
     } finally {

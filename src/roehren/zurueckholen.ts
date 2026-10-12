@@ -3,7 +3,7 @@
 // nachgebaut nach Wallet.tsx refreshOneBearer, ohne den Vault-Zweig (Senden spaltet nur Scheine,
 // deren Geheimnis im Browser liegt).
 //
-// Hat der Empfänger schon eingelöst, ist das kein Fehler: der Schein wird als ausgegeben markiert.
+// Hat der Empfänger schon eingelöst, ist das kein Fehler: der Schein verschwindet, der Verlauf sagt „gesendet“.
 import {
   AmbiguousMutationError,
   fetchNoteInfo,
@@ -19,21 +19,26 @@ import type {Bearer} from '../storage'
 import type {WalletContextType} from '../WalletContext'
 import {vergiss} from './einloesen'
 
-type Kontext = Pick<WalletContextType, 'addBearer' | 'updateBearer' | 'logActivity'>
+type Kontext = Pick<WalletContextType, 'addBearer' | 'updateBearer' | 'removeBearer' | 'logActivity'>
 
 export type Ergebnis = 'zurueck' | 'schon-eingeloest'
 
 export const holeZurueck = async (schein: Bearer, ctx: Kontext): Promise<Ergebnis> => {
-  const {addBearer, updateBearer, logActivity} = ctx
+  const {addBearer, updateBearer, removeBearer, logActivity} = ctx
   const sats = Math.floor(schein.amount / 1000)
+  // schon eingelöst: wertlos, also weg — wie bei der Einlöse-Wache, mit derselben Zeile im Verlauf
+  const eingeloest = () => {
+    logActivity('spent', `${sats.toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst (${serverOf(schein.url)}).`, schein.label)
+    removeBearer(schein.id)
+    vergiss(schein.id)
+  }
 
   let info
   try {
     info = await fetchNoteInfo(schein.url)
   } catch (err) {
     if (err instanceof NoteSpentError || err instanceof NoteUnknownError) {
-      await updateBearer(schein.id, {spent: true})
-      vergiss(schein.id)
+      eingeloest()
       return 'schon-eingeloest'
     }
     throw err
@@ -46,8 +51,7 @@ export const holeZurueck = async (schein: Bearer, ctx: Kontext): Promise<Ergebni
   } catch (err) {
     if (err instanceof NoteSpentError) {
       // zwischen Nachfrage und Erneuern eingelöst
-      await updateBearer(schein.id, {spent: true})
-      vergiss(schein.id)
+      eingeloest()
       return 'schon-eingeloest'
     }
     if (!(err instanceof AmbiguousMutationError)) throw err

@@ -14,6 +14,7 @@ import {A} from '@solidjs/router'
 import Dialog from '../components/Dialog'
 import {serverOf} from '../lnurlcash'
 import type {Bearer} from '../storage'
+import Rueckfrage from './Rueckfrage'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -269,15 +270,22 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
           <Show when={m.ausgegebene().length > 0}>
             <details class="rz-erweitert">
               <summary>
-                Ausgegeben ({m.ausgegebene().length}) <Symbol d={PFADE.chev} />
+                Zu prüfen ({m.ausgegebene().length}) <Symbol d={PFADE.chev} />
               </summary>
-              <p class="rz-hinweis">Schon eingelöst oder von dir markiert. Antippen zum Aufheben der Markierung.</p>
+              <p class="rz-hinweis">
+                Eingelöste Scheine verschwinden von selbst. Hier bleibt nur, worüber du entscheiden solltest.
+              </p>
               <div class="rz-notes rz-ausgegeben">
                 <For each={m.ausgegebene()}>
                   {b => (
-                    <button type="button" class="rz-note-knopf" onClick={() => setAusBlatt(b.id)}>
-                      <Schein schein={b} klein />
-                    </button>
+                    <div class="rz-note-platz">
+                      <button type="button" class="rz-note-knopf" onClick={() => setAusBlatt(b.id)}>
+                        <Schein schein={b} klein />
+                      </button>
+                      <div class="rz-etikett" classList={{warn: b.spentGrund !== 'markiert'}}>
+                        {b.spentGrund === 'markiert' ? 'Von dir markiert' : 'Als eingelöst gemeldet'}
+                      </div>
+                    </div>
                   )}
                 </For>
               </div>
@@ -285,28 +293,21 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 when={entfernenFrage()}
                 fallback={
                   <button type="button" class="rz-aendern rz-block" onClick={() => setEntfernenFrage(true)}>
-                    Alle ausgegebenen endgültig entfernen
+                    Alle endgültig entfernen
                   </button>
                 }
               >
-                <div class="rz-rueckfrage">
-                  <p>Die ausgegebenen Scheine verschwinden aus der Wallet. Der Verlauf bleibt.</p>
-                  <div class="rz-duo">
-                    <button
-                      type="button"
-                      class="rz-knopf-gefahr"
-                      onClick={() => {
-                        m.ausgegebeneEntfernen()
-                        setEntfernenFrage(false)
-                      }}
-                    >
-                      Entfernen
-                    </button>
-                    <button type="button" class="rz-knopf" onClick={() => setEntfernenFrage(false)}>
-                      Abbrechen
-                    </button>
-                  </div>
-                </div>
+                <Rueckfrage
+                  titel="Alle endgültig entfernen?"
+                  ja="Entfernen"
+                  onJa={() => {
+                    m.ausgegebeneEntfernen()
+                    setEntfernenFrage(false)
+                  }}
+                  onNein={() => setEntfernenFrage(false)}
+                >
+                  <p>Diese Scheine verschwinden aus der Wallet. Der Verlauf bleibt.</p>
+                </Rueckfrage>
               </Show>
             </details>
           </Show>
@@ -318,20 +319,33 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
           <Dialog onClose={() => setAusBlatt(null)}>
             <div class="rz-blatt rz-schein-blatt">
               <Schein schein={s()} />
-              <p class="rz-hinweis">
-                Als ausgegeben vermerkt. Hebst du die Markierung auf, prüft die Wallet den Schein beim nächsten Erneuern
-                wieder bei der Stelle.
-              </p>
-              <button
-                type="button"
-                class="rz-knopf an rz-weiter"
-                onClick={() => {
-                  m.aufheben(s())
-                  setAusBlatt(null)
-                }}
+              <Show
+                when={s().spentGrund === 'markiert'}
+                fallback={
+                  <p class="rz-hinweis">
+                    Die Ausgabestelle meldet diesen Schein als schon eingelöst. Hast du ihn nicht selbst weitergegeben,
+                    hatte jemand anderes eine Kopie — etwa aus einer alten Sicherung oder einem geteilten Bild. Die
+                    Markierung aufzuheben bringt das Geld nicht zurück.
+                  </p>
+                }
               >
-                <span class="lbl">Markierung aufheben</span>
-              </button>
+                <p class="rz-hinweis">
+                  Von dir als ausgegeben markiert. Hebst du die Markierung auf, prüft die Wallet den Schein beim nächsten
+                  Erneuern wieder bei der Stelle.
+                </p>
+              </Show>
+              <Show when={s().spentGrund === 'markiert'}>
+                <button
+                  type="button"
+                  class="rz-knopf an rz-weiter"
+                  onClick={() => {
+                    m.aufheben(s())
+                    setAusBlatt(null)
+                  }}
+                >
+                  <span class="lbl">Markierung aufheben</span>
+                </button>
+              </Show>
             </div>
           </Dialog>
         )}

@@ -1,6 +1,6 @@
 // Beobachtet übergebene Scheine, solange die Wallet offen und sichtbar ist (einloesen.ts).
-// Kein eigenes Bild: meldet die Ausgabestelle einen Schein als verbraucht, wird er als
-// ausgegeben markiert, und das Zählwerk zählt herunter.
+// Kein eigenes Bild: meldet die Ausgabestelle einen Schein als verbraucht, verschwindet er aus der
+// Wallet (der Verlauf behält „gesendet“), und das Zählwerk zählt herunter.
 import type {Component} from 'solid-js'
 import {onCleanup, onMount} from 'solid-js'
 
@@ -12,7 +12,7 @@ import {pruefeRunde, unterwegsIds} from './einloesen'
 const ABSTAND_MS = 8000
 
 const EinloeseWache: Component = () => {
-  const {bearers, updateBearer, logActivity} = useWallet()
+  const {bearers, removeBearer, logActivity} = useWallet()
   let laeuft = false
   let uhr: ReturnType<typeof setInterval> | undefined
 
@@ -21,8 +21,8 @@ const EinloeseWache: Component = () => {
     laeuft = true
     try {
       await pruefeRunde(bearers(), async id => {
-        await updateBearer(id, {spent: true})
-        // im Verlauf soll stehen, dass Geld gegangen ist — das Original kennt nur „Mark done“
+        // eingelöst heißt wertlos: der Schein verschwindet, die Geschichte steht im Verlauf
+        // (Steve, 2026-10-12) — das Original kannte nur „als ausgegeben markieren“
         const b = bearers().find(x => x.id === id)
         if (b) {
           let stelle = ''
@@ -37,6 +37,7 @@ const EinloeseWache: Component = () => {
             b.label
           )
         }
+        removeBearer(id)
       })
     } finally {
       laeuft = false

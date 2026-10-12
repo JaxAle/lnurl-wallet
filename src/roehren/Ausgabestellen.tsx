@@ -18,6 +18,7 @@ import {offlineMode} from '../offlineMode'
 import {isMintTrusted, PUBLIC_MINTS, trustedMints} from '../trustedMints'
 import type {TrustedMint} from '../trustedMints'
 import {useWallet} from '../WalletContext'
+import Rueckfrage from './Rueckfrage'
 import {setStandard, standardStelle} from './standard'
 import './roehren.css'
 
@@ -548,19 +549,19 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                   </p>
                 }
               >
-                <Zeile label="Ausgabestelle entfernen" gefahr onClick={() => setFragt(v => !v)} />
+                <Zeile label="Ausgabestelle entfernen" gefahr onClick={() => setFragt(true)} />
                 <Show when={fragt()}>
-                  <div class="rz-rueckfrage">
-                    <p>Aus der Liste entfernen? Scheine dieser Stelle gelten dann nicht mehr als geprüft.</p>
-                    <div class="rz-duo">
-                      <button type="button" class="rz-knopf-gefahr" onClick={weg}>
-                        Entfernen
-                      </button>
-                      <button type="button" class="rz-knopf" onClick={() => setFragt(false)}>
-                        Abbrechen
-                      </button>
-                    </div>
-                  </div>
+                  <Rueckfrage
+                    titel={`${params.host} entfernen?`}
+                    ja="Entfernen"
+                    onJa={() => {
+                      setFragt(false)
+                      weg()
+                    }}
+                    onNein={() => setFragt(false)}
+                  >
+                    <p>Scheine dieser Stelle gelten danach nicht mehr als geprüft. Du kannst sie später wieder hinzufügen.</p>
+                  </Rueckfrage>
                 </Show>
               </Show>
             </div>

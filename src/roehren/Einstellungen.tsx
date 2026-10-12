@@ -21,6 +21,7 @@ import {downloadBackupFile} from '../storage'
 import {trustedMints} from '../trustedMints'
 import {setVaultEnabled, vaultEnabled} from '../vaultFeature'
 import {useWallet} from '../WalletContext'
+import Rueckfrage from './Rueckfrage'
 import './roehren.css'
 
 // Bauzeit in Ortszeit, z. B. „11.10.2026, 21:40“ — daran erkennt man am Gerät, ob „Neu laden“ gegriffen hat
@@ -213,26 +214,19 @@ const Einstellungen: Component = () => {
           <Zeile label="Alle Einstellungen des Originals" href="/settings/erweitert" />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />
           <Show when={offen() && activity().length > 0}>
-            <Zeile label="Verlauf löschen" onClick={() => setVerlaufFrage(v => !v)} />
+            <Zeile label="Verlauf löschen" onClick={() => setVerlaufFrage(true)} />
             <Show when={verlaufFrage()}>
-              <div class="rz-rueckfrage">
+              <Rueckfrage
+                titel="Verlauf löschen?"
+                ja="Löschen"
+                onJa={() => {
+                  clearActivity()
+                  setVerlaufFrage(false)
+                }}
+                onNein={() => setVerlaufFrage(false)}
+              >
                 <p>Nur die Liste im Verlauf verschwindet — deine Scheine bleiben unberührt.</p>
-                <div class="rz-duo">
-                  <button
-                    type="button"
-                    class="rz-knopf-gefahr"
-                    onClick={() => {
-                      clearActivity()
-                      setVerlaufFrage(false)
-                    }}
-                  >
-                    Löschen
-                  </button>
-                  <button type="button" class="rz-knopf" onClick={() => setVerlaufFrage(false)}>
-                    Abbrechen
-                  </button>
-                </div>
-              </div>
+              </Rueckfrage>
             </Show>
           </Show>
         </details>
@@ -244,25 +238,24 @@ const Einstellungen: Component = () => {
             label="Wallet von diesem Gerät entfernen"
             unter="Danach beginnt die App von vorn"
             gefahr
-            onClick={() => setFragt(v => !v)}
+            onClick={() => setFragt(true)}
           />
           <Show when={fragt()}>
-            <div class="rz-rueckfrage">
+            <Rueckfrage
+              titel="Wallet von diesem Gerät entfernen?"
+              ja="Entfernen"
+              onJa={entfernen}
+              nein={offen() ? 'Erst sichern' : undefined}
+              onNein={() => {
+                if (offen()) downloadBackupFile()
+                setFragt(false)
+              }}
+            >
               <p>
-                Hast du eine Sicherung? Ohne sie sind die Scheine auf diesem Gerät verloren — die zwölf
-                Wörter allein bringen sie nicht zurück.
+                Hast du eine Sicherung? Ohne sie sind die Scheine auf diesem Gerät verloren — die zwölf Wörter allein
+                bringen sie nicht zurück.
               </p>
-              <div class="rz-duo">
-                <button type="button" class="rz-knopf-gefahr" onClick={entfernen}>
-                  Entfernen
-                </button>
-                <Show when={offen()}>
-                  <button type="button" class="rz-knopf" onClick={downloadBackupFile}>
-                    Erst sichern
-                  </button>
-                </Show>
-              </div>
-            </div>
+            </Rueckfrage>
           </Show>
         </Gruppe>
       </Show>
