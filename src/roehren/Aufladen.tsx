@@ -16,6 +16,8 @@ import {serverOf} from '../lnurlcash'
 import {offlineMode} from '../offlineMode'
 import {trustedMints} from '../trustedMints'
 import {createBetrag, Tastatur} from './Betrag'
+import {AusgabestelleHinzufuegen} from './Ausgabestellen'
+import type {HinzufuegeMotor} from './Ausgabestellen'
 import {standardStelle} from './standard'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
@@ -36,6 +38,8 @@ export type AufladeMotor = {
   abholen: () => void
   abbrechen: () => void
   adresseFuer: (server: string) => string
+  // ohne vertraute Stelle: gleich hier wählen (Ausgabestellen.tsx, eingebettet)
+  stelle: HinzufuegeMotor
 }
 
 const sats = (msat: number) => Math.floor(msat / 1000)
@@ -84,18 +88,7 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
         <Show
           when={trustedMints().length > 0}
           fallback={
-            <>
-              <div class="rz-seitenkopf">
-                <A href="/empfangen" class="rz-zurueck" aria-label="Zurück zu Empfangen">
-                  ‹
-                </A>
-                <h2>Aufladen</h2>
-              </div>
-              <p class="rz-hinweis">Noch keine Ausgabestelle eingetragen.</p>
-              <A href="/mint" class="rz-leise">
-                Ausgabestelle wählen ›
-              </A>
-            </>
+            <AusgabestelleHinzufuegen motor={m.stelle} eingebettet />
           }
         >
           <Show

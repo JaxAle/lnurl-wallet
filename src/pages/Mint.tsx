@@ -1122,7 +1122,7 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
         )
       } else {
         notify(
-          `${pending.server} als vertraut eingetragen.`,
+          `${serverOf(pending.server)} hinzugefügt.`,
           NotifyKind.SUCCESS
         )
       }
@@ -1256,7 +1256,14 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
             if (secret) void claim(secret, invoicedMsat(), invoicedGrossMsat())
           },
           abbrechen: closeMintDialog,
-          adresseFuer: mintAddressFor
+          adresseFuer: mintAddressFor,
+          stelle: {
+            nachschlagen: addByAddress,
+            frage: addressTrust,
+            sucht: addressBusy,
+            ja: confirmAddressTrust,
+            nein: () => setAddressTrust(null)
+          }
         }}
       />
     )

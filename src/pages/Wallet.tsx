@@ -1523,11 +1523,7 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
               {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
               <Knoepfe
                 leer={spendableTotal() === 0}
-                onSenden={() =>
-                  spendableTotal() === 0
-                    ? notify('Noch nichts zu senden — zuerst empfangen oder aufladen.')
-                    : navigate('/senden')
-                }
+                onSenden={() => navigate('/senden')}
                 onEmpfangen={() => navigate('/empfangen')}
               />
               <Show when={blatt()}>

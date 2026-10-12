@@ -119,6 +119,23 @@ const Senden: Component = () => {
               </A>
               <h2>Senden</h2>
             </div>
+            {/* ohne Guthaben ein Weg statt einer Meldung (Steve, 2026-10-12) */}
+            <Show
+              when={guthaben() > 0}
+              fallback={
+                <>
+                  <Zaehlwerk sats={0} sofort kalt>
+                    <p class="rz-zeile-matt">Noch keine Sats</p>
+                  </Zaehlwerk>
+                  <A href="/aufladen" class="rz-knopf an rz-weiter rz-link-knopf">
+                    <span class="lbl">Aufladen</span>
+                  </A>
+                  <A href="/empfangen" class="rz-leise rz-mitte rz-block">
+                    oder einen Schein empfangen ›
+                  </A>
+                </>
+              }
+            >
             <Zaehlwerk
               sats={betrag()}
               sofort
@@ -154,6 +171,7 @@ const Senden: Component = () => {
             <button type="button" class="rz-leise" onClick={() => navigate('/wallet?bezahlen=1')}>
               Rechnung oder Adresse bekommen? bezahlen ›
             </button>
+            </Show>
           </>
         }
       >

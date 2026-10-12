@@ -27,6 +27,9 @@ export type HinzufuegeMotor = {
 
 const zahl = (n: number) => n.toLocaleString('de-DE')
 
+// vorgeschlagen, nie still eingetragen (Gerhard, 2026-10-12): am Meetup verwenden alle die Stelle des Vereins
+const VORSCHLAG: Record<string, string> = {'lnurl.21linz.at': 'Bitcoin Club Linz — am Meetup verwendet'}
+
 const Bank: Component = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18" />
@@ -38,7 +41,7 @@ const Pfeil: Component = () => (
   </svg>
 )
 
-const Kopf: Component<{titel: string; zurueck?: string}> = props => {
+const Kopf: Component<{titel: string; zurueck?: string; onZurueck?: () => void}> = props => {
   const navigate = useNavigate()
   return (
     <div class="rz-seitenkopf">
@@ -46,7 +49,15 @@ const Kopf: Component<{titel: string; zurueck?: string}> = props => {
         type="button"
         class="rz-zurueck"
         aria-label="Zurück"
-        onClick={() => (props.zurueck ? navigate(props.zurueck) : history.length > 1 ? history.back() : navigate('/settings'))}
+        onClick={() =>
+          props.onZurueck
+            ? props.onZurueck()
+            : props.zurueck
+              ? navigate(props.zurueck)
+              : history.length > 1
+                ? history.back()
+                : navigate('/settings')
+        }
       >
         ‹
       </button>
@@ -120,7 +131,9 @@ export const AusgabestellenListe: Component = () => {
   )
 }
 
-export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor}> = props => {
+// eingebettet: im Aufladen, wenn noch keine Stelle da ist — gefragt wird dort, wo man sie braucht,
+// und nach „Hinzufügen“ steht man gleich auf der Tastatur (Steve, 2026-10-12)
+export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingebettet?: boolean}> = props => {
   const m = props.motor
   const navigate = useNavigate()
   const [text, setText] = createSignal('')
@@ -130,11 +143,12 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor}> = pro
     PUBLIC_MINTS.map(a => ({adresse: a, url: resolveMintInput(a)}))
       .filter(x => x.url && !isMintTrusted(serviceOriginOf(x.url)))
       .map(x => ({adresse: x.adresse, host: serverOf(x.url!)}))
+      .sort((a, b) => Number(!!VORSCHLAG[b.host]) - Number(!!VORSCHLAG[a.host]))
 
   const ja = () => {
     const f = m.frage()
     m.ja()
-    if (f && isMintTrusted(f.server)) navigate('/mint')
+    if (f && isMintTrusted(f.server) && !props.eingebettet) navigate('/mint')
   }
 
   return (
@@ -143,7 +157,16 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor}> = pro
         when={m.frage()}
         fallback={
           <>
-            <Kopf titel="Ausgabestelle hinzufügen" zurueck="/mint" />
+            <Show
+              when={props.eingebettet}
+              fallback={<Kopf titel="Ausgabestelle hinzufügen" zurueck="/mint" />}
+            >
+              <Kopf titel="Aufladen" zurueck="/empfangen" />
+              <p class="rz-frage-kurz">Wo sollen deine Sats liegen?</p>
+              <p class="rz-hinweis">
+                Eine Ausgabestelle verwahrt die Sats hinter deinen Scheinen. Wähle eine — danach geht es gleich weiter.
+              </p>
+            </Show>
             <Show when={bekannte().length > 0}>
               <span class="rz-eyebrow rz-abstand">Aus der Liste wählen</span>
               <div class="rz-liste">
@@ -160,7 +183,7 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor}> = pro
                       </span>
                       <span class="mitte">
                         <span class="t">{b.host}</span>
-                        <span class="s">Öffentliche Ausgabestelle</span>
+                        <span class="s">{VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}</span>
                       </span>
                       <span class="amt">
                         <Pfeil />
@@ -199,7 +222,7 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor}> = pro
       >
         {f => (
           <>
-            <Kopf titel="Ausgabestelle hinzufügen" zurueck="/mint/hinzufuegen" />
+            <Kopf titel={props.eingebettet ? 'Aufladen' : 'Ausgabestelle hinzufügen'} onZurueck={() => m.nein()} />
             <div class="rz-frage">
               <h3>{serverOf(f().server)} hinzufügen?</h3>
               <p>
