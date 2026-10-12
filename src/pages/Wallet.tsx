@@ -1431,10 +1431,17 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
       return !!k1 && !isCk1(k1) && !isCw1(k1) && !schein.deviceId
     },
     absichern: schein => upgradeOneBearer(schein),
+    // eine einzige Änderung: markSpentSelected wartet updateBearer nicht ab, ein zweites updateBearer
+    // las den alten Stand und schrieb spent wieder auf false — der markierte Schein blieb sichtbar
+    // und „Zu prüfen“ leer (Gerhard am Pixel, 2026-10-12)
     markieren: async schein => {
-      nurDieser(schein.id)
-      await markSpentSelected()
-      await updateBearer(schein.id, {spentGrund: 'markiert'})
+      await updateBearer(schein.id, {spent: true, spentGrund: 'markiert'})
+      if (schein.deviceId) await markDeviceNoteSpent(deviceClient(), schein.deviceId)
+      logActivity(
+        'spent',
+        `${msatToSats(schein.amount)} Sats von ${serverOf(schein.url)} als ausgegeben markiert.`,
+        schein.label
+      )
     },
     ausgegebene: spentBearers,
     aufheben: schein => {
