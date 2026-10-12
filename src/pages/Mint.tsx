@@ -118,7 +118,7 @@ import FiatValue from '../components/FiatValue'
 import AddressDialog from '../components/AddressDialog'
 import RescanDialog from '../components/RescanDialog'
 import Aufladen from '../roehren/Aufladen'
-import {AusgabestelleHinzufuegen, AusgabestellenListe} from '../roehren/Ausgabestellen'
+import {AusgabestelleHinzufuegen, AusgabestellenListe, StelleSeite} from '../roehren/Ausgabestellen'
 
 // LUD-21 auto-poll interval, in seconds - both the countdown shown on the
 // button and the cadence of the automatic check
@@ -148,7 +148,7 @@ const mintAddressFor = (server: string): string =>
 // without a network connection - only the minting half below is gated on
 // both (see RequireWallet, and the individual offlineMode() checks on its
 // own controls).
-const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> = props => {
+const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | 'stelle'}> = props => {
   const {state, bearers, addBearer, logActivity} = useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
@@ -1142,7 +1142,7 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
   const rekey = (mintServer: string) => {
     confirmTrustedMintRekey(mintServer)
     notify(
-      `${mintServer}'s signing-key changes are now pinned.`,
+      `Neuer Prüfschlüssel von ${serverOf(mintServer)} angenommen.`,
       NotifyKind.SUCCESS
     )
   }
@@ -1150,7 +1150,7 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
   const dismissRekey = (mintServer: string) => {
     dismissTrustedMintRekey(mintServer)
     notify(
-      `Keeping the accepted signing keys for ${mintServer}.`,
+      `${serverOf(mintServer)}: der bisherige Prüfschlüssel bleibt.`,
       NotifyKind.SUCCESS
     )
   }
@@ -1200,7 +1200,7 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
       }
       setManualServer('')
       setManualPubkey('')
-      notify('Ausgabestelle als vertraut eingetragen.', NotifyKind.SUCCESS)
+      notify('Ausgabestelle hinzugefügt.', NotifyKind.SUCCESS)
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     }
@@ -1218,7 +1218,31 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
 
   // Fork: /mint ist die ruhige Liste, /mint/hinzufuegen der Weg dazu (roehren/Ausgabestellen.tsx);
   // diese ganze Seite bleibt als Werkstatt unter /mint/werkstatt
-  if (props.ansicht === 'liste') return <AusgabestellenListe />
+  if (props.ansicht === 'liste') return <AusgabestellenListe alleAktualisieren={refreshAllMints} sucht={addressBusy} />
+  // Seite einer Stelle: was früher die Karte hier trug; Adresse und Suche öffnen die Dialoge des Originals
+  if (props.ansicht === 'stelle') {
+    return (
+      <>
+        <StelleSeite
+          motor={{
+            annehmen: rekey,
+            ablehnen: dismissRekey,
+            aktualisieren: refreshMint,
+            aktualisiert: refreshingServer,
+            entfernen: removeMint,
+            adresse: setAddressDialogFor,
+            suchen: setRescanDialogFor
+          }}
+        />
+        <Show when={addressDialogFor()}>
+          {server => <AddressDialog server={server()} onClose={() => setAddressDialogFor(null)} />}
+        </Show>
+        <Show when={rescanDialogFor()}>
+          {server => <RescanDialog server={server()} onClose={() => setRescanDialogFor(null)} />}
+        </Show>
+      </>
+    )
+  }
   if (props.ansicht === 'hinzufuegen') {
     return (
       <AusgabestelleHinzufuegen
@@ -1227,7 +1251,12 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen'}> =
           frage: addressTrust,
           sucht: addressBusy,
           ja: confirmAddressTrust,
-          nein: () => setAddressTrust(null)
+          nein: () => setAddressTrust(null),
+          vonHand: (server, schluessel) => {
+            setManualServer(server)
+            setManualPubkey(schluessel)
+            addManualMint()
+          }
         }}
       />
     )

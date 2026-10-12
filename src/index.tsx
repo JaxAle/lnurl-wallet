@@ -102,6 +102,7 @@ const cleanup = render(
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={() => <Mint ansicht="liste" />} />
       <Route path="/mint/hinzufuegen" component={() => <Mint ansicht="hinzufuegen" />} />
+      <Route path="/mint/stelle/:host" component={() => <Mint ansicht="stelle" />} />
       <Route path="/mint/werkstatt" component={Mint} />
       <Route path="/aufladen" component={() => <Mint aufladen />} />
       {/* /mints merged into /mint (trusted-mint management now lives at

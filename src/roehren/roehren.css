@@ -1338,3 +1338,59 @@ select {
   font: 300 22px/1.3 'Jost', system-ui, sans-serif;
   color: #f4ebdf;
 }
+
+/* Seite einer Ausgabestelle */
+.rz-stelle-kopf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.rz-stelle-kopf h3 {
+  margin: 0;
+  font: 300 24px/1.2 'Jost', system-ui, sans-serif;
+  color: #f4ebdf;
+}
+.rz-farbpunkt {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #17110c, 0 0 0 3px #2f2218;
+}
+.rz-stelle-summe {
+  margin: 10px 0 0;
+  font-size: 17px;
+  color: rgba(238, 152, 90, 0.85);
+}
+.rz-warnung {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 98, 50, 0.45);
+  border-radius: 14px;
+  background: rgba(255, 98, 50, 0.07);
+  color: #f4ebdf;
+}
+.rz-warnung p {
+  margin: 0 0 8px;
+}
+.rz-warnung b {
+  color: #ff8a5c;
+  font-weight: 500;
+}
+.rz-warnung .rz-duo {
+  margin: 10px 0 0;
+  align-items: center;
+}
+.rz-setting.rz-still {
+  cursor: default;
+}
+.rz-setting.rz-still .val {
+  color: #a3907c;
+}
+.rz-eintrag-kopf .s.warn {
+  color: #ff8a5c;
+}
+.rz-abstand-klein {
+  margin-top: 8px;
+}
