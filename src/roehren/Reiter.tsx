@@ -8,6 +8,7 @@ import {A, useLocation} from '@solidjs/router'
 
 import {useWallet} from '../WalletContext'
 import EinloeseWache from './EinloeseWache'
+import Pruefwache from './Pruefwache'
 import {unterwegs} from './einloesen'
 import './roehren.css'
 
@@ -53,6 +54,7 @@ const Reiter: Component = () => {
   return (
     <Show when={state() === 'unlocked'}>
       <EinloeseWache />
+      <Pruefwache />
       {/* beim Eintippen eines Betrags keine Leiste — wie im Prototyp (keypadScreen: tabs: false) */}
       <Show when={!['/senden', '/empfangen', '/aufladen'].some(p => ort.pathname.startsWith(p))}>
       {/* div statt nav: style.scss hängt jedem nav "position: fixed; top: 0" an — zusammen mit

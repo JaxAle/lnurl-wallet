@@ -1467,3 +1467,10 @@ select {
 .rz-note.hue-f .n-amt {
   color: #1f3f6e;
 }
+
+/* ungeprüft: noch nicht ganz gedruckt (Steve) */
+.rz-note.ungeprueft {
+  opacity: 0.55;
+  outline: 1.5px dashed rgba(240, 131, 42, 0.7);
+  outline-offset: 2px;
+}

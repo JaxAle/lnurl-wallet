@@ -21,6 +21,7 @@ import {useWallet} from '../WalletContext'
 import {teilGebuehr} from './gebuehren'
 import {unterwegs} from './einloesen'
 import Rueckfrage from './Rueckfrage'
+import {offenZurPruefung} from './Pruefwache'
 import {holeZurueck} from './zurueckholen'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
@@ -82,7 +83,10 @@ const PFADE = {
 export const Schein: Component<{schein: Bearer; gewaehlt?: boolean; klein?: boolean}> = props => {
   const host = () => serverOf(props.schein.url)
   return (
-    <div class={`rz-note hue-${farbe(host())}`} classList={{sel: props.gewaehlt, klein: props.klein}}>
+    <div
+      class={`rz-note hue-${farbe(host())}`}
+      classList={{sel: props.gewaehlt, klein: props.klein, ungeprueft: offenZurPruefung(props.schein)}}
+    >
       <div class="n-top">
         <span class="n-mint">{host()}</span>
         <span class="n-serial">Nr. {props.schein.id.slice(0, 6).toUpperCase()}</span>
@@ -132,7 +136,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
     return [...je.entries()].map(([host, scheine]) => ({
       host,
       scheine,
-      summe: scheine.reduce((a, b) => a + sats(b), 0)
+      // nur Gesichertes zählt; Ungeprüftes steht als „wird geprüft …“ an der Kachel
+      summe: scheine.filter(b => !offenZurPruefung(b)).reduce((a, b) => a + sats(b), 0)
     }))
   })
   const wahl = () => m.ausgewaehlt().size
@@ -300,6 +305,11 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                     >
                       <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} klein />
                     </button>
+                    <Show when={offenZurPruefung(b)}>
+                      <div class="rz-etikett rz-unterwegs-zeile">
+                        <span class="rz-lampe-klein" /> wird geprüft …
+                      </div>
+                    </Show>
                     <Show when={b.label}>
                       <div class="rz-etikett">{b.label}</div>
                     </Show>
@@ -362,7 +372,11 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                         <Schein schein={b} klein />
                       </button>
                       <div class="rz-etikett">
-                        {b.spentGrund === 'markiert' ? 'Von dir markiert' : 'Als eingelöst gemeldet'}
+                        {b.spentGrund === 'markiert'
+                          ? 'Von dir markiert'
+                          : b.spentGrund === 'unbekannt'
+                            ? 'Der Stelle unbekannt'
+                            : 'Als eingelöst gemeldet'}
                       </div>
                     </div>
                   )}
@@ -416,10 +430,17 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
           <Dialog onClose={() => setAusBlatt(null)}>
             <div class="rz-blatt rz-schein-blatt">
               <Schein schein={s()} />
+              <Show when={s().spentGrund === 'unbekannt'}>
+                <p class="rz-hinweis">
+                  Die Ausgabestelle kennt diesen Schein nicht (mehr). Meist ist es eine der zwei Möglichkeiten, die die
+                  Wallet nach einer unklaren Antwort vorsorglich abgelegt hat — der echte Schein liegt bei deinen
+                  anderen. Er ist nichts wert und kann weg.
+                </p>
+              </Show>
               <Show
                 when={s().spentGrund === 'markiert'}
                 fallback={
-                  <p class="rz-hinweis">
+                  <p class="rz-hinweis" hidden={s().spentGrund === 'unbekannt'}>
                     Die Ausgabestelle meldet diesen Schein als eingelöst. Hast du ihn gesendet oder gezeigt, ist alles in
                     Ordnung — dann kannst du ihn entfernen. Wenn nicht, hatte jemand anderes eine Kopie, etwa aus einer
                     alten Sicherung oder einem geteilten Bild; das Geld bringt dann nichts mehr zurück.

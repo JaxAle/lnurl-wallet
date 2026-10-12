@@ -26,3 +26,10 @@ describe('Verlauf lesen', () => {
     })
   })
 })
+
+describe('Prüfwache im Verlauf', () => {
+  it('nennt Bestätigen und Unbekannt kurz', () => {
+    expect(titel(e('refresh', 'Ungeprüften Schein über 52 Sats bestätigt (lnurl.21linz.at).'))).toBe('Bestätigt')
+    expect(titel(e('refresh', 'lnurl.21linz.at kennt einen ungeprüften Schein über 52 Sats nicht — unter „Zu prüfen“.'))).toBe('Unbekannt — zu prüfen')
+  })
+})

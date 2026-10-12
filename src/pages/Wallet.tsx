@@ -95,6 +95,7 @@ import {unterwegs} from '../roehren/einloesen'
 import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
+import {offenZurPruefung} from '../roehren/Pruefwache'
 import {merkeTeilGebuehr} from '../roehren/gebuehren'
 import type {ScheineMotor} from '../roehren/Scheine'
 
@@ -422,6 +423,11 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     spentBearers().reduce((sum, b) => sum + b.amount, 0)
   )
   const mintCount = createMemo(() => groupByServer(spendableBearers()).length)
+  // Fork: die große Zahl zeigt nur, was sicher ist — Ungeprüftes steht leise darunter (Steve, 2026-10-12)
+  const pruefSumme = createMemo(() =>
+    bearers().filter(offenZurPruefung).reduce((sum, b) => sum + b.amount, 0)
+  )
+  const sicherTotal = () => spendableTotal() - pruefSumme()
 
   // notes no longer live in per-mint sections - one flat list for the
   // whole wallet, always ordered by the chosen sort criteria below
@@ -1540,12 +1546,18 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
             <Show when={!scheineAnsicht()}>
             <section class="wallet-hero">
               {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
-              <Zaehlwerk sats={Math.floor(spendableTotal() / 1000)}>
+              <Zaehlwerk sats={Math.floor(sicherTotal() / 1000)}>
                 {/* Fork: Rückmeldung beim Einlösen eines gescannten/eingefügten Scheins — ohne sie
                 sah man am Pixel nicht, ob der Scan angekommen war (Gerhard, 2026-10-11) */}
                 <Show when={heroReceiving()}>
                   <p class="rz-status">
                     <span class="rz-lampe-klein" /> Schein wird eingelöst …
+                  </p>
+                </Show>
+                <Show when={pruefSumme() > 0}>
+                  <p class="rz-status">
+                    <span class="rz-lampe-klein" /> +{' '}
+                    {Math.floor(pruefSumme() / 1000).toLocaleString('de-DE')} Sats werden geprüft
                   </p>
                 </Show>
                 <Show when={unterwegsScheine().length > 0}>

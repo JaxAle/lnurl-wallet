@@ -47,7 +47,7 @@ export type Bearer = {
   spent?: boolean
   // Fork: warum ausgegeben — 'markiert' = vom Nutzer von Hand (bleibt in „Zu prüfen“, aufhebbar);
   // fehlt es bei spent, meldete die Ausgabestelle den Schein unerwartet als eingelöst (roehren/Scheine.tsx)
-  spentGrund?: 'markiert'
+  spentGrund?: 'markiert' | 'unbekannt'
   // a free-text note the holder can attach for their own reference (e.g.
   // "rent", "gift for Alex") - purely local, never sent anywhere, no
   // protocol meaning at all

@@ -1,4 +1,5 @@
 import toast, {type ToastPosition} from 'solid-toast'
+import {meldung} from './roehren/meldungen'
 
 export enum NotifyKind {
   SUCCESS = 'success',
@@ -17,6 +18,10 @@ export const notify = (
   _type: NotifyKind | null = null,
   position?: ToastPosition
 ): void => {
+  // Fork: Meldungen deutsch, unklare Antworten ruhig statt rot (roehren/meldungen.ts)
+  const m = meldung(message)
+  message = m.text
+  if (m.art === 'ruhig') _type = null
   const options = position ? {position} : undefined
   switch (_type) {
     case NotifyKind.SUCCESS:
