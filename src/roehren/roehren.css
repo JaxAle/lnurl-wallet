@@ -572,12 +572,22 @@ body:has(.rz-reiter) {
   color: #ff6232;
   text-shadow: 0 0 2px #ff9a6a, 0 0 7px rgba(255, 60, 20, 0.45);
 }
+/* so groß wie im Original (.qr-wrapper bis 400 px, volle Breite): mit 300 px und Polster lasen
+   weder Pixel noch iPad den Schein-QR (Gerhard, 2026-10-12) — ruhige weiße Zone statt cremefarbenem
+   Rahmen, kein Download-Knopf mitten im Code */
 .rz-qr {
-  margin: 16px auto 4px;
-  max-width: 300px;
-  background: #f6efe2;
-  border-radius: 16px;
-  padding: 12px;
+  margin: 12px auto 4px;
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+}
+.rz-qr .qr-frame {
+  max-width: none;
+}
+.rz-qr .qr-download-btn {
+  display: none;
 }
 .rz-status {
   display: flex;
