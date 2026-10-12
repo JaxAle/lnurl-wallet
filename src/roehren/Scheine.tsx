@@ -168,16 +168,26 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   }
 
   // lange antippen = auswählen (Prototyp); kurz = Werkzeuge, oder bei laufender Auswahl umschalten
+  // Wischen ist kein langes Antippen: am iPad wählte Scrollen über einer Kachel sie aus, weil der
+  // Browser statt „loslassen“ nur „abgebrochen“ meldet (Gerhard, 2026-10-12)
   let uhr: ReturnType<typeof setTimeout> | undefined
   let lang = false
-  const druck = (id: string) => {
+  let start: {x: number; y: number} | null = null
+  const druck = (id: string, e: PointerEvent) => {
     lang = false
+    start = {x: e.clientX, y: e.clientY}
     uhr = setTimeout(() => {
       lang = true
       m.waehle(id, !m.ausgewaehlt().has(id))
     }, 480)
   }
-  const los = () => clearTimeout(uhr)
+  const los = () => {
+    clearTimeout(uhr)
+    start = null
+  }
+  const bewegt = (e: PointerEvent) => {
+    if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) los()
+  }
   const tipp = (id: string) => {
     if (lang) return
     if (wahl() > 0) m.waehle(id, !m.ausgewaehlt().has(id))
@@ -272,7 +282,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                       type="button"
                       class="rz-note-knopf"
                       aria-label={`Schein über ${zahl(sats(b))} Sats`}
-                      onPointerDown={() => druck(b.id)}
+                      onPointerDown={e => druck(b.id, e)}
+                      onPointerMove={bewegt}
+                      onPointerCancel={los}
                       onPointerUp={los}
                       onPointerLeave={los}
                       onContextMenu={e => e.preventDefault()}
@@ -341,7 +353,7 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                       <button type="button" class="rz-note-knopf" onClick={() => setAusBlatt(b.id)}>
                         <Schein schein={b} klein />
                       </button>
-                      <div class="rz-etikett" classList={{warn: b.spentGrund !== 'markiert'}}>
+                      <div class="rz-etikett">
                         {b.spentGrund === 'markiert' ? 'Von dir markiert' : 'Als eingelöst gemeldet'}
                       </div>
                     </div>
@@ -400,9 +412,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 when={s().spentGrund === 'markiert'}
                 fallback={
                   <p class="rz-hinweis">
-                    Die Ausgabestelle meldet diesen Schein als schon eingelöst. Hast du ihn nicht selbst weitergegeben,
-                    hatte jemand anderes eine Kopie — etwa aus einer alten Sicherung oder einem geteilten Bild. Die
-                    Markierung aufzuheben bringt das Geld nicht zurück.
+                    Die Ausgabestelle meldet diesen Schein als eingelöst. Hast du ihn gesendet oder gezeigt, ist alles in
+                    Ordnung — dann kannst du ihn entfernen. Wenn nicht, hatte jemand anderes eine Kopie, etwa aus einer
+                    alten Sicherung oder einem geteilten Bild; das Geld bringt dann nichts mehr zurück.
                   </p>
                 }
               >
@@ -423,6 +435,16 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   <span class="lbl">Markierung aufheben</span>
                 </button>
               </Show>
+              <button
+                type="button"
+                class="rz-leise rz-block rz-mitte"
+                onClick={() => {
+                  removeBearer(s().id)
+                  setAusBlatt(null)
+                }}
+              >
+                Aus der Wallet entfernen
+              </button>
             </div>
           </Dialog>
         )}
