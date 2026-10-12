@@ -7,7 +7,7 @@
 // Nur das Bild ist hier. Nachschlagen und Eintragen sind addByAddress/confirmAddressTrust des
 // Originals in pages/Mint.tsx; dessen ganze Seite bleibt als Werkstatt unter /mint/werkstatt.
 import type {Accessor, Component} from 'solid-js'
-import {createMemo, createSignal, For, Show} from 'solid-js'
+import {createEffect, createMemo, createSignal, For, Show} from 'solid-js'
 import {A, useNavigate, useParams} from '@solidjs/router'
 
 import {resolveMintInput, serverOf, serviceOriginOf} from '../lnurlcash'
@@ -15,9 +15,10 @@ import {registeredAddresses} from '../addressRegistry'
 import Scanner, {canScan} from '../components/Scanner'
 import {copyToClipboard, mempoolNodeUrl} from '../helpers'
 import {offlineMode} from '../offlineMode'
-import {isMintTrusted, PUBLIC_MINTS, trustedMints} from '../trustedMints'
+import {getTrustedMintAddress, isMintTrusted, PUBLIC_MINTS, trustedMints} from '../trustedMints'
 import type {TrustedMint} from '../trustedMints'
 import {useWallet} from '../WalletContext'
+import {aufladeGebuehr, frageAufladeGebuehr, teilGebuehr} from './gebuehren'
 import Rueckfrage from './Rueckfrage'
 import {setStandard, standardStelle} from './standard'
 import './roehren.css'
@@ -77,6 +78,10 @@ export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<vo
   const navigate = useNavigate()
   const {state, bearers} = useWallet()
   const std = () => standardStelle(trustedMints())
+  // Gebühren fürs Aufladen, einmal je Sitzung erfragt (gebuehren.ts)
+  createEffect(() => {
+    for (const t of trustedMints()) frageAufladeGebuehr(getTrustedMintAddress(t.server) || `mint@${serverOf(t.server)}`)
+  })
   const guthaben = createMemo(() => {
     const je = new Map<string, number>()
     if (state() !== 'unlocked') return je
@@ -113,7 +118,9 @@ export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<vo
                         ? 'Neuer Prüfschlüssel — bitte ansehen'
                         : m.sunsetDate
                           ? `Schließt am ${new Date(m.sunsetDate).toLocaleDateString('de-DE')}`
-                          : host}
+                          : aufladeGebuehr(host)
+                            ? `${host} · Aufladen ${aufladeGebuehr(host)}`
+                            : host}
                     </span>
                   </span>
                   <Show
@@ -161,6 +168,10 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
       .map(x => ({adresse: x.adresse, host: serverOf(x.url!)}))
       .sort((a, b) => Number(!!VORSCHLAG[b.host]) - Number(!!VORSCHLAG[a.host]))
 
+  createEffect(() => {
+    for (const b of bekannte()) frageAufladeGebuehr(b.adresse)
+  })
+
   const ja = () => {
     const f = m.frage()
     m.ja()
@@ -199,7 +210,10 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
                       </span>
                       <span class="mitte">
                         <span class="t">{b.host}</span>
-                        <span class="s">{VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}</span>
+                        <span class="s">
+                          {VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}
+                          {aufladeGebuehr(b.host) ? ` · Aufladen ${aufladeGebuehr(b.host)}` : ''}
+                        </span>
                       </span>
                       <span class="amt">
                         <Pfeil />
@@ -401,6 +415,10 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
   const summe = () => scheine().reduce((a, b) => a + Math.floor(b.amount / 1000), 0)
   const istStandard = () => standardStelle(trustedMints())?.server === stelle()?.server
   const adresse = () => registeredAddresses().find(r => serverOf(r.server) === params.host)
+  createEffect(() => {
+    const s = stelle()
+    if (s) frageAufladeGebuehr(getTrustedMintAddress(s.server) || `mint@${params.host}`)
+  })
 
   const weg = () => {
     const s = stelle()
@@ -520,6 +538,16 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
               <Show when={s().outstandingNotesMsat !== undefined}>
                 <Zeile label="Ausgegebene Scheine insgesamt" wert={`${zahl(Math.floor(s().outstandingNotesMsat! / 1000))} Sats`} still />
               </Show>
+              <Zeile
+                label="Gebühren"
+                wert={aufladeGebuehr(params.host) ? `Aufladen ${aufladeGebuehr(params.host)}` : undefined}
+                unter={
+                  teilGebuehr(params.host)
+                    ? `Teilen: ${teilGebuehr(params.host)}`
+                    : 'Teilen: kündigt die Stelle nicht an — zeigt sich beim ersten Teilen'
+                }
+                still
+              />
               <Zeile label="Eingetragen seit" wert={datum(s().addedAt)} still />
               <Zeile label="Webseite" href={`https://${params.host}`} extern />
               <Show when={s().nodePubkey}>

@@ -16,7 +16,9 @@ import Qr from '../components/Qr'
 import {notify, NotifyKind} from '../helpers'
 import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import type {Bearer} from '../storage'
+import {trustedMints} from '../trustedMints'
 import {useWallet} from '../WalletContext'
+import {teilGebuehr} from './gebuehren'
 import {unterwegs} from './einloesen'
 import Rueckfrage from './Rueckfrage'
 import {holeZurueck} from './zurueckholen'
@@ -53,8 +55,14 @@ export type ScheineMotor = {
 const sats = (b: Bearer) => Math.floor(b.amount / 1000)
 const zahl = (n: number) => n.toLocaleString('de-DE')
 
-// jede Ausgabestelle bekommt ihre Druckfarbe (Prototyp hue-a/b/c), fest aus dem Namen
-const farbe = (host: string) => 'abc'[[...host].reduce((a, c) => a + c.charCodeAt(0), 0) % 3]
+// Druckfarbe nach der Reihenfolge in der Liste der Ausgabestellen — sechs gut unterscheidbare,
+// keine zwei Stellen gleich bis zur sechsten (Gerhard, 2026-10-12: aus dem Namen gerechnet kamen bei
+// nur drei Farben zwei Stellen gleich heraus). Unbekannte Stellen: aus dem Namen.
+const FARBEN = 'abcdef'
+const farbe = (host: string) => {
+  const i = trustedMints().findIndex(t => serverOf(t.server) === host)
+  return FARBEN[(i >= 0 ? i : [...host].reduce((a, c) => a + c.charCodeAt(0), 0)) % FARBEN.length]
+}
 
 const Symbol: Component<{d: string}> = props => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -614,8 +622,10 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 />
                 <p class="rz-hinweis">
                   Danach: {teilMal() > 1 ? `${teilMal()} × ` : ''}
-                  {zahl(teilBetrag())} + {zahl(Math.max(0, sats(s()) - teilBetrag() * teilMal()))} Sats — eine Gebühr
-                  der Ausgabestelle geht vom Rest ab.
+                  {zahl(teilBetrag())} + {zahl(Math.max(0, sats(s()) - teilBetrag() * teilMal()))} Sats.{' '}
+                  {teilGebuehr(serverOf(s().url))
+                    ? `Gebühr bei ${serverOf(s().url)}: ${teilGebuehr(serverOf(s().url))} je Teilung, vom Rest.`
+                    : `Ob ${serverOf(s().url)} fürs Teilen etwas verlangt, zeigt sich erst beim Teilen.`}
                 </p>
                 <button
                   type="button"

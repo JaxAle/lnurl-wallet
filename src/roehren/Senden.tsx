@@ -14,11 +14,12 @@ import RequireWallet from '../components/RequireWallet'
 import {useDevice} from '../DeviceContext'
 import {requireDeviceClient} from '../deviceOrchestration'
 import {notify, NotifyKind} from '../helpers'
-import {toBech32Lnurl} from '../lnurlcash'
+import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import {splitBearerIntoAmounts} from '../noteSplitting'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs} from './einloesen'
+import {merkeTeilGebuehr} from './gebuehren'
 import {holeZurueck} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
 import Zaehlwerk from './Zaehlwerk'
@@ -64,13 +65,14 @@ const Senden: Component = () => {
     try {
       let ziel = quelle
       if (quelle.amount !== msat) {
-        const {parts} = await splitBearerIntoAmounts(
+        const {parts, lastFeeMsat} = await splitBearerIntoAmounts(
           quelle,
           [{amountMsat: msat}],
           {addBearer, updateBearer, removeBearer, logActivity, deviceClient, requireDeviceClient},
           {plain: false}
         )
         ziel = parts[0]
+        merkeTeilGebuehr(serverOf(quelle.url), lastFeeMsat)
       }
       merkeUnterwegs(ziel.id)
       setSchein(ziel)

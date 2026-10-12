@@ -1453,3 +1453,17 @@ select {
   gap: 6px;
   color: #ffb35c;
 }
+
+/* sechs Druckfarben nach Listenreihenfolge (Scheine.tsx farbe) */
+.rz-note.hue-d .n-mint,
+.rz-note.hue-d .n-amt {
+  color: #7a2230;
+}
+.rz-note.hue-e .n-mint,
+.rz-note.hue-e .n-amt {
+  color: #2f5a1f;
+}
+.rz-note.hue-f .n-mint,
+.rz-note.hue-f .n-amt {
+  color: #1f3f6e;
+}

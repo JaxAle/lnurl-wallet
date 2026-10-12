@@ -95,6 +95,7 @@ import {unterwegs} from '../roehren/einloesen'
 import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
+import {merkeTeilGebuehr} from '../roehren/gebuehren'
 import type {ScheineMotor} from '../roehren/Scheine'
 
 const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props => {
@@ -1048,6 +1049,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
           },
           {plain: plainSecret()}
         )
+      // Fork: gemerkt für „Gebühr bei <Stelle>: zuletzt …“ (roehren/gebuehren.ts)
+      merkeTeilGebuehr(serverOf(bearer.url), perSplitFeeMsat)
       const feeNote =
         totalFeeMsat > 0
           ? times > 1
