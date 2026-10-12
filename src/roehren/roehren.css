@@ -1445,3 +1445,11 @@ select {
   padding: 0;
   color: #ffefc4;
 }
+
+/* Scheine unterwegs: eigene Gruppe oben, Lämpchen */
+.rz-unterwegs-zeile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffb35c;
+}

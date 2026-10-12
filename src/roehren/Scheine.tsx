@@ -12,9 +12,14 @@ import {createMemo, createSignal, For, Show} from 'solid-js'
 import {A} from '@solidjs/router'
 
 import Dialog from '../components/Dialog'
-import {serverOf} from '../lnurlcash'
+import Qr from '../components/Qr'
+import {notify, NotifyKind} from '../helpers'
+import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import type {Bearer} from '../storage'
+import {useWallet} from '../WalletContext'
+import {unterwegs} from './einloesen'
 import Rueckfrage from './Rueckfrage'
+import {holeZurueck} from './zurueckholen'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -102,9 +107,17 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const offen = () => m.scheine().find(b => b.id === blatt()) ?? null
   // nach Ausgabestelle geordnet (Steve, 2026-10-11): was zusammengehört, steht beisammen — und
   // Zusammenlegen geht genau innerhalb einer Gruppe
+  // gezeigt, noch nicht eingelöst: eigene Gruppe ganz oben, nicht zwischen den anderen — „der Zustand ist
+  // der Ort“ (Steve, 2026-10-12); eingelöst verschwindet er, zurückgeholt wandert er in seine Gruppe
+  const draussen = createMemo(() => {
+    const ids = new Set(unterwegs())
+    return m.scheine().filter(b => ids.has(b.id))
+  })
   const gruppen = createMemo(() => {
     const je = new Map<string, Bearer[]>()
+    const ids = new Set(unterwegs())
     for (const b of m.scheine()) {
+      if (ids.has(b.id)) continue
       const h = serverOf(b.url)
       je.set(h, [...(je.get(h) ?? []), b].sort((x, y) => y.amount - x.amount))
     }
@@ -135,6 +148,24 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const teilMal = () => Math.max(1, Math.trunc(Number(mal()) || 1))
   const teilGeht = (s: Bearer) => teilBetrag() >= 1 && teilBetrag() * teilMal() < sats(s)
   const ausOffen = () => m.ausgegebene().find(b => b.id === ausBlatt()) ?? null
+
+  // Blatt eines gezeigten Scheins: derselbe QR noch einmal, sonst nur Zurückholen
+  const {addBearer, updateBearer, removeBearer, logActivity} = useWallet()
+  const [gezeigt, setGezeigt] = createSignal<string | null>(null)
+  const [holt, setHolt] = createSignal(false)
+  const gezeigterSchein = () => draussen().find(b => b.id === gezeigt()) ?? null
+  const zurueckholen = async (b: Bearer) => {
+    setHolt(true)
+    try {
+      const e = await holeZurueck(b, {addBearer, updateBearer, removeBearer, logActivity})
+      notify(e === 'zurueck' ? 'Zurückgeholt — der gezeigte QR ist wertlos.' : 'Schon eingelöst.')
+      setGezeigt(null)
+    } catch (err) {
+      notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+    } finally {
+      setHolt(false)
+    }
+  }
 
   // lange antippen = auswählen (Prototyp); kurz = Werkzeuge, oder bei laufender Auswahl umschalten
   let uhr: ReturnType<typeof setTimeout> | undefined
@@ -190,6 +221,34 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
         }
       >
         <p class="rz-hinweis">Antippen für Werkzeuge, lange antippen zum Auswählen.</p>
+
+        <Show when={draussen().length > 0}>
+          <section class="rz-gruppe rz-draussen">
+            <span class="rz-eyebrow">
+              Unterwegs · {draussen().length} {draussen().length === 1 ? 'Schein' : 'Scheine'} ·{' '}
+              {zahl(draussen().reduce((a, b) => a + sats(b), 0))} Sats
+            </span>
+            <div class="rz-notes">
+              <For each={draussen()}>
+                {b => (
+                  <div class="rz-note-platz">
+                    <button
+                      type="button"
+                      class="rz-note-knopf"
+                      aria-label={`Gezeigter Schein über ${zahl(sats(b))} Sats`}
+                      onClick={() => setGezeigt(b.id)}
+                    >
+                      <Schein schein={b} klein />
+                    </button>
+                    <div class="rz-etikett rz-unterwegs-zeile">
+                      <span class="rz-lampe-klein" /> unterwegs
+                    </div>
+                  </div>
+                )}
+              </For>
+            </div>
+          </section>
+        </Show>
 
         <For each={gruppen()}>
           {g => (
@@ -312,6 +371,24 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
             </details>
           </Show>
         </div>
+      </Show>
+
+      <Show when={gezeigterSchein()}>
+        {s => (
+          <Dialog onClose={() => setGezeigt(null)}>
+            <div class="rz-blatt rz-schein-blatt">
+              <div class="rz-qr">
+                <Qr value={toBech32Lnurl(s().url)} />
+              </div>
+              <p class="rz-status">
+                <span class="rz-lampe-klein" /> Gezeigt, noch nicht eingelöst · {zahl(sats(s()))} Sats
+              </p>
+              <button type="button" class="rz-leise rz-block rz-mitte" disabled={holt()} onClick={() => void zurueckholen(s())}>
+                {holt() ? 'Einen Moment …' : 'Zurückholen — der QR wird wertlos'}
+              </button>
+            </div>
+          </Dialog>
+        )}
       </Show>
 
       <Show when={ausOffen()}>
