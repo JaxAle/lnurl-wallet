@@ -1394,3 +1394,18 @@ select {
 .rz-abstand-klein {
   margin-top: 8px;
 }
+
+/* Scheine: Ende des Reiters (früher Werkstatt) */
+.rz-alle {
+  margin-top: 30px;
+}
+.rz-ausgegeben {
+  margin: 10px 0;
+}
+.rz-ausgegeben .rz-note {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+.rz-schein-blatt .rz-erweitert summary {
+  padding: 10px 0 4px;
+}

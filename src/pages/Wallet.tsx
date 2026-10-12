@@ -1395,10 +1395,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     leereAuswahl: () => setSelected(new Set<string>()),
     kannZusammenlegen: canCombine,
     arbeitet: () => splittingSingle() || combining() || refreshing(),
-    teilen: async (schein, sats) => {
+    teilen: async (schein, sats, mal = 1) => {
       nurDieser(schein.id)
       setSplitSingleSats(String(sats))
-      setSplitSingleTimes('1')
+      setSplitSingleTimes(String(mal))
       await splitSingleSelected()
     },
     zusammenlegen: combineSelected,
@@ -1409,7 +1409,41 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     },
     erneuern: async schein => {
       await refreshOneBearer(schein)
-    }
+    },
+    // was früher nur die Werkstatt des Originals konnte (Gerhard: keine Design-Rücksprünge)
+    qrBild: schein => {
+      nurDieser(schein.id)
+      downloadQrSelected()
+      setSelected(new Set<string>())
+    },
+    alsText: schein => {
+      nurDieser(schein.id)
+      exportSelected()
+      setSelected(new Set<string>())
+    },
+    umziehen: schein => setTransferSource(schein),
+    anSchluessel: schein => setSendToPubkeySource([schein]),
+    absicherbar: schein => {
+      const k1 = noteK1(schein.url) || ''
+      return !!k1 && !isCk1(k1) && !isCw1(k1) && !schein.deviceId
+    },
+    absichern: schein => upgradeOneBearer(schein),
+    markieren: async schein => {
+      nurDieser(schein.id)
+      await markSpentSelected()
+    },
+    ausgegebene: spentBearers,
+    aufheben: schein => {
+      updateBearer(schein.id, {spent: false})
+      logActivity(
+        'unspent',
+        `Markierung aufgehoben: ${msatToSats(schein.amount)} Sats von ${serverOf(schein.url)}.`,
+        schein.label
+      )
+    },
+    ausgegebeneEntfernen: clearAllSpent,
+    alleErneuern: refreshAllNotes,
+    erneuertAlle: refreshingAll
   }
 
   return (

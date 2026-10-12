@@ -211,7 +211,6 @@ const Einstellungen: Component = () => {
             onClick={() => setVaultEnabled(!vaultEnabled())}
           />
           <Zeile label="Alle Einstellungen des Originals" href="/settings/erweitert" />
-          <Zeile label="Scheine-Werkstatt" unter="Alle erneuern, Ausgegebene entfernen, QR-Export" href="/scheine/werkstatt" />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />
           <Show when={offen() && activity().length > 0}>
             <Zeile label="Verlauf löschen" onClick={() => setVerlaufFrage(v => !v)} />

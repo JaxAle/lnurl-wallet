@@ -4,8 +4,9 @@
 // Null wie auf der Startseite und der Weg zu Empfangen.
 //
 // Nur das Bild ist hier. Teilen, Zusammenlegen, Beschriften und Erneuern sind die Funktionen des
-// Originals in pages/Wallet.tsx (dort kommt der „Motor“ her); dessen volle Werkzeugleiste ist die
-// Scheine-Werkstatt unter Einstellungen › Erweitert. Umziehen zu einer anderen Ausgabestelle folgt später.
+// Originals in pages/Wallet.tsx (dort kommt der „Motor“ her). Was früher nur die Werkzeugleiste des
+// Originals konnte, steht zugeklappt im Blatt („Weitere Werkzeuge“) und am Ende des Reiters
+// („Für alle Scheine“, „Ausgegeben“) — eine Werkstatt gibt es nicht mehr (Gerhard, 2026-10-12).
 import type {Accessor, Component} from 'solid-js'
 import {createMemo, createSignal, For, Show} from 'solid-js'
 import {A} from '@solidjs/router'
@@ -23,10 +24,24 @@ export type ScheineMotor = {
   leereAuswahl: () => void
   kannZusammenlegen: Accessor<boolean>
   arbeitet: Accessor<boolean>
-  teilen: (schein: Bearer, sats: number) => Promise<void>
+  teilen: (schein: Bearer, sats: number, mal?: number) => Promise<void>
   zusammenlegen: () => Promise<void>
   beschriften: (schein: Bearer, text: string) => void
   erneuern: (schein: Bearer) => Promise<void>
+  // seltene Werkzeuge, früher nur in der Werkstatt des Originals — im Blatt unter „Weitere Werkzeuge“
+  qrBild: (schein: Bearer) => void
+  alsText: (schein: Bearer) => void
+  umziehen: (schein: Bearer) => void
+  anSchluessel: (schein: Bearer) => void
+  absicherbar: (schein: Bearer) => boolean
+  absichern: (schein: Bearer) => Promise<void>
+  markieren: (schein: Bearer) => Promise<void>
+  // ausgegebene Scheine: zugeklappt am Ende des Reiters
+  ausgegebene: Accessor<Bearer[]>
+  aufheben: (schein: Bearer) => void
+  ausgegebeneEntfernen: () => void
+  alleErneuern: () => Promise<void>
+  erneuertAlle: Accessor<boolean>
 }
 
 const sats = (b: Bearer) => Math.floor(b.amount / 1000)
@@ -79,6 +94,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const [blatt, setBlatt] = createSignal<string | null>(null)
   const [eingabe, setEingabe] = createSignal<'teilen' | 'etikett' | null>(null)
   const [text, setText] = createSignal('')
+  const [mal, setMal] = createSignal('1')
+  const [ausBlatt, setAusBlatt] = createSignal<string | null>(null)
+  const [entfernenFrage, setEntfernenFrage] = createSignal(false)
 
   const offen = () => m.scheine().find(b => b.id === blatt()) ?? null
   // nach Ausgabestelle geordnet (Steve, 2026-10-11): was zusammengehört, steht beisammen — und
@@ -87,7 +105,7 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
     const je = new Map<string, Bearer[]>()
     for (const b of m.scheine()) {
       const h = serverOf(b.url)
-      je.set(h, [...(je.get(h) ?? []), b])
+      je.set(h, [...(je.get(h) ?? []), b].sort((x, y) => y.amount - x.amount))
     }
     return [...je.entries()].map(([host, scheine]) => ({
       host,
@@ -110,7 +128,12 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
     setBlatt(null)
     setEingabe(null)
     setText('')
+    setMal('1')
   }
+  const teilBetrag = () => Math.trunc(Number(text()) || 0)
+  const teilMal = () => Math.max(1, Math.trunc(Number(mal()) || 1))
+  const teilGeht = (s: Bearer) => teilBetrag() >= 1 && teilBetrag() * teilMal() < sats(s)
+  const ausOffen = () => m.ausgegebene().find(b => b.id === ausBlatt()) ?? null
 
   // lange antippen = auswählen (Prototyp); kurz = Werkzeuge, oder bei laufender Auswahl umschalten
   let uhr: ReturnType<typeof setTimeout> | undefined
@@ -231,6 +254,89 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
       </Show>
 
 
+      <Show when={m.scheine().length > 0 || m.ausgegebene().length > 0}>
+        <div class="rz-gruppe rz-alle">
+          <span class="rz-eyebrow">Für alle Scheine</span>
+          <Show when={m.scheine().length > 0}>
+            <button type="button" class="rz-setting" disabled={m.erneuertAlle()} onClick={() => void m.alleErneuern()}>
+              <span>
+                <span class="sl">Alle erneuern</span>
+                <span class="s">Nach dem Einspielen einer alten Sicherung — alte Kopien entwerten</span>
+              </span>
+              <span class="val">{m.erneuertAlle() ? '…' : <Symbol d={PFADE.chev} />}</span>
+            </button>
+          </Show>
+          <Show when={m.ausgegebene().length > 0}>
+            <details class="rz-erweitert">
+              <summary>
+                Ausgegeben ({m.ausgegebene().length}) <Symbol d={PFADE.chev} />
+              </summary>
+              <p class="rz-hinweis">Schon eingelöst oder von dir markiert. Antippen zum Aufheben der Markierung.</p>
+              <div class="rz-notes rz-ausgegeben">
+                <For each={m.ausgegebene()}>
+                  {b => (
+                    <button type="button" class="rz-note-knopf" onClick={() => setAusBlatt(b.id)}>
+                      <Schein schein={b} klein />
+                    </button>
+                  )}
+                </For>
+              </div>
+              <Show
+                when={entfernenFrage()}
+                fallback={
+                  <button type="button" class="rz-aendern rz-block" onClick={() => setEntfernenFrage(true)}>
+                    Alle ausgegebenen endgültig entfernen
+                  </button>
+                }
+              >
+                <div class="rz-rueckfrage">
+                  <p>Die ausgegebenen Scheine verschwinden aus der Wallet. Der Verlauf bleibt.</p>
+                  <div class="rz-duo">
+                    <button
+                      type="button"
+                      class="rz-knopf-gefahr"
+                      onClick={() => {
+                        m.ausgegebeneEntfernen()
+                        setEntfernenFrage(false)
+                      }}
+                    >
+                      Entfernen
+                    </button>
+                    <button type="button" class="rz-knopf" onClick={() => setEntfernenFrage(false)}>
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              </Show>
+            </details>
+          </Show>
+        </div>
+      </Show>
+
+      <Show when={ausOffen()}>
+        {s => (
+          <Dialog onClose={() => setAusBlatt(null)}>
+            <div class="rz-blatt rz-schein-blatt">
+              <Schein schein={s()} />
+              <p class="rz-hinweis">
+                Als ausgegeben vermerkt. Hebst du die Markierung auf, prüft die Wallet den Schein beim nächsten Erneuern
+                wieder bei der Stelle.
+              </p>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                onClick={() => {
+                  m.aufheben(s())
+                  setAusBlatt(null)
+                }}
+              >
+                <span class="lbl">Markierung aufheben</span>
+              </button>
+            </div>
+          </Dialog>
+        )}
+      </Show>
+
       <Show when={offen()}>
         {s => (
           <Dialog onClose={schliessen}>
@@ -304,6 +410,67 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   </span>
                   <Symbol d={PFADE.chev} />
                 </button>
+                <details class="rz-erweitert">
+                  <summary>
+                    Weitere Werkzeuge <Symbol d={PFADE.chev} />
+                  </summary>
+                  <button type="button" class="rz-setting" onClick={() => m.qrBild(s())}>
+                    <span>
+                      <span class="sl">Als QR-Bild sichern</span>
+                      <span class="s">Zum Ausdrucken oder Weitergeben — wer es hat, kann einlösen</span>
+                    </span>
+                    <span class="val">
+                      <Symbol d={PFADE.chev} />
+                    </span>
+                  </button>
+                  <button type="button" class="rz-setting" onClick={() => m.alsText(s())}>
+                    <span>
+                      <span class="sl">Als Text sichern</span>
+                      <span class="s">Eine Datei mit dem Schein (LNURL) — wie bares Geld behandeln</span>
+                    </span>
+                    <span class="val">
+                      <Symbol d={PFADE.chev} />
+                    </span>
+                  </button>
+                  <button type="button" class="rz-setting" onClick={() => { m.umziehen(s()); schliessen() }}>
+                    <span>
+                      <span class="sl">Zu anderer Ausgabestelle umziehen</span>
+                      <span class="s">Kostet eine kleine Gebühr</span>
+                    </span>
+                    <span class="val">
+                      <Symbol d={PFADE.chev} />
+                    </span>
+                  </button>
+                  <button type="button" class="rz-setting" onClick={() => { m.anSchluessel(s()); schliessen() }}>
+                    <span>
+                      <span class="sl">An einen Schlüssel übertragen</span>
+                      <span class="s">Nur der Inhaber dieses Schlüssels kann einlösen</span>
+                    </span>
+                    <span class="val">
+                      <Symbol d={PFADE.chev} />
+                    </span>
+                  </button>
+                  <Show when={m.absicherbar(s())}>
+                    <button type="button" class="rz-setting" onClick={() => void ausfuehren(() => m.absichern(s()))}>
+                      <span>
+                        <span class="sl">Wiederherstellbar machen</span>
+                        <span class="s">Älterer Schein — danach auch über die zwölf Wörter wiederzufinden</span>
+                      </span>
+                      <span class="val">
+                        <Symbol d={PFADE.chev} />
+                      </span>
+                    </button>
+                  </Show>
+                  <button type="button" class="rz-setting" onClick={() => void ausfuehren(() => m.markieren(s()))}>
+                    <span>
+                      <span class="sl">Als ausgegeben markieren</span>
+                      <span class="s">Wenn er woanders schon eingelöst wurde — lässt sich wieder aufheben</span>
+                    </span>
+                    <span class="val">
+                      <Symbol d={PFADE.chev} />
+                    </span>
+                  </button>
+                </details>
               </Show>
 
               <Show when={eingabe() === 'teilen'}>
@@ -320,15 +487,28 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   value={text()}
                   onInput={e => setText(e.currentTarget.value)}
                 />
+                <label class="rz-feldname" for="rz-mal">
+                  Wie viele solche Scheine?
+                </label>
+                <input
+                  id="rz-mal"
+                  class="rz-feld"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  value={mal()}
+                  onInput={e => setMal(e.currentTarget.value)}
+                />
                 <p class="rz-hinweis">
-                  Danach: {zahl(Number(text()) || 0)} + {zahl(Math.max(0, sats(s()) - (Number(text()) || 0)))} Sats — eine
-                  Gebühr der Ausgabestelle geht vom Rest ab.
+                  Danach: {teilMal() > 1 ? `${teilMal()} × ` : ''}
+                  {zahl(teilBetrag())} + {zahl(Math.max(0, sats(s()) - teilBetrag() * teilMal()))} Sats — eine Gebühr
+                  der Ausgabestelle geht vom Rest ab.
                 </p>
                 <button
                   type="button"
                   class="rz-knopf an rz-weiter"
-                  disabled={!(Number(text()) >= 1 && Number(text()) < sats(s())) || m.arbeitet()}
-                  onClick={() => void ausfuehren(() => m.teilen(s(), Math.trunc(Number(text()))))}
+                  disabled={!teilGeht(s()) || m.arbeitet()}
+                  onClick={() => void ausfuehren(() => m.teilen(s(), teilBetrag(), teilMal()))}
                 >
                   <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Teilen'}</span>
                 </button>
