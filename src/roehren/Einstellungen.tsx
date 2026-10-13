@@ -133,6 +133,13 @@ const Einstellungen: Component = () => {
       <h2 class="rz-titel">Einstellungen</h2>
 
       <Gruppe titel="Sicherheit">
+        <Show when={offen()}>
+          <Zeile
+            label={encrypted() ? 'Passwort ändern' : 'Passwort setzen'}
+            unter={encrypted() ? undefined : 'Schützt die Wallet auf diesem Gerät'}
+            href="/settings/passwort"
+          />
+        </Show>
         <Zeile
           label="Automatisch sperren"
           wert={AUTO_LOCK_LABEL[autoLockMinutes()]}

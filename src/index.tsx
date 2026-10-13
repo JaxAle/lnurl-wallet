@@ -31,6 +31,7 @@ import Vault from './pages/Vault'
 import Claim from './pages/Claim'
 import Settings from './pages/Settings'
 import Einstellungen from './roehren/Einstellungen'
+import PasswortSeite from './roehren/PasswortSeite'
 import AddonRun from './pages/AddonRun'
 
 const root = document.getElementById('root')
@@ -122,6 +123,7 @@ const cleanup = render(
       <Route path="/docs" component={Docs} />
       <Route path="/settings" component={Einstellungen} />
       <Route path="/settings/erweitert" component={Settings} />
+      <Route path="/settings/passwort" component={PasswortSeite} />
       <Route path="/addons/:addonId" component={AddonRun} />
       <Route path="/vault" component={Vault} />
       <Route path="/claim" component={Claim} />
