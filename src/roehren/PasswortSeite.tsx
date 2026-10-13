@@ -8,7 +8,7 @@ import RequireWallet from '../components/RequireWallet'
 import {MIN_PASSWORD_LENGTH} from '../pages/Setup'
 import {downloadBackupFile} from '../storage'
 import {useWallet} from '../WalletContext'
-import {setzePasswort} from './passwort'
+import {pruefePasswort, setzePasswort} from './passwort'
 import './roehren.css'
 
 const PasswortSeite: Component = () => {
@@ -22,6 +22,19 @@ const PasswortSeite: Component = () => {
   const [arbeitet, setArbeitet] = createSignal(false)
   const [fehler, setFehler] = createSignal<string | null>(null)
   const [fertig, setFertig] = createSignal(false)
+  // zwei Schritte: erst das bisherige allein, dann die neuen — Bitwarden füllte sonst alle drei Felder
+  // mit dem bisherigen (Gerhard am Pixel, 2026-10-13)
+  const [geprueft, setGeprueft] = createSignal(!hatte)
+
+  const weiter = async () => {
+    if (!alt()) return
+    setArbeitet(true)
+    setFehler(null)
+    const ok = await pruefePasswort(alt())
+    setArbeitet(false)
+    if (ok) setGeprueft(true)
+    else setFehler('Das bisherige Passwort stimmt nicht.')
+  }
 
   const problem = () => {
     if (hatte && !alt()) return 'Bitte das bisherige Passwort eingeben.'
@@ -83,6 +96,9 @@ const PasswortSeite: Component = () => {
               <h3>{hatte ? 'Passwort geändert.' : 'Passwort gesetzt.'}</h3>
               <p>Ab jetzt öffnet sich die Wallet auf diesem Gerät nur mit dem neuen Passwort.</p>
               <p class="rz-hinweis">
+                Hast du es in einem Passwortmanager (z. B. Bitwarden) gespeichert, trag dort jetzt das neue ein.
+              </p>
+              <p class="rz-hinweis">
                 Sicherungsdateien von früher öffnen sich weiter mit dem Passwort, das beim Herunterladen galt
                 {hatte ? '' : ' — oder ohne'}. Lade jetzt eine neue Sicherung herunter.
               </p>
@@ -100,18 +116,32 @@ const PasswortSeite: Component = () => {
               ? 'Das Passwort schützt die Wallet auf diesem Gerät. Deine Scheine und deine zwölf Wörter bleiben dieselben.'
               : 'Ohne Passwort öffnet sich die Wallet von selbst. Mit Passwort braucht es zum Öffnen dieses Passwort — und das automatische Sperren wirkt.'}
           </p>
-          <Show when={hatte}>{feld({id: 'pw-alt', label: 'Bisheriges Passwort', wert: alt, setze: setAlt})}</Show>
-          {feld({id: 'pw-neu', label: 'Neues Passwort', wert: neu, setze: setNeu, neu: true})}
-          {feld({id: 'pw-nochmal', label: 'Neues Passwort wiederholen', wert: nochmal, setze: setNochmal, neu: true})}
-          <Show when={(neu() || nochmal()) && problem()}>
-            <p class="rz-hinweis">{problem()}</p>
+          <Show
+            when={geprueft()}
+            fallback={
+              <>
+                {feld({id: 'pw-alt', label: 'Bisheriges Passwort', wert: alt, setze: setAlt})}
+                <Show when={fehler()}>
+                  <p class="rz-erkannt fremd">{fehler()}</p>
+                </Show>
+                <button type="button" class="rz-knopf an rz-weiter" disabled={!alt() || arbeitet()} onClick={() => void weiter()}>
+                  <span class="lbl">{arbeitet() ? 'Einen Moment …' : 'Weiter'}</span>
+                </button>
+              </>
+            }
+          >
+            {feld({id: 'pw-neu', label: 'Neues Passwort', wert: neu, setze: setNeu, neu: true})}
+            {feld({id: 'pw-nochmal', label: 'Neues Passwort wiederholen', wert: nochmal, setze: setNochmal, neu: true})}
+            <Show when={(neu() || nochmal()) && problem()}>
+              <p class="rz-hinweis">{problem()}</p>
+            </Show>
+            <Show when={fehler()}>
+              <p class="rz-erkannt fremd">{fehler()}</p>
+            </Show>
+            <button type="button" class="rz-knopf an rz-weiter" disabled={!!problem() || arbeitet()} onClick={() => void los()}>
+              <span class="lbl">{arbeitet() ? 'Einen Moment …' : hatte ? 'Passwort ändern' : 'Passwort setzen'}</span>
+            </button>
           </Show>
-          <Show when={fehler()}>
-            <p class="rz-erkannt fremd">{fehler()}</p>
-          </Show>
-          <button type="button" class="rz-knopf an rz-weiter" disabled={!!problem() || arbeitet()} onClick={() => void los()}>
-            <span class="lbl">{arbeitet() ? 'Einen Moment …' : hatte ? 'Passwort ändern' : 'Passwort setzen'}</span>
-          </button>
         </Show>
       </div>
     </RequireWallet>

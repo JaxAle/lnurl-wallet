@@ -63,6 +63,16 @@ export class FalschesPasswort extends Error {
   }
 }
 
+// nur prüfen, ob das bisherige Passwort stimmt (erster Schritt der Seite) — verändert nichts
+export const pruefePasswort = async (alt: string): Promise<boolean> => {
+  try {
+    await oeffne(alt)
+    return true
+  } catch {
+    return false
+  }
+}
+
 // alt: bisheriges Passwort, oder undefined, wenn die Wallet keines hat (Setzen)
 export const setzePasswort = async (alt: string | undefined, neu: string): Promise<void> => {
   let offen: Offen
