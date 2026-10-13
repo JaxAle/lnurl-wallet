@@ -77,3 +77,16 @@ describe('Prüfwache im Verlauf', () => {
     ).toBe('Unbekannt — zu prüfen')
   })
 })
+
+describe('Neue Ausgabestelle im Verlauf', () => {
+  it('heißt so', () => {
+    expect(
+      titel(
+        e(
+          'refresh',
+          'Neue Ausgabestelle: mint.lnurlcash.com ist eine neue Ausgabestelle …'
+        )
+      )
+    ).toBe('Neue Ausgabestelle')
+  })
+})

@@ -32,6 +32,7 @@ import Claim from './pages/Claim'
 import Settings from './pages/Settings'
 import Einstellungen from './roehren/Einstellungen'
 import PasswortSeite from './roehren/PasswortSeite'
+import Willkommen from './roehren/Willkommen'
 import AddonRun from './pages/AddonRun'
 
 const root = document.getElementById('root')
@@ -91,7 +92,8 @@ const App = (props: any) => {
 const cleanup = render(
   () => (
     <HashRouter root={App}>
-      <Route path="/" component={Hero} />
+      <Route path="/" component={Willkommen} />
+      <Route path="/ueber" component={Hero} />
       <Route path="/wallet" component={Wallet} />
       {/* Fork: Reiter „Scheine“ (Profi-Modus) — dieselbe Seite, nur die Liste */}
       <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />

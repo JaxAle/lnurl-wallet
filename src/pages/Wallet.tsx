@@ -105,6 +105,7 @@ import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
 import {offenZurPruefung} from '../roehren/Pruefwache'
+import {trustedMints} from '../trustedMints'
 import {
   beobachte,
   erreichbar,
@@ -336,6 +337,9 @@ const Wallet: Component<{
   const receiveHero = async (noteValue: string) => {
     if (heroReceiving()) return
     setHeroReceiving(true)
+    // Fork: eine Stelle, von der man einen Schein hält, trägt das Original still ein — hier wird es
+    // gesagt (Gerhard, 2026-10-13: Schein von dnis Wallet ging ohne eingetragene Ausgabestelle)
+    const vorher = new Set(trustedMints().map(m => m.server))
     try {
       await receiveIntoWallet(noteValue, {
         bearers: bearers(),
@@ -344,6 +348,12 @@ const Wallet: Component<{
         logActivity,
         deviceClient: deviceClient()
       })
+      for (const m of trustedMints().filter(t => !vorher.has(t.server))) {
+        const host = serverOf(m.server)
+        const text = `${host} ist eine neue Ausgabestelle und steht jetzt in deiner Liste — sie verwahrt die Sats hinter diesem Schein.`
+        logActivity('refresh', `Neue Ausgabestelle: ${text}`)
+        notify(text)
+      }
     } catch (err) {
       notify(aufDeutsch(err), NotifyKind.ERROR)
     } finally {

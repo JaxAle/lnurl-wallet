@@ -306,6 +306,7 @@ const Einstellungen: Component = () => {
             label="Alle Einstellungen des Originals"
             href="/settings/erweitert"
           />
+          <Zeile label="Wie die Wallet funktioniert" href="/ueber" />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />
           <Show when={offen() && activity().length > 0}>
             <Zeile

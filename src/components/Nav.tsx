@@ -1,6 +1,6 @@
 import '../roehren/roehren.css'
 import {Show, For, createSignal} from 'solid-js'
-import {A, useNavigate} from '@solidjs/router'
+import {A, useLocation, useNavigate} from '@solidjs/router'
 import {
   IoMenuSharp,
   IoCloseSharp,
@@ -44,6 +44,9 @@ const Nav = () => {
   // Fork: steht die Reiterleiste (entsperrt), führt das Menü nur noch Seltenes — Wallet, Verlauf,
   // Einstellungen und Sperren sind dann in der Leiste bzw. am Netzschalter (Steve, 2026-10-11)
   const leiste = () => state() === 'unlocked'
+  // Fork: die Begrüßung (roehren/Willkommen) steht allein, ohne Menü und Titel (Prototyp onb-welcome)
+  const ort = useLocation()
+  const begruessung = () => ort.pathname === '/' && state() === 'none'
 
   const lock_action = () => {
     closeMenu()
@@ -52,7 +55,7 @@ const Nav = () => {
   }
 
   return (
-    <nav classList={{'rz-kopf': leiste()}}>
+    <nav classList={{'rz-kopf': leiste()}} hidden={begruessung()}>
       {/* Fork: kein Menü, solange die Reiterleiste steht — wie im Prototyp nur Titel und
       Netzschalter (Steve, 2026-10-11). Gesperrt/ohne Wallet bleibt es: dort liegt der Weg zu
       „Sicherung einspielen“ in den Einstellungen. */}

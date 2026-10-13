@@ -1702,3 +1702,40 @@ select {
   justify-content: flex-start;
   margin: 0 0 4px;
 }
+
+/* Begrüßung (Prototyp onb-welcome / .hero-onb) */
+.rz-willkommen {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100dvh - 140px);
+}
+.rz-willkommen-text {
+  margin-top: 18vh;
+}
+.rz-willkommen-text h2 {
+  margin: 8px 0 14px;
+  font:
+    300 38px/1.1 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  color: #ead8bf;
+  text-wrap: balance;
+}
+.rz-willkommen-text p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #a3907c;
+}
+.rz-willkommen-knoepfe {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+/* hidden gilt auch dort, wo das Original display setzt (nav ist flex) */
+nav[hidden] {
+  display: none !important;
+}

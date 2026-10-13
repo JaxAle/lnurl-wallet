@@ -39,6 +39,7 @@ export const titel = (e: ActivityEvent): string => {
       return 'Zusammengelegt'
     case 'refresh':
       if (/zurückgeholt/.test(m)) return 'Zurückgeholt'
+      if (/^Neue Ausgabestelle/.test(m)) return 'Neue Ausgabestelle'
       if (/Ungeprüften Schein .* bestätigt/.test(m)) return 'Bestätigt'
       if (/kennt einen ungeprüften Schein/.test(m))
         return 'Unbekannt — zu prüfen'
