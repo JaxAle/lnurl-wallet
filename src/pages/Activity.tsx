@@ -66,11 +66,15 @@ const Activity: Component = () => {
           when={activity().length > 0}
           fallback={
             <p class="rz-hinweis">
-              Noch nichts geschehen – Aufladen, Teilen, Zusammenlegen, Bezahlen und Umziehen erscheinen hier.
+              Noch nichts geschehen – Aufladen, Teilen, Zusammenlegen, Bezahlen
+              und Umziehen erscheinen hier.
             </p>
           }
         >
-          <VerlaufListe eintraege={activity()} onPruefen={url => void openVerify(url)} />
+          <VerlaufListe
+            eintraege={activity()}
+            onPruefen={url => void openVerify(url)}
+          />
         </Show>
       </div>
       <Show when={verifyDialogUrl()}>
@@ -109,7 +113,9 @@ const Activity: Component = () => {
                     when={result().preimage}
                     fallback={
                       <p class="warning">
-                        Bezahlt, aber die Ausgabestelle hat kein Preimage genannt – das ist nur ihre eigene Angabe, nicht unabhängig prüfbar.
+                        Bezahlt, aber die Ausgabestelle hat kein Preimage
+                        genannt – das ist nur ihre eigene Angabe, nicht
+                        unabhängig prüfbar.
                       </p>
                     }
                   >
@@ -118,13 +124,16 @@ const Activity: Component = () => {
                         when={verifyMeltPreimage(result().pr, preimage())}
                         fallback={
                           <p class="warning">
-                            Das genannte Preimage passt NICHT zum Zahlungs-Hash dieser Rechnung – das ist kein gültiger Zahlungsbeleg.
+                            Das genannte Preimage passt NICHT zum Zahlungs-Hash
+                            dieser Rechnung – das ist kein gültiger
+                            Zahlungsbeleg.
                           </p>
                         }
                       >
                         <p>
                           <IoCheckmarkCircleSharp />
-                          &nbsp;Preimage geprüft – es passt genau zum Zahlungs-Hash dieser Rechnung.
+                          &nbsp;Preimage geprüft – es passt genau zum
+                          Zahlungs-Hash dieser Rechnung.
                         </p>
                       </Show>
                     )}

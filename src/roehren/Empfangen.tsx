@@ -11,16 +11,23 @@ import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
 import Scanner, {canScan} from '../components/Scanner'
-import {decodeBolt11AmountMsat, isBolt11Invoice, isLightningAddress, noteDeclaredAmount, resolveNoteInput} from '../lnurlcash'
+import {
+  decodeBolt11AmountMsat,
+  isBolt11Invoice,
+  isLightningAddress,
+  noteDeclaredAmount,
+  resolveNoteInput
+} from '../lnurlcash'
 import {setEingang} from './uebergabe'
 import './roehren.css'
 
 // Symbole wörtlich aus dem Prototyp (Konstante I: scan, paste, bolt, chev)
 const SYMBOLE: Record<string, string> = {
   scan: '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16"/>',
-  paste: '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h4"/>',
+  paste:
+    '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h4"/>',
   bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
-  chev: '<path d="M9 5l7 7-7 7"/>',
+  chev: '<path d="M9 5l7 7-7 7"/>'
 }
 const Symbol: Component<{name: string}> = props => (
   <svg
@@ -53,12 +60,16 @@ const erkenne = (wert: string): Erkannt | null => {
   const rechnung = w.replace(/^lightning:/i, '')
   if (isBolt11Invoice(rechnung)) {
     const msat = decodeBolt11AmountMsat(rechnung)
-    return {art: 'rechnung', sats: msat === null ? null : Math.floor(msat / 1000)}
+    return {
+      art: 'rechnung',
+      sats: msat === null ? null : Math.floor(msat / 1000)
+    }
   }
   if (isLightningAddress(w)) return {art: 'adresse'}
   return {art: 'unbekannt'}
 }
-const ueber = (sats: number | null) => (sats === null ? '' : ` über ${sats.toLocaleString('de-DE')} Sats`)
+const ueber = (sats: number | null) =>
+  sats === null ? '' : ` über ${sats.toLocaleString('de-DE')} Sats`
 
 const Kopf: Component<{titel: string; zurueck: string}> = props => (
   <div class="rz-seitenkopf">
@@ -89,12 +100,20 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
             <Kopf titel="Scannen" zurueck="/empfangen" />
             <Show
               when={canScan()}
-              fallback={<p class="rz-hinweis">Dieses Gerät kann hier nicht scannen — füge den Schein stattdessen ein.</p>}
+              fallback={
+                <p class="rz-hinweis">
+                  Dieses Gerät kann hier nicht scannen — füge den Schein
+                  stattdessen ein.
+                </p>
+              }
             >
               <div class="rz-scanner">
                 <Scanner onScan={uebernimm} />
               </div>
-              <p class="rz-hinweis rz-mitte">Schein oder Rechnung in den Rahmen halten — erkannt wird von selbst.</p>
+              <p class="rz-hinweis rz-mitte">
+                Schein oder Rechnung in den Rahmen halten — erkannt wird von
+                selbst.
+              </p>
             </Show>
           </Match>
 
@@ -116,14 +135,27 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
             />
             <Show when={erkannt()}>
               {e => (
-                <p class="rz-erkannt" classList={{fremd: e().art === 'unbekannt'}}>
+                <p
+                  class="rz-erkannt"
+                  classList={{fremd: e().art === 'unbekannt'}}
+                >
                   <Switch>
-                    <Match when={e().art === 'schein'}>Sieht aus wie ein Schein{ueber((e() as {sats: number | null}).sats)}</Match>
-                    <Match when={e().art === 'rechnung'}>
-                      Sieht aus wie eine Rechnung{ueber((e() as {sats: number | null}).sats)} — die würdest du bezahlen
+                    <Match when={e().art === 'schein'}>
+                      Sieht aus wie ein Schein
+                      {ueber((e() as {sats: number | null}).sats)}
                     </Match>
-                    <Match when={e().art === 'adresse'}>Sieht aus wie eine Lightning-Adresse — dorthin würdest du zahlen</Match>
-                    <Match when={e().art === 'unbekannt'}>Das ist kein Schein, keine Rechnung und keine Adresse.</Match>
+                    <Match when={e().art === 'rechnung'}>
+                      Sieht aus wie eine Rechnung
+                      {ueber((e() as {sats: number | null}).sats)} — die würdest
+                      du bezahlen
+                    </Match>
+                    <Match when={e().art === 'adresse'}>
+                      Sieht aus wie eine Lightning-Adresse — dorthin würdest du
+                      zahlen
+                    </Match>
+                    <Match when={e().art === 'unbekannt'}>
+                      Das ist kein Schein, keine Rechnung und keine Adresse.
+                    </Match>
                   </Switch>
                 </p>
               )}
@@ -134,7 +166,11 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
               disabled={!erkannt() || erkannt()!.art === 'unbekannt'}
               onClick={() => uebernimm(text())}
             >
-              <span class="lbl">{erkannt()?.art === 'schein' || !erkannt() ? 'Einlösen' : 'Weiter zum Bezahlen'}</span>
+              <span class="lbl">
+                {erkannt()?.art === 'schein' || !erkannt()
+                  ? 'Einlösen'
+                  : 'Weiter zum Bezahlen'}
+              </span>
             </button>
           </Match>
 
@@ -168,7 +204,9 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
               </span>
               <span>
                 <span class="t">Aufladen per Lightning</span>
-                <span class="s">Aus einer anderen Wallet Sats hierher holen</span>
+                <span class="s">
+                  Aus einer anderen Wallet Sats hierher holen
+                </span>
               </span>
               <Symbol name="chev" />
             </A>

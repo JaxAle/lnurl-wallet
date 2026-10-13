@@ -3,8 +3,16 @@
 type Art = 'fehler' | 'ruhig' | null
 
 const REGELN: [RegExp, string, Art][] = [
-  [/^This note has already been spent/, 'Dieser Schein wurde schon eingelöst.', null],
-  [/^The service doesn't recognize this note/, 'Die Ausgabestelle kennt diesen Schein nicht (mehr).', null],
+  [
+    /^This note has already been spent/,
+    'Dieser Schein wurde schon eingelöst.',
+    null
+  ],
+  [
+    /^The service doesn't recognize this note/,
+    'Die Ausgabestelle kennt diesen Schein nicht (mehr).',
+    null
+  ],
   [
     /^The split may have gone through but could not be confirmed/,
     'Die Antwort der Ausgabestelle war unklar. Die Wallet prüft gleich selbst, ob geteilt wurde.',
@@ -23,6 +31,7 @@ const REGELN: [RegExp, string, Art][] = [
 ]
 
 export const meldung = (text: string): {text: string; art: Art} => {
-  for (const [muster, deutsch, art] of REGELN) if (muster.test(text)) return {text: deutsch, art}
+  for (const [muster, deutsch, art] of REGELN)
+    if (muster.test(text)) return {text: deutsch, art}
   return {text, art: null}
 }

@@ -20,10 +20,18 @@ const Rueckfrage: Component<{
       <h3>{props.titel}</h3>
       <div class="rz-rueckfrage-text">{props.children}</div>
       <div class="rz-duo">
-        <button type="button" class="rz-knopf-gefahr" onClick={() => props.onJa()}>
+        <button
+          type="button"
+          class="rz-knopf-gefahr"
+          onClick={() => props.onJa()}
+        >
           {props.ja}
         </button>
-        <button type="button" class="rz-knopf rz-knopf-flach" onClick={() => props.onNein()}>
+        <button
+          type="button"
+          class="rz-knopf rz-knopf-flach"
+          onClick={() => props.onNein()}
+        >
           {props.nein ?? 'Abbrechen'}
         </button>
       </div>

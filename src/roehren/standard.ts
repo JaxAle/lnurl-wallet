@@ -29,5 +29,7 @@ export const setStandard = (server: string): void => {
 }
 
 // die gewählte Stelle, sonst die erste vertraute
-export const standardStelle = (stellen: TrustedMint[]): TrustedMint | undefined =>
+export const standardStelle = (
+  stellen: TrustedMint[]
+): TrustedMint | undefined =>
   stellen.find(m => serverOf(m.server) === standard()) ?? stellen[0]

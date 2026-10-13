@@ -15,7 +15,12 @@ import {registeredAddresses} from '../addressRegistry'
 import Scanner, {canScan} from '../components/Scanner'
 import {copyToClipboard, mempoolNodeUrl} from '../helpers'
 import {offlineMode} from '../offlineMode'
-import {getTrustedMintAddress, isMintTrusted, PUBLIC_MINTS, trustedMints} from '../trustedMints'
+import {
+  getTrustedMintAddress,
+  isMintTrusted,
+  PUBLIC_MINTS,
+  trustedMints
+} from '../trustedMints'
 import type {TrustedMint} from '../trustedMints'
 import {useWallet} from '../WalletContext'
 import {aufladeGebuehr, frageAufladeGebuehr, teilGebuehr} from './gebuehren'
@@ -36,20 +41,42 @@ export type HinzufuegeMotor = {
 const zahl = (n: number) => n.toLocaleString('de-DE')
 
 // vorgeschlagen, nie still eingetragen (Gerhard, 2026-10-12): am Meetup verwenden alle die Stelle des Vereins
-const VORSCHLAG: Record<string, string> = {'lnurl.21linz.at': 'Bitcoin Club Linz — am Meetup verwendet'}
+const VORSCHLAG: Record<string, string> = {
+  'lnurl.21linz.at': 'Bitcoin Club Linz — am Meetup verwendet'
+}
 
 const Bank: Component = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
     <path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18" />
   </svg>
 )
 const Pfeil: Component = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
     <path d="M9 5l7 7-7 7" />
   </svg>
 )
 
-const Kopf: Component<{titel: string; zurueck?: string; onZurueck?: () => void}> = props => {
+const Kopf: Component<{
+  titel: string
+  zurueck?: string
+  onZurueck?: () => void
+}> = props => {
   const navigate = useNavigate()
   return (
     <div class="rz-seitenkopf">
@@ -74,13 +101,19 @@ const Kopf: Component<{titel: string; zurueck?: string; onZurueck?: () => void}>
   )
 }
 
-export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<void>; sucht: Accessor<boolean>}> = props => {
+export const AusgabestellenListe: Component<{
+  alleAktualisieren: () => Promise<void>
+  sucht: Accessor<boolean>
+}> = props => {
   const navigate = useNavigate()
   const {state, bearers} = useWallet()
   const std = () => standardStelle(trustedMints())
   // Gebühren fürs Aufladen, einmal je Sitzung erfragt (gebuehren.ts)
   createEffect(() => {
-    for (const t of trustedMints()) frageAufladeGebuehr(getTrustedMintAddress(t.server) || `mint@${serverOf(t.server)}`)
+    for (const t of trustedMints())
+      frageAufladeGebuehr(
+        getTrustedMintAddress(t.server) || `mint@${serverOf(t.server)}`
+      )
   })
   const guthaben = createMemo(() => {
     const je = new Map<string, number>()
@@ -97,23 +130,37 @@ export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<vo
     <div class="page rz-stellen">
       <Kopf titel="Ausgabestellen" />
       <p class="rz-hinweis">
-        Ausgabestellen verwahren die echten Sats hinter deinen Scheinen. Verteile größere Beträge ruhig auf
-        mehrere.
+        Ausgabestellen verwahren die echten Sats hinter deinen Scheinen.
+        Verteile größere Beträge ruhig auf mehrere.
       </p>
-      <Show when={trustedMints().length > 0} fallback={<p class="rz-hinweis">Noch keine Ausgabestelle eingetragen.</p>}>
+      <Show
+        when={trustedMints().length > 0}
+        fallback={
+          <p class="rz-hinweis">Noch keine Ausgabestelle eingetragen.</p>
+        }
+      >
         <div class="rz-liste">
           <For each={trustedMints()}>
             {m => {
               const host = serverOf(m.server)
               const istStandard = () => std()?.server === m.server
               return (
-                <button type="button" class="rz-eintrag-kopf rz-stelle-zeile" onClick={() => navigate(`/mint/stelle/${host}`)}>
+                <button
+                  type="button"
+                  class="rz-eintrag-kopf rz-stelle-zeile"
+                  onClick={() => navigate(`/mint/stelle/${host}`)}
+                >
                   <span class="ic in">
                     <Bank />
                   </span>
                   <span class="mitte">
                     <span class="t">{m.nodeAlias || host}</span>
-                    <span class="s" classList={{warn: !!m.pendingMintPubkey || !!m.sunsetDate}}>
+                    <span
+                      class="s"
+                      classList={{
+                        warn: !!m.pendingMintPubkey || !!m.sunsetDate
+                      }}
+                    >
                       {m.pendingMintPubkey
                         ? 'Neuer Prüfschlüssel — bitte ansehen'
                         : m.sunsetDate
@@ -139,8 +186,15 @@ export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<vo
             }}
           </For>
         </div>
-        <button type="button" class="rz-aendern rz-block" disabled={props.sucht()} onClick={() => void props.alleAktualisieren()}>
-          {props.sucht() ? 'Frage nach …' : 'Angaben aller Stellen aktualisieren'}
+        <button
+          type="button"
+          class="rz-aendern rz-block"
+          disabled={props.sucht()}
+          onClick={() => void props.alleAktualisieren()}
+        >
+          {props.sucht()
+            ? 'Frage nach …'
+            : 'Angaben aller Stellen aktualisieren'}
         </button>
       </Show>
       <A href="/mint/hinzufuegen" class="rz-knopf an rz-weiter rz-link-knopf">
@@ -152,7 +206,10 @@ export const AusgabestellenListe: Component<{alleAktualisieren: () => Promise<vo
 
 // eingebettet: im Aufladen, wenn noch keine Stelle da ist — gefragt wird dort, wo man sie braucht,
 // und nach „Hinzufügen“ steht man gleich auf der Tastatur (Steve, 2026-10-12)
-export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingebettet?: boolean}> = props => {
+export const AusgabestelleHinzufuegen: Component<{
+  motor: HinzufuegeMotor
+  eingebettet?: boolean
+}> = props => {
   const m = props.motor
   const navigate = useNavigate()
   const [text, setText] = createSignal('')
@@ -186,12 +243,15 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
           <>
             <Show
               when={props.eingebettet}
-              fallback={<Kopf titel="Ausgabestelle hinzufügen" zurueck="/mint" />}
+              fallback={
+                <Kopf titel="Ausgabestelle hinzufügen" zurueck="/mint" />
+              }
             >
               <Kopf titel="Aufladen" zurueck="/empfangen" />
               <p class="rz-frage-kurz">Wo sollen deine Sats liegen?</p>
               <p class="rz-hinweis">
-                Eine Ausgabestelle verwahrt die Sats hinter deinen Scheinen. Wähle eine — danach geht es gleich weiter.
+                Eine Ausgabestelle verwahrt die Sats hinter deinen Scheinen.
+                Wähle eine — danach geht es gleich weiter.
               </p>
             </Show>
             <Show when={bekannte().length > 0}>
@@ -212,7 +272,9 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
                         <span class="t">{b.host}</span>
                         <span class="s">
                           {VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}
-                          {aufladeGebuehr(b.host) ? ` · Aufladen ${aufladeGebuehr(b.host)}` : ''}
+                          {aufladeGebuehr(b.host)
+                            ? ` · Aufladen ${aufladeGebuehr(b.host)}`
+                            : ''}
                         </span>
                       </span>
                       <span class="amt">
@@ -236,11 +298,22 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
               placeholder="z. B. lnurl.21linz.at"
               value={text()}
               onInput={e => setText(e.currentTarget.value)}
-              onKeyDown={e => e.key === 'Enter' && text().trim() && void m.nachschlagen(text().trim())}
+              onKeyDown={e =>
+                e.key === 'Enter' &&
+                text().trim() &&
+                void m.nachschlagen(text().trim())
+              }
             />
-            <p class="rz-hinweis">Die Adresse steht auf der Webseite der Stelle oder am Aushang beim Meetup.</p>
+            <p class="rz-hinweis">
+              Die Adresse steht auf der Webseite der Stelle oder am Aushang beim
+              Meetup.
+            </p>
             <Show when={canScan()}>
-              <button type="button" class="rz-aendern rz-block" onClick={() => setScannt(v => !v)}>
+              <button
+                type="button"
+                class="rz-aendern rz-block"
+                onClick={() => setScannt(v => !v)}
+              >
                 {scannt() ? 'Scannen beenden' : 'Stattdessen QR-Code scannen'}
               </button>
               <Show when={scannt()}>
@@ -264,12 +337,17 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
               <span class="lbl">{m.sucht() ? 'Einen Moment …' : 'Weiter'}</span>
             </button>
             <Show when={m.vonHand}>
-              <button type="button" class="rz-aendern rz-block rz-technik" onClick={() => setHand(v => !v)}>
+              <button
+                type="button"
+                class="rz-aendern rz-block rz-technik"
+                onClick={() => setHand(v => !v)}
+              >
                 Von Hand mit Prüfschlüssel {hand() ? '‹' : '›'}
               </button>
               <Show when={hand()}>
                 <p class="rz-hinweis">
-                  Nur wenn die Stelle keinen Schlüssel über ihre Adresse anbietet und du ihn von ihr selbst hast.
+                  Nur wenn die Stelle keinen Schlüssel über ihre Adresse
+                  anbietet und du ihn von ihr selbst hast.
                 </p>
                 <input
                   class="rz-feld"
@@ -292,10 +370,22 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
                 <button
                   type="button"
                   class="rz-leise rz-block"
-                  disabled={!handStelle().trim() || !/^0[23][0-9a-f]{64}$/i.test(handSchluessel())}
+                  disabled={
+                    !handStelle().trim() ||
+                    !/^0[23][0-9a-f]{64}$/i.test(handSchluessel())
+                  }
                   onClick={() => {
-                    m.vonHand!(handStelle().trim(), handSchluessel().toLowerCase())
-                    if (trustedMints().some(t => serverOf(t.server) === serverOf(handStelle().trim()))) navigate('/mint')
+                    m.vonHand!(
+                      handStelle().trim(),
+                      handSchluessel().toLowerCase()
+                    )
+                    if (
+                      trustedMints().some(
+                        t =>
+                          serverOf(t.server) === serverOf(handStelle().trim())
+                      )
+                    )
+                      navigate('/mint')
                   }}
                 >
                   Hinzufügen ›
@@ -307,16 +397,23 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
       >
         {f => (
           <>
-            <Kopf titel={props.eingebettet ? 'Aufladen' : 'Ausgabestelle hinzufügen'} onZurueck={() => m.nein()} />
+            <Kopf
+              titel={
+                props.eingebettet ? 'Aufladen' : 'Ausgabestelle hinzufügen'
+              }
+              onZurueck={() => m.nein()}
+            />
             <div class="rz-frage">
               <h3>{serverOf(f().server)} hinzufügen?</h3>
               <p>
-                Hier kannst du künftig aufladen, und Scheine dieser Stelle erkennt deine Wallet als echt. Die Stelle
-                verwahrt die Sats hinter diesen Scheinen.
+                Hier kannst du künftig aufladen, und Scheine dieser Stelle
+                erkennt deine Wallet als echt. Die Stelle verwahrt die Sats
+                hinter diesen Scheinen.
               </p>
               <p class="rz-hinweis">
-                Füge nur Stellen hinzu, deren Adresse du von ihnen selbst hast — von ihrer Webseite oder vom Aushang
-                beim Meetup, nicht aus einer weitergeleiteten Nachricht.
+                Füge nur Stellen hinzu, deren Adresse du von ihnen selbst hast —
+                von ihrer Webseite oder vom Aushang beim Meetup, nicht aus einer
+                weitergeleiteten Nachricht.
               </p>
               <div class="rz-duo">
                 <button type="button" class="rz-knopf an" onClick={ja}>
@@ -326,12 +423,17 @@ export const AusgabestelleHinzufuegen: Component<{motor: HinzufuegeMotor; eingeb
                   Abbrechen
                 </button>
               </div>
-              <button type="button" class="rz-aendern rz-technik" onClick={() => setTechnik(v => !v)}>
+              <button
+                type="button"
+                class="rz-aendern rz-technik"
+                onClick={() => setTechnik(v => !v)}
+              >
                 Technische Angaben {technik() ? '‹' : '›'}
               </button>
               <Show when={technik()}>
                 <p class="rz-hinweis">
-                  Prüfschlüssel der Stelle — damit erkennt die Wallet ihre Scheine:
+                  Prüfschlüssel der Stelle — damit erkennt die Wallet ihre
+                  Scheine:
                   <br />
                   <code class="rz-schluessel">{f().pubkey}</code>
                 </p>
@@ -354,13 +456,29 @@ export type StelleMotor = {
   suchen: (server: string) => void // fehlende Scheine suchen (RescanDialog des Originals)
 }
 
-const datum = (ts: number | string) => new Date(ts).toLocaleDateString('de-DE', {day: 'numeric', month: 'long', year: 'numeric'})
+const datum = (ts: number | string) =>
+  new Date(ts).toLocaleDateString('de-DE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
 const groesse = (msat: number) => {
   const btc = msat / 1000 / 100_000_000
-  return btc >= 0.01 ? `${btc.toLocaleString('de-DE', {maximumFractionDigits: 2})} BTC` : `${zahl(Math.floor(msat / 1000))} Sats`
+  return btc >= 0.01
+    ? `${btc.toLocaleString('de-DE', {maximumFractionDigits: 2})} BTC`
+    : `${zahl(Math.floor(msat / 1000))} Sats`
 }
 
-const Zeile: Component<{label: string; wert?: string; unter?: string; href?: string; extern?: boolean; onClick?: () => void; gefahr?: boolean; still?: boolean}> = props => {
+const Zeile: Component<{
+  label: string
+  wert?: string
+  unter?: string
+  href?: string
+  extern?: boolean
+  onClick?: () => void
+  gefahr?: boolean
+  still?: boolean
+}> = props => {
   const innen = (
     <>
       <span>
@@ -385,14 +503,31 @@ const Zeile: Component<{label: string; wert?: string; unter?: string; href?: str
           when={props.onClick}
           fallback={<div class="rz-setting rz-still">{innen}</div>}
         >
-          <button type="button" class="rz-setting" classList={{gefahr: props.gefahr}} onClick={() => props.onClick?.()}>
+          <button
+            type="button"
+            class="rz-setting"
+            classList={{gefahr: props.gefahr}}
+            onClick={() => props.onClick?.()}
+          >
             {innen}
           </button>
         </Show>
       }
     >
-      <Show when={props.extern} fallback={<A href={props.href!} class="rz-setting">{innen}</A>}>
-        <a href={props.href} class="rz-setting" target="_blank" rel="noreferrer">
+      <Show
+        when={props.extern}
+        fallback={
+          <A href={props.href!} class="rz-setting">
+            {innen}
+          </A>
+        }
+      >
+        <a
+          href={props.href}
+          class="rz-setting"
+          target="_blank"
+          rel="noreferrer"
+        >
           {innen}
         </a>
       </Show>
@@ -409,15 +544,24 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
   const {state, bearers} = useWallet()
   const [fragt, setFragt] = createSignal(false)
 
-  const stelle = () => trustedMints().find(t => serverOf(t.server) === params.host)
+  const stelle = () =>
+    trustedMints().find(t => serverOf(t.server) === params.host)
   const offen = () => state() === 'unlocked'
-  const scheine = createMemo(() => bearers().filter(b => !b.spent && serverOf(b.url) === params.host))
-  const summe = () => scheine().reduce((a, b) => a + Math.floor(b.amount / 1000), 0)
-  const istStandard = () => standardStelle(trustedMints())?.server === stelle()?.server
-  const adresse = () => registeredAddresses().find(r => serverOf(r.server) === params.host)
+  const scheine = createMemo(() =>
+    bearers().filter(b => !b.spent && serverOf(b.url) === params.host)
+  )
+  const summe = () =>
+    scheine().reduce((a, b) => a + Math.floor(b.amount / 1000), 0)
+  const istStandard = () =>
+    standardStelle(trustedMints())?.server === stelle()?.server
+  const adresse = () =>
+    registeredAddresses().find(r => serverOf(r.server) === params.host)
   createEffect(() => {
     const s = stelle()
-    if (s) frageAufladeGebuehr(getTrustedMintAddress(s.server) || `mint@${params.host}`)
+    if (s)
+      frageAufladeGebuehr(
+        getTrustedMintAddress(s.server) || `mint@${params.host}`
+      )
   })
 
   const weg = () => {
@@ -430,12 +574,22 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
   return (
     <div class="page rz-einstellungen rz-stellen">
       <Kopf titel="Ausgabestelle" zurueck="/mint" />
-      <Show when={stelle()} fallback={<p class="rz-hinweis">Diese Ausgabestelle ist nicht (mehr) eingetragen.</p>}>
+      <Show
+        when={stelle()}
+        fallback={
+          <p class="rz-hinweis">
+            Diese Ausgabestelle ist nicht (mehr) eingetragen.
+          </p>
+        }
+      >
         {s => (
           <>
             <div class="rz-stelle-kopf">
               <Show when={s().nodeColor}>
-                <span class="rz-farbpunkt" style={{'background-color': s().nodeColor!}} />
+                <span
+                  class="rz-farbpunkt"
+                  style={{'background-color': s().nodeColor!}}
+                />
               </Show>
               <div>
                 <h3>{s().nodeAlias || params.host}</h3>
@@ -444,7 +598,8 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
             </div>
             <Show when={offen()}>
               <p class="rz-stelle-summe">
-                {zahl(summe())} Sats in {scheine().length} {scheine().length === 1 ? 'Schein' : 'Scheinen'}
+                {zahl(summe())} Sats in {scheine().length}{' '}
+                {scheine().length === 1 ? 'Schein' : 'Scheinen'}
               </p>
             </Show>
 
@@ -452,16 +607,25 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
             <Show when={s().pendingMintPubkey}>
               <div class="rz-warnung">
                 <p>
-                  <b>Neuer Prüfschlüssel.</b> Die Stelle meldet einen anderen Schlüssel als den, dem du zugestimmt
-                  hast. Nimm ihn nur an, wenn die Stelle das selbst angekündigt hat — etwa auf ihrer Webseite. Bis
-                  dahin gilt der alte.
+                  <b>Neuer Prüfschlüssel.</b> Die Stelle meldet einen anderen
+                  Schlüssel als den, dem du zugestimmt hast. Nimm ihn nur an,
+                  wenn die Stelle das selbst angekündigt hat — etwa auf ihrer
+                  Webseite. Bis dahin gilt der alte.
                 </p>
                 <code class="rz-schluessel">{s().pendingMintPubkey}</code>
                 <div class="rz-duo">
-                  <button type="button" class="rz-knopf an" onClick={() => m.annehmen(s().server)}>
+                  <button
+                    type="button"
+                    class="rz-knopf an"
+                    onClick={() => m.annehmen(s().server)}
+                  >
                     <span class="lbl">Annehmen</span>
                   </button>
-                  <button type="button" class="rz-leise" onClick={() => m.ablehnen(s().server)}>
+                  <button
+                    type="button"
+                    class="rz-leise"
+                    onClick={() => m.ablehnen(s().server)}
+                  >
                     Alten behalten
                   </button>
                 </div>
@@ -470,15 +634,17 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
             <Show when={s().sunsetDate}>
               <div class="rz-warnung">
                 <p>
-                  <b>Schließt am {datum(s().sunsetDate!)}.</b> Gib die Scheine dieser Stelle vorher aus oder bezahle
-                  damit — danach kann sie sie nicht mehr einlösen.
+                  <b>Schließt am {datum(s().sunsetDate!)}.</b> Gib die Scheine
+                  dieser Stelle vorher aus oder bezahle damit — danach kann sie
+                  sie nicht mehr einlösen.
                 </p>
               </div>
             </Show>
             <Show when={s().unconfirmed}>
               <p class="rz-hinweis">
-                Aus einer Sicherung übernommen und noch nicht bei der Stelle selbst bestätigt — das geschieht beim
-                nächsten Aufladen oder mit „Angaben aktualisieren“.
+                Aus einer Sicherung übernommen und noch nicht bei der Stelle
+                selbst bestätigt — das geschieht beim nächsten Aufladen oder mit
+                „Angaben aktualisieren“.
               </p>
             </Show>
 
@@ -486,9 +652,14 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
               <span class="rz-eyebrow">Verwenden</span>
               <Show
                 when={!istStandard()}
-                fallback={<Zeile label="Standard fürs Aufladen" wert="ja" still />}
+                fallback={
+                  <Zeile label="Standard fürs Aufladen" wert="ja" still />
+                }
               >
-                <Zeile label="Als Standard fürs Aufladen" onClick={() => setStandard(s().server)} />
+                <Zeile
+                  label="Als Standard fürs Aufladen"
+                  onClick={() => setStandard(s().server)}
+                />
               </Show>
               <Show when={offen()}>
                 <Zeile
@@ -505,8 +676,16 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
               <div class="rz-gruppe">
                 <span class="rz-eyebrow">Deine Adresse</span>
                 <Zeile
-                  label={adresse() ? `${adresse()!.username}@${params.host}` : 'Adresse anlegen'}
-                  unter={adresse() ? 'Zum Teilen — Zahlungen kommen hier an' : 'Eine Lightning-Adresse bei dieser Stelle'}
+                  label={
+                    adresse()
+                      ? `${adresse()!.username}@${params.host}`
+                      : 'Adresse anlegen'
+                  }
+                  unter={
+                    adresse()
+                      ? 'Zum Teilen — Zahlungen kommen hier an'
+                      : 'Eine Lightning-Adresse bei dieser Stelle'
+                  }
                   onClick={() => m.adresse(s().server)}
                 />
               </div>
@@ -527,8 +706,12 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                   label="Größe"
                   wert={groesse(s().nodeCapacityMsat!)}
                   unter={[
-                    s().nodeNumChannels !== undefined ? `${s().nodeNumChannels} Kanäle` : '',
-                    s().nodeNumPeers !== undefined ? `${s().nodeNumPeers} Partner` : ''
+                    s().nodeNumChannels !== undefined
+                      ? `${s().nodeNumChannels} Kanäle`
+                      : '',
+                    s().nodeNumPeers !== undefined
+                      ? `${s().nodeNumPeers} Partner`
+                      : ''
                   ]
                     .filter(Boolean)
                     .join(' · ')}
@@ -536,11 +719,19 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                 />
               </Show>
               <Show when={s().outstandingNotesMsat !== undefined}>
-                <Zeile label="Ausgegebene Scheine insgesamt" wert={`${zahl(Math.floor(s().outstandingNotesMsat! / 1000))} Sats`} still />
+                <Zeile
+                  label="Ausgegebene Scheine insgesamt"
+                  wert={`${zahl(Math.floor(s().outstandingNotesMsat! / 1000))} Sats`}
+                  still
+                />
               </Show>
               <Zeile
                 label="Gebühren"
-                wert={aufladeGebuehr(params.host) ? `Aufladen ${aufladeGebuehr(params.host)}` : undefined}
+                wert={
+                  aufladeGebuehr(params.host)
+                    ? `Aufladen ${aufladeGebuehr(params.host)}`
+                    : undefined
+                }
                 unter={
                   teilGebuehr(params.host)
                     ? `Teilen: ${teilGebuehr(params.host)}`
@@ -551,7 +742,11 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
               <Zeile label="Eingetragen seit" wert={datum(s().addedAt)} still />
               <Zeile label="Webseite" href={`https://${params.host}`} extern />
               <Show when={s().nodePubkey}>
-                <Zeile label="Knoten auf mempool.space" href={mempoolNodeUrl(s().nodePubkey!)} extern />
+                <Zeile
+                  label="Knoten auf mempool.space"
+                  href={mempoolNodeUrl(s().nodePubkey!)}
+                  extern
+                />
               </Show>
               <Zeile
                 label="Prüfschlüssel kopieren"
@@ -572,12 +767,16 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                 fallback={
                   <p class="rz-hinweis">
                     Entfernen geht erst, wenn du hier keine Scheine mehr hast
-                    <Show when={offen()}> (noch {zahl(summe())} Sats)</Show>. Deine Sats liegen bei der Stelle, nicht
-                    in dieser Liste.
+                    <Show when={offen()}> (noch {zahl(summe())} Sats)</Show>.
+                    Deine Sats liegen bei der Stelle, nicht in dieser Liste.
                   </p>
                 }
               >
-                <Zeile label="Ausgabestelle entfernen" gefahr onClick={() => setFragt(true)} />
+                <Zeile
+                  label="Ausgabestelle entfernen"
+                  gefahr
+                  onClick={() => setFragt(true)}
+                />
                 <Show when={fragt()}>
                   <Rueckfrage
                     titel={`${params.host} entfernen?`}
@@ -588,7 +787,10 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                     }}
                     onNein={() => setFragt(false)}
                   >
-                    <p>Scheine dieser Stelle gelten danach nicht mehr als geprüft. Du kannst sie später wieder hinzufügen.</p>
+                    <p>
+                      Scheine dieser Stelle gelten danach nicht mehr als
+                      geprüft. Du kannst sie später wieder hinzufügen.
+                    </p>
                   </Rueckfrage>
                 </Show>
               </Show>

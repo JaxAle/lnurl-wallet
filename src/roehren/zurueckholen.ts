@@ -19,16 +19,26 @@ import type {Bearer} from '../storage'
 import type {WalletContextType} from '../WalletContext'
 import {vergiss} from './einloesen'
 
-type Kontext = Pick<WalletContextType, 'addBearer' | 'updateBearer' | 'removeBearer' | 'logActivity'>
+type Kontext = Pick<
+  WalletContextType,
+  'addBearer' | 'updateBearer' | 'removeBearer' | 'logActivity'
+>
 
 export type Ergebnis = 'zurueck' | 'schon-eingeloest'
 
-export const holeZurueck = async (schein: Bearer, ctx: Kontext): Promise<Ergebnis> => {
+export const holeZurueck = async (
+  schein: Bearer,
+  ctx: Kontext
+): Promise<Ergebnis> => {
   const {addBearer, updateBearer, removeBearer, logActivity} = ctx
   const sats = Math.floor(schein.amount / 1000)
   // schon eingelöst: wertlos, also weg — wie bei der Einlöse-Wache, mit derselben Zeile im Verlauf
   const eingeloest = () => {
-    logActivity('spent', `${sats.toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst (${serverOf(schein.url)}).`, schein.label)
+    logActivity(
+      'spent',
+      `${sats.toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst (${serverOf(schein.url)}).`,
+      schein.label
+    )
     removeBearer(schein.id)
     vergiss(schein.id)
   }
@@ -47,7 +57,12 @@ export const holeZurueck = async (schein: Bearer, ctx: Kontext): Promise<Ergebni
   let url: string
   try {
     const rotiert = await rotateNote(info.callback, requireNoteK1(schein.url))
-    url = withNewK1(schein.url, rotiert.k1, info.maxWithdrawable, rotiert.signature)
+    url = withNewK1(
+      schein.url,
+      rotiert.k1,
+      info.maxWithdrawable,
+      rotiert.signature
+    )
   } catch (err) {
     if (err instanceof NoteSpentError) {
       // zwischen Nachfrage und Erneuern eingelöst
@@ -82,6 +97,10 @@ export const holeZurueck = async (schein: Bearer, ctx: Kontext): Promise<Ergebni
     mintPubkey: info.mintPubkey ?? schein.mintPubkey
   })
   vergiss(schein.id)
-  logActivity('refresh', `Schein über ${sats} Sats zurückgeholt (${serverOf(url)}) — der gezeigte QR ist wertlos.`, schein.label)
+  logActivity(
+    'refresh',
+    `Schein über ${sats} Sats zurückgeholt (${serverOf(url)}) — der gezeigte QR ist wertlos.`,
+    schein.label
+  )
   return 'zurueck'
 }

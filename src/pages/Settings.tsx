@@ -257,10 +257,7 @@ const Settings: Component = () => {
       setUpgradeSeed('')
       setUpgradePassword('')
       setUpgradeConfirmPassword('')
-      notify(
-        'Verschlüsselung erneuert.',
-        NotifyKind.SUCCESS
-      )
+      notify('Verschlüsselung erneuert.', NotifyKind.SUCCESS)
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
     } finally {
@@ -283,7 +280,9 @@ const Settings: Component = () => {
     setKeyRestored(false)
     try {
       if (file.size > MAX_BACKUP_FILE_BYTES) {
-        throw new Error('Diese Datei ist viel zu groß für eine Wallet-Sicherung.')
+        throw new Error(
+          'Diese Datei ist viel zu groß für eine Wallet-Sicherung.'
+        )
       }
       const data = JSON.parse(await file.text())
       const result = applyBackup(data)
@@ -335,10 +334,7 @@ const Settings: Component = () => {
   const doForget = () => {
     forgetWallet()
     setConfirmForget(false)
-    notify(
-      'Wallet von diesem Gerät gelöscht.',
-      NotifyKind.SUCCESS
-    )
+    notify('Wallet von diesem Gerät gelöscht.', NotifyKind.SUCCESS)
     navigate('/')
   }
 
@@ -346,7 +342,8 @@ const Settings: Component = () => {
   const [suche] = useSearchParams()
   onMount(() => {
     const teil = suche.teil
-    if (typeof teil === 'string') document.getElementById(teil)?.scrollIntoView({block: 'start'})
+    if (typeof teil === 'string')
+      document.getElementById(teil)?.scrollIntoView({block: 'start'})
   })
 
   return (
@@ -354,7 +351,11 @@ const Settings: Component = () => {
       {/* Fork: die Einstellungen selbst sind jetzt das Bedienfeld (roehren/Einstellungen.tsx);
           hier bleibt das Original als „Erweitert“, erreichbar über dessen Zeilen */}
       <div class="rz-seitenkopf">
-        <A href="/settings" class="rz-zurueck" aria-label="Zurück zu den Einstellungen">
+        <A
+          href="/settings"
+          class="rz-zurueck"
+          aria-label="Zurück zu den Einstellungen"
+        >
           ‹
         </A>
         <h2>Erweitert</h2>
@@ -367,10 +368,12 @@ const Settings: Component = () => {
               &nbsp;Automatisch sperren
             </h4>
             <p>
-              Sperrt die Wallet, wenn so lange nichts passiert — mit einer Warnung 30 Sekunden vorher.
+              Sperrt die Wallet, wenn so lange nichts passiert — mit einer
+              Warnung 30 Sekunden vorher.
               <Show when={!encrypted()}>
                 {' '}
-                Wirkt erst, wenn die Wallet ein Passwort hat — ohne Passwort würde sie sich sowieso gleich wieder entsperren.
+                Wirkt erst, wenn die Wallet ein Passwort hat — ohne Passwort
+                würde sie sich sowieso gleich wieder entsperren.
               </Show>
             </p>
             <div class="btns">
@@ -393,7 +396,11 @@ const Settings: Component = () => {
               &nbsp;Suchtiefe beim Wiederherstellen
             </h4>
             <p>
-              Wie viele leere Stellen hintereinander die Wallet bei einer Ausgabestelle prüft, bevor sie aufhört, nach eigenen Scheinen zu suchen (beim Wiederherstellen aus den zwölf Wörtern). Höher findet mehr, braucht aber mehr Anfragen; niedriger ist schneller, kann aber einen Schein übersehen.
+              Wie viele leere Stellen hintereinander die Wallet bei einer
+              Ausgabestelle prüft, bevor sie aufhört, nach eigenen Scheinen zu
+              suchen (beim Wiederherstellen aus den zwölf Wörtern). Höher findet
+              mehr, braucht aber mehr Anfragen; niedriger ist schneller, kann
+              aber einen Schein übersehen.
             </p>
             <div class="btns">
               <For each={GAP_LIMIT_OPTIONS}>
@@ -415,7 +422,9 @@ const Settings: Component = () => {
               &nbsp;Währung
             </h4>
             <p>
-              Zeigt neben den Sats einen ungefähren Betrag in Landeswährung (Kurs von price.lnbits.com). Nur zur Anzeige — gehalten und bewegt wird immer in Sats.
+              Zeigt neben den Sats einen ungefähren Betrag in Landeswährung
+              (Kurs von price.lnbits.com). Nur zur Anzeige — gehalten und bewegt
+              wird immer in Sats.
             </p>
             <div class="btns">
               <For each={CURRENCY_OPTIONS}>
@@ -437,7 +446,10 @@ const Settings: Component = () => {
               &nbsp;Offline-Betrieb
             </h4>
             <p>
-              Die Wallet spricht mit keiner Ausgabestelle mehr: kein Senden, Teilen, Zusammenlegen oder Bezahlen. Deine Scheine bleiben sichtbar; erst wenn du das wieder ausschaltest, geht etwas ins Netz.
+              Die Wallet spricht mit keiner Ausgabestelle mehr: kein Senden,
+              Teilen, Zusammenlegen oder Bezahlen. Deine Scheine bleiben
+              sichtbar; erst wenn du das wieder ausschaltest, geht etwas ins
+              Netz.
             </p>
             <div class="btns">
               <button
@@ -484,18 +496,23 @@ const Settings: Component = () => {
                 &nbsp;Sicherung herunterladen
               </h4>
               <p>
-                Eine Datei mit deinen {bearers().length} Scheinen (verschlüsselt, nie im Klartext) und {trustedMints().length} vertrauten Ausgabestellen.
+                Eine Datei mit deinen {bearers().length} Scheinen
+                (verschlüsselt, nie im Klartext) und {trustedMints().length}{' '}
+                vertrauten Ausgabestellen.
                 <Show
                   when={encrypted()}
                   fallback={
                     <>
                       {' '}
-                      Deine Wallet hat kein Passwort, deshalb ist dein Schlüssel{' '} <strong>nicht</strong> dabei — auf einem anderen Gerät brauchst du zusätzlich deine zwölf Wörter.
+                      Deine Wallet hat kein Passwort, deshalb ist dein Schlüssel{' '}
+                      <strong>nicht</strong> dabei — auf einem anderen Gerät
+                      brauchst du zusätzlich deine zwölf Wörter.
                     </>
                   }
                 >
                   {' '}
-                  Dein mit Passwort verschlüsselter Schlüssel ist dabei — auf einem neuen Gerät reichen diese Datei und dein Passwort.
+                  Dein mit Passwort verschlüsselter Schlüssel ist dabei — auf
+                  einem neuen Gerät reichen diese Datei und dein Passwort.
                 </Show>
               </p>
               <div class="btns">
@@ -510,7 +527,11 @@ const Settings: Component = () => {
             <div class="setup-card" id="verschluesselung">
               <h4>Verschlüsselung erneuern</h4>
               <p>
-                Deine Scheine sind noch mit einem Schlüssel aus einer älteren Fassung verschlüsselt. Gibst du hier deine zwölf Wörter ein, verschlüsselt die Wallet alle Scheine und den Verlauf mit einem einfacher abgeleiteten Schlüssel neu. Deine Wörter und deine Scheine bleiben dieselben.
+                Deine Scheine sind noch mit einem Schlüssel aus einer älteren
+                Fassung verschlüsselt. Gibst du hier deine zwölf Wörter ein,
+                verschlüsselt die Wallet alle Scheine und den Verlauf mit einem
+                einfacher abgeleiteten Schlüssel neu. Deine Wörter und deine
+                Scheine bleiben dieselben.
               </p>
               <label>Deine zwölf Wörter</label>
               <textarea
@@ -568,11 +589,20 @@ const Settings: Component = () => {
               &nbsp;Sicherung einspielen
             </h4>
             <p>
-              Die Scheine aus der Datei kommen dazu (doppelte werden übersprungen), lesbar sind sie aber nur mit dem Schlüssel, mit dem sie verschlüsselt wurden.{' '} <strong>Die Reihenfolge zählt</strong>: zuerst die Wallet mit deinen zwölf Wörtern{' '} <A href="/setup">wiederherstellen</A> — oder die Datei auf einem Gerät ohne Wallet einspielen, wenn sie den Schlüssel mitbringt. Legst du hier zuerst eine neue Wallet an, sind die Scheine danach da, aber nicht lesbar.
+              Die Scheine aus der Datei kommen dazu (doppelte werden
+              übersprungen), lesbar sind sie aber nur mit dem Schlüssel, mit dem
+              sie verschlüsselt wurden. <strong>Die Reihenfolge zählt</strong>:
+              zuerst die Wallet mit deinen zwölf Wörtern{' '}
+              <A href="/setup">wiederherstellen</A> — oder die Datei auf einem
+              Gerät ohne Wallet einspielen, wenn sie den Schlüssel mitbringt.
+              Legst du hier zuerst eine neue Wallet an, sind die Scheine danach
+              da, aber nicht lesbar.
             </p>
             <Show when={state() === 'none'}>
               <p>
-                Hier gibt es noch keine Wallet: Bringt die Sicherung ihren Schlüssel mit, entsteht sie von selbst; sonst zuerst mit den zwölf Wörtern wiederherstellen.
+                Hier gibt es noch keine Wallet: Bringt die Sicherung ihren
+                Schlüssel mit, entsteht sie von selbst; sonst zuerst mit den
+                zwölf Wörtern wiederherstellen.
               </p>
             </Show>
             <input
@@ -592,14 +622,18 @@ const Settings: Component = () => {
             </div>
             <Show when={keyRestored()}>
               <p class="warning">
-                Der Schlüssel aus dieser Sicherung ist jetzt eingespielt. Wer die Datei erstellt hat, kann ihn kennen — mach nur weiter, wenn du ihr vertraust; sonst vergiss diese Wallet unten und richte sie mit deinen eigenen zwölf Wörtern neu ein.
+                Der Schlüssel aus dieser Sicherung ist jetzt eingespielt. Wer
+                die Datei erstellt hat, kann ihn kennen — mach nur weiter, wenn
+                du ihr vertraust; sonst vergiss diese Wallet unten und richte
+                sie mit deinen eigenen zwölf Wörtern neu ein.
               </p>
               <Show
                 when={encrypted()}
                 fallback={
                   <>
                     <p class="warning">
-                      Dieser Schlüssel hatte kein Passwort und liegt jetzt unverschlüsselt hier. Bestätige, bevor du ihn verwendest:
+                      Dieser Schlüssel hatte kein Passwort und liegt jetzt
+                      unverschlüsselt hier. Bestätige, bevor du ihn verwendest:
                     </p>
                     <div class="btns">
                       <button onClick={activateRestoredKey}>
@@ -610,13 +644,18 @@ const Settings: Component = () => {
                 }
               >
                 <p class="warning">
-                  <A href="/wallet">Entsperre die Wallet</A> mit dem Passwort, das zur Sicherung gehört.
+                  <A href="/wallet">Entsperre die Wallet</A> mit dem Passwort,
+                  das zur Sicherung gehört.
                 </p>
               </Show>
             </Show>
             <Show when={keySkipped()}>
               <p class="warning">
-                Auf diesem Gerät gibt es schon eine Wallet, deshalb wurde der Schlüssel aus der Sicherung nicht übernommen — ihre Scheine erscheinen hier nicht. Ist das nicht die richtige Wallet, vergiss sie unten (gefahrlos, wenn sie leer ist) und spiel die Datei danach noch einmal ein.
+                Auf diesem Gerät gibt es schon eine Wallet, deshalb wurde der
+                Schlüssel aus der Sicherung nicht übernommen — ihre Scheine
+                erscheinen hier nicht. Ist das nicht die richtige Wallet,
+                vergiss sie unten (gefahrlos, wenn sie leer ist) und spiel die
+                Datei danach noch einmal ein.
               </p>
             </Show>
           </div>
@@ -627,7 +666,9 @@ const Settings: Component = () => {
                 &nbsp;Wallet von diesem Gerät löschen
               </h4>
               <p class="warning">
-                Entfernt <strong>alles</strong> von diesem Gerät: Schlüssel, Scheine, Ausgabestellen. Die zwölf Wörter bringen die Scheine nicht zurück — nur eine vorher heruntergeladene Sicherung.
+                Entfernt <strong>alles</strong> von diesem Gerät: Schlüssel,
+                Scheine, Ausgabestellen. Die zwölf Wörter bringen die Scheine
+                nicht zurück — nur eine vorher heruntergeladene Sicherung.
               </p>
               <div class="btns">
                 <button onClick={download}>
@@ -647,7 +688,9 @@ const Settings: Component = () => {
                 }
               >
                 <p class="warning">
-                  Wirklich? Schlüssel und alle Scheine verschwinden von diesem Gerät — zurück bringt sie nur eine vorher heruntergeladene Sicherung.
+                  Wirklich? Schlüssel und alle Scheine verschwinden von diesem
+                  Gerät — zurück bringt sie nur eine vorher heruntergeladene
+                  Sicherung.
                 </p>
                 <div class="btns">
                   <button onClick={doForget}>Ja, alles löschen</button>

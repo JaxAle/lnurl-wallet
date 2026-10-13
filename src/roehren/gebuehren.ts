@@ -25,7 +25,8 @@ export const frageAufladeGebuehr = (adresse: string): void => {
     .finally(() => laeuft.delete(host))
 }
 
-const zahl = (n: number, stellen = 0) => n.toLocaleString('de-DE', {maximumFractionDigits: stellen})
+const zahl = (n: number, stellen = 0) =>
+  n.toLocaleString('de-DE', {maximumFractionDigits: stellen})
 
 // „1 Sat + 0,2 %“, „keine“, oder undefined solange nicht bekannt
 export const aufladeGebuehr = (host: string): string | undefined => {
@@ -43,7 +44,10 @@ export const aufladeGebuehr = (host: string): string | undefined => {
 const SCHLUESSEL = 'fork_teilgebuehr'
 const lies = (): Record<string, number> => {
   try {
-    return JSON.parse(localStorage.getItem(SCHLUESSEL) ?? '{}') as Record<string, number>
+    return JSON.parse(localStorage.getItem(SCHLUESSEL) ?? '{}') as Record<
+      string,
+      number
+    >
   } catch {
     return {}
   }
@@ -65,5 +69,7 @@ export const teilGebuehr = (host: string): string | undefined => {
   const msat = teilen()[host]
   if (msat === undefined) return undefined
   const sats = msat / 1000
-  return sats > 0 ? `zuletzt ${zahl(sats, 3)} Sat${sats === 1 ? '' : 's'}` : 'zuletzt keine'
+  return sats > 0
+    ? `zuletzt ${zahl(sats, 3)} Sat${sats === 1 ? '' : 's'}`
+    : 'zuletzt keine'
 }

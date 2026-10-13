@@ -12,7 +12,12 @@ import type {Component} from 'solid-js'
 import {onCleanup, onMount} from 'solid-js'
 
 import {notify} from '../helpers'
-import {fetchNoteInfo, NoteSpentError, NoteUnknownError, serverOf} from '../lnurlcash'
+import {
+  fetchNoteInfo,
+  NoteSpentError,
+  NoteUnknownError,
+  serverOf
+} from '../lnurlcash'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {aendere, gebunden, vorgaenge} from './klaerung'
@@ -21,26 +26,37 @@ import type {Vorgang} from './klaerung'
 const ABSTAND_MS = 15_000
 const RUHEZEIT_MS = 60_000
 
-export const offenZurPruefung = (b: {verified: boolean; spent?: boolean; deviceId?: string}) =>
-  !b.verified && !b.spent && !b.deviceId
+export const offenZurPruefung = (b: {
+  verified: boolean
+  spent?: boolean
+  deviceId?: string
+}) => !b.verified && !b.spent && !b.deviceId
 
 const Pruefwache: Component = () => {
   const {state, bearers, updateBearer, removeBearer, logActivity} = useWallet()
 
-  type Antwort = {b: Bearer; info?: Awaited<ReturnType<typeof fetchNoteInfo>>; fremd?: boolean}
+  type Antwort = {
+    b: Bearer
+    info?: Awaited<ReturnType<typeof fetchNoteInfo>>
+    fremd?: boolean
+  }
   const frage = async (b: Bearer): Promise<Antwort> => {
     try {
       return {b, info: await fetchNoteInfo(b.url)}
     } catch (err) {
-      if (err instanceof NoteSpentError || err instanceof NoteUnknownError) return {b, fremd: true}
+      if (err instanceof NoteSpentError || err instanceof NoteUnknownError)
+        return {b, fremd: true}
       return {b} // keine Antwort
     }
   }
-  const summe = (xs: number[]) => xs.map(x => x.toLocaleString('de-DE')).join(' + ')
+  const summe = (xs: number[]) =>
+    xs.map(x => x.toLocaleString('de-DE')).join(' + ')
 
   // einen Vorgang „in Klärung“ als Ganzes auflösen (klaerung.ts)
   const klaere = async (v: Vorgang) => {
-    const ergebnis = v.ergebnis.map(id => bearers().find(b => b.id === id)).filter((b): b is Bearer => !!b)
+    const ergebnis = v.ergebnis
+      .map(id => bearers().find(b => b.id === id))
+      .filter((b): b is Bearer => !!b)
     if (ergebnis.length === 0) return aendere(v.id, () => null)
     const antworten = await Promise.all(ergebnis.map(frage))
     if (antworten.some(a => !a.info && !a.fremd)) {
@@ -68,8 +84,14 @@ const Pruefwache: Component = () => {
       for (const a of antworten.filter(x => x.fremd)) removeBearer(a.b.id)
       for (const id of v.eingang) removeBearer(id)
       const neu = echt.map(a => Math.floor(a.info!.maxWithdrawable / 1000))
-      const text = v.art === 'teilen' ? `Geteilt: ${summe(neu)} Sats.` : `Zusammengelegt: ${summe(neu)} Sats.`
-      logActivity('refresh', `${text} Nach unklarer Antwort bestätigt (${v.host}).`)
+      const text =
+        v.art === 'teilen'
+          ? `Geteilt: ${summe(neu)} Sats.`
+          : `Zusammengelegt: ${summe(neu)} Sats.`
+      logActivity(
+        'refresh',
+        `${text} Nach unklarer Antwort bestätigt (${v.host}).`
+      )
       notify(text)
     }
     aendere(v.id, () => null)
@@ -83,7 +105,10 @@ const Pruefwache: Component = () => {
     const faellig = vorgaenge().filter(v => jetzt - v.seit > 5000)
     const bindung = gebunden()
     const offen = bearers().filter(
-      b => offenZurPruefung(b) && !bindung.has(b.id) && jetzt - b.updatedAt > RUHEZEIT_MS
+      b =>
+        offenZurPruefung(b) &&
+        !bindung.has(b.id) &&
+        jetzt - b.updatedAt > RUHEZEIT_MS
     )
     if (offen.length === 0 && faellig.length === 0) return
     laeuft = true
@@ -107,12 +132,23 @@ const Pruefwache: Component = () => {
           })
           bestaetigt++
           bestaetigtSats += Math.floor(info.maxWithdrawable / 1000)
-          logActivity('refresh', `Ungeprüften Schein über ${Math.floor(info.maxWithdrawable / 1000)} Sats bestätigt (${serverOf(b.url)}).`, b.label)
+          logActivity(
+            'refresh',
+            `Ungeprüften Schein über ${Math.floor(info.maxWithdrawable / 1000)} Sats bestätigt (${serverOf(b.url)}).`,
+            b.label
+          )
         } catch (err) {
-          if (err instanceof NoteSpentError || err instanceof NoteUnknownError) {
+          if (
+            err instanceof NoteSpentError ||
+            err instanceof NoteUnknownError
+          ) {
             await updateBearer(b.id, {spent: true, spentGrund: 'unbekannt'})
             fremd++
-            logActivity('refresh', `${serverOf(b.url)} kennt einen ungeprüften Schein über ${Math.floor(b.amount / 1000)} Sats nicht — unter „Zu prüfen“.`, b.label)
+            logActivity(
+              'refresh',
+              `${serverOf(b.url)} kennt einen ungeprüften Schein über ${Math.floor(b.amount / 1000)} Sats nicht — unter „Zu prüfen“.`,
+              b.label
+            )
           }
           // sonst: keine Antwort — nächste Runde
         }
@@ -122,7 +158,9 @@ const Pruefwache: Component = () => {
     }
     // ein ruhiger Satz mit dem Ergebnis, statt eines roten Hinweises
     const teile = [
-      bestaetigt ? `${bestaetigt} ${bestaetigt === 1 ? 'Schein' : 'Scheine'} bestätigt (${bestaetigtSats.toLocaleString('de-DE')} Sats)` : '',
+      bestaetigt
+        ? `${bestaetigt} ${bestaetigt === 1 ? 'Schein' : 'Scheine'} bestätigt (${bestaetigtSats.toLocaleString('de-DE')} Sats)`
+        : '',
       fremd ? `${fremd} unbekannt — unter „Zu prüfen“` : ''
     ].filter(Boolean)
     if (teile.length) notify(`Geprüft: ${teile.join(', ')}.`)

@@ -189,7 +189,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
         `${msatToSats(note.amount)} Sats von ${serverOf(note.url)} – Rechnung bezahlt. Prüfen: ${url}.`,
         note.label
       )
-      notify('Zahlung bestätigt – der Schein ist ausgegeben.', NotifyKind.SUCCESS)
+      notify(
+        'Zahlung bestätigt – der Schein ist ausgegeben.',
+        NotifyKind.SUCCESS
+      )
       props.onClose()
     } catch {
       // a single failed check isn't fatal - the next tick tries again
@@ -271,7 +274,10 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       setValue('')
       return
     }
-    notify('Keine gültige Lightning-Rechnung und keine Lightning-Adresse.', NotifyKind.ERROR)
+    notify(
+      'Keine gültige Lightning-Rechnung und keine Lightning-Adresse.',
+      NotifyKind.ERROR
+    )
   }
 
   const handle = () => {
@@ -487,10 +493,7 @@ const MeltDialog: Component<MeltDialogProps> = props => {
         'melt',
         `${msatToSats(msat)} Sats an ${lnAddressText() || serverOf(info.callback)} intern übertragen (bei ${serverOf(info.callback)}).`
       )
-      notify(
-        `${msatToSats(msat)} Sats intern übertragen.`,
-        NotifyKind.SUCCESS
-      )
+      notify(`${msatToSats(msat)} Sats intern übertragen.`, NotifyKind.SUCCESS)
       setLnAddressPayRequest(null)
       setLnAddressAmountSats('')
       props.onClose()
@@ -1050,7 +1053,9 @@ const MeltDialog: Component<MeltDialogProps> = props => {
   return (
     <Dialog onClose={props.onClose}>
       <figure class="paste-widget">
-        <figcaption>Bezahlen – eine Rechnung mit einem Schein begleichen</figcaption>
+        <figcaption>
+          Bezahlen – eine Rechnung mit einem Schein begleichen
+        </figcaption>
         {/* hidden once a destination has actually resolved (a pasted
         invoice, or a looked-up Lightning Address's payRequest) - it used
         to stay rendered the whole time, cleared back to empty rather than
@@ -1239,7 +1244,9 @@ const MeltDialog: Component<MeltDialogProps> = props => {
       <Show when={storeableMeltAddresses().length > 0}>
         <h4>Deine gespeicherten Adressen</h4>
         <p>
-          Diese Adressen sind zum Wiederverwenden gedacht (LUD-11) – hier gespeichert, damit du sie mit einem Tipp wieder bezahlen kannst. Nur Zahlungsziele, getrennt von den Ausgabestellen.
+          Diese Adressen sind zum Wiederverwenden gedacht (LUD-11) – hier
+          gespeichert, damit du sie mit einem Tipp wieder bezahlen kannst. Nur
+          Zahlungsziele, getrennt von den Ausgabestellen.
         </p>
         <div class="mint-picker">
           <For each={storeableMeltAddresses()}>
@@ -1278,7 +1285,9 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             <>
               <h4>Zahlung wird bestätigt</h4>
               <p class="bearer-hint">
-                Die Wallet prüft den Zahlungsnachweis der Ausgabestelle (LUD-25) – meldet sie die Zahlung als durchgegangen, ist der Schein endgültig ausgegeben.
+                Die Wallet prüft den Zahlungsnachweis der Ausgabestelle (LUD-25)
+                – meldet sie die Zahlung als durchgegangen, ist der Schein
+                endgültig ausgegeben.
               </p>
               <div class="btns">
                 <button
@@ -1302,12 +1311,17 @@ const MeltDialog: Component<MeltDialogProps> = props => {
             when={invoiceAmountMsat() !== null}
             fallback={
               <p class="bearer-hint">
-                Aus dieser Rechnung ließ sich kein Betrag lesen – wähle Scheine einer Ausgabestelle, sie prüft, ob es reicht.
+                Aus dieser Rechnung ließ sich kein Betrag lesen – wähle Scheine
+                einer Ausgabestelle, sie prüft, ob es reicht.
               </p>
             }
           >
             <p class="bearer-hint">
-              Verlangt {msatToSats(invoiceAmountMsat()!)} Sats <FiatValue msat={invoiceAmountMsat()!} /> – wähle Scheine einer Ausgabestelle, die mindestens so viel wert sind. Bezahlt wird mit einem Schein über genau den Rechnungsbetrag: passt einer genau, geht es sofort, sonst zuerst „Teilen und bezahlen“.
+              Verlangt {msatToSats(invoiceAmountMsat()!)} Sats{' '}
+              <FiatValue msat={invoiceAmountMsat()!} /> – wähle Scheine einer
+              Ausgabestelle, die mindestens so viel wert sind. Bezahlt wird mit
+              einem Schein über genau den Rechnungsbetrag: passt einer genau,
+              geht es sofort, sonst zuerst „Teilen und bezahlen“.
             </p>
           </Show>
           <Show

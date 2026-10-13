@@ -18,17 +18,30 @@ const host = (url: string): string => {
 }
 
 const UnterwegsListe: Component = () => {
-  const {bearers, addBearer, updateBearer, removeBearer, logActivity} = useWallet()
+  const {bearers, addBearer, updateBearer, removeBearer, logActivity} =
+    useWallet()
   const [holt, setHolt] = createSignal<string | null>(null)
   const zurueckholen = async (id: string) => {
     const b = bearers().find(x => x.id === id)
     if (!b) return
     setHolt(id)
     try {
-      const e = await holeZurueck(b, {addBearer, updateBearer, removeBearer, logActivity})
-      notify(e === 'zurueck' ? 'Zurückgeholt — der gezeigte QR ist wertlos.' : 'Schon eingelöst.')
+      const e = await holeZurueck(b, {
+        addBearer,
+        updateBearer,
+        removeBearer,
+        logActivity
+      })
+      notify(
+        e === 'zurueck'
+          ? 'Zurückgeholt — der gezeigte QR ist wertlos.'
+          : 'Schon eingelöst.'
+      )
     } catch (err) {
-      notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+      notify(
+        `Zurückholen geht gerade nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
     } finally {
       setHolt(null)
     }
@@ -42,13 +55,16 @@ const UnterwegsListe: Component = () => {
       <section class="rz-unterwegs">
         <div class="rz-tag">Unterwegs</div>
         <p class="rz-hinweis">
-          Übergeben, aber noch nicht eingelöst — die Wallet fragt nach, solange sie offen ist.
+          Übergeben, aber noch nicht eingelöst — die Wallet fragt nach, solange
+          sie offen ist.
         </p>
         <For each={liste()}>
           {bearer => (
             <div class="rz-zeile">
               <span class="rz-lampe-klein" />
-              <span>{Math.floor(bearer.amount / 1000).toLocaleString('de-DE')} Sats</span>
+              <span>
+                {Math.floor(bearer.amount / 1000).toLocaleString('de-DE')} Sats
+              </span>
               <span class="rz-matt">{host(bearer.url)}</span>
               <button
                 type="button"

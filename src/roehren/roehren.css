@@ -56,7 +56,12 @@
   opacity: 0.4;
   mix-blend-mode: screen;
   background:
-    radial-gradient(44% 36% at 50% 56%, rgba(255, 118, 22, 0.8), rgba(255, 72, 0, 0.38) 60%, transparent 84%),
+    radial-gradient(
+      44% 36% at 50% 56%,
+      rgba(255, 118, 22, 0.8),
+      rgba(255, 72, 0, 0.38) 60%,
+      transparent 84%
+    ),
     radial-gradient(34% 9% at 50% 92%, rgba(255, 130, 40, 0.6), transparent 80%);
 }
 
@@ -70,9 +75,21 @@
   line-height: 1;
   transform: translateY(7%) scaleX(0.8);
   color: #ffd59a;
-  text-shadow: 0 0 1px #fff3d6, 0 0 3px #ffb04a, 0 0 8px #ff7a10, 0 0 16px rgba(255, 70, 0, 0.55);
-  -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
-  mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+  text-shadow:
+    0 0 1px #fff3d6,
+    0 0 3px #ffb04a,
+    0 0 8px #ff7a10,
+    0 0 16px rgba(255, 70, 0, 0.55);
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
+  mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
 }
 
 /* Null mit Punkt in der Mitte, wie im Vorbild */
@@ -105,20 +122,35 @@
 .roehren-zaehlwerk .sign {
   align-self: center;
   margin-right: 4px;
-  font: 300 30px/1 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 30px/1 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   color: #ffd59a;
-  text-shadow: 0 0 3px #ffb04a, 0 0 9px #ff7a10, 0 0 16px rgba(255, 70, 0, 0.55);
+  text-shadow:
+    0 0 3px #ffb04a,
+    0 0 9px #ff7a10,
+    0 0 16px rgba(255, 70, 0, 0.55);
 }
 /* Abschluss (Prototyp doneBody): Zeile matt, Erklärung klein */
 .rz-fertig .rz-zeile-matt {
   margin: 0;
-  font: 300 18px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 18px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   color: #a3907c;
 }
 .rz-fertig .rz-klein {
   max-width: 32ch;
   margin: 4px auto 0;
-  font: 300 15px/1.4 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 15px/1.4 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   color: #a3907c;
 }
 
@@ -129,13 +161,22 @@
   -webkit-tap-highlight-color: transparent;
 }
 .roehren-zaehlwerk .waehlbar.aktiv {
-  background: radial-gradient(70% 90% at 50% 55%, rgba(255, 110, 20, 0.14), transparent 75%), #070504;
+  background:
+    radial-gradient(
+      70% 90% at 50% 55%,
+      rgba(255, 110, 20, 0.14),
+      transparent 75%
+    ),
+    #070504;
   border: 1px solid #3a2414;
   box-shadow: inset 0 0 16px rgba(255, 90, 0, 0.14);
 }
 .roehren-zaehlwerk .rz-eurrow.aktiv .rz-euro {
   color: #ffefc4;
-  text-shadow: 0 0 1px #fff3d6, 0 0 4px #ffc070, 0 0 10px rgba(255, 110, 20, 0.55);
+  text-shadow:
+    0 0 1px #fff3d6,
+    0 0 4px #ffc070,
+    0 0 10px rgba(255, 110, 20, 0.55);
 }
 /* glimmend: in Euro getippt — Ziffern klar, ohne vollen Lichthof (Prototyp .bal-tubes.idle) */
 .roehren-zaehlwerk .bal-tubes.idle .tube:not(.unlit) {
@@ -146,7 +187,10 @@
 }
 .roehren-zaehlwerk .bal-tubes.idle .tube .ch {
   color: #f2a65a;
-  text-shadow: 0 0 1px #ffc890, 0 0 4px rgba(255, 110, 16, 0.55), 0 0 9px rgba(255, 80, 0, 0.25);
+  text-shadow:
+    0 0 1px #ffc890,
+    0 0 4px rgba(255, 110, 16, 0.55),
+    0 0 9px rgba(255, 80, 0, 0.25);
 }
 .roehren-zaehlwerk .bal-tubes.idle .dot:not(.unlit) {
   background: #f2a65a;
@@ -165,7 +209,9 @@
   border-radius: 50%;
   flex: none;
   background: #ffcf8a;
-  box-shadow: 0 0 4px #ff9a2a, 0 0 10px rgba(255, 80, 0, 0.7);
+  box-shadow:
+    0 0 4px #ff9a2a,
+    0 0 10px rgba(255, 80, 0, 0.7);
 }
 .roehren-zaehlwerk .dot.unlit {
   background: #2a1a10;
@@ -186,7 +232,8 @@
   stroke: #ffd59a;
   stroke-width: 1.3;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 1px #fff3d6) drop-shadow(0 0 3px #ffb04a) drop-shadow(0 0 7px rgba(255, 110, 16, 0.6));
+  filter: drop-shadow(0 0 1px #fff3d6) drop-shadow(0 0 3px #ffb04a)
+    drop-shadow(0 0 7px rgba(255, 110, 16, 0.6));
 }
 
 /* kalt: nichts da — die Null steht, glüht aber nicht (Prototyp .bal-tubes.cold) */
@@ -216,15 +263,37 @@
   animation: rz-chhit 2.4s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 @keyframes rz-tubehit {
-  0% { filter: brightness(1.3) saturate(1.1); }
+  0% {
+    filter: brightness(1.3) saturate(1.1);
+  }
 }
 @keyframes rz-glow {
-  0% { opacity: 1; }
-  40% { opacity: 0.8; }
+  0% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.8;
+  }
 }
 @keyframes rz-chhit {
-  0% { color: #fff3d6; text-shadow: 0 0 2px #fff, 0 0 6px #ffc070, 0 0 13px #ff7a00, 0 0 24px #ff5000, 0 0 44px rgba(255, 60, 0, 0.9); }
-  30% { color: #ffcf7a; text-shadow: 0 0 1px #ffe9c0, 0 0 4px #ffa22e, 0 0 10px #ff6a00, 0 0 20px rgba(255, 74, 0, 0.8), 0 0 34px rgba(255, 60, 0, 0.5); }
+  0% {
+    color: #fff3d6;
+    text-shadow:
+      0 0 2px #fff,
+      0 0 6px #ffc070,
+      0 0 13px #ff7a00,
+      0 0 24px #ff5000,
+      0 0 44px rgba(255, 60, 0, 0.9);
+  }
+  30% {
+    color: #ffcf7a;
+    text-shadow:
+      0 0 1px #ffe9c0,
+      0 0 4px #ffa22e,
+      0 0 10px #ff6a00,
+      0 0 20px rgba(255, 74, 0, 0.8),
+      0 0 34px rgba(255, 60, 0, 0.5);
+  }
 }
 
 /* Euro darunter, in Drahtform wie im Prototyp (.eurin, ungewählt) */
@@ -275,20 +344,41 @@
   line-height: 1;
   transform: scaleX(0.8);
   letter-spacing: 0.02em;
-  text-shadow: 0 0 2px rgba(255, 112, 30, 0.35), 0 0 6px rgba(255, 80, 0, 0.14);
-  -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
-  mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+  text-shadow:
+    0 0 2px rgba(255, 112, 30, 0.35),
+    0 0 6px rgba(255, 80, 0, 0.14);
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
+  mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
 }
 .rz-knopf.an,
 .rz-knopf:active {
-  background: radial-gradient(70% 80% at 50% 60%, rgba(255, 110, 20, 0.22), transparent 75%), #070504;
+  background:
+    radial-gradient(
+      70% 80% at 50% 60%,
+      rgba(255, 110, 20, 0.22),
+      transparent 75%
+    ),
+    #070504;
   border-color: #3a2414;
   box-shadow: inset 0 0 18px rgba(255, 90, 0, 0.18);
   color: #ffefc4;
 }
 .rz-knopf.an .lbl,
 .rz-knopf:active .lbl {
-  text-shadow: 0 0 1px #fff, 0 0 3px #ffd27a, 0 0 7px #ff9a22, 0 0 13px #ff5a00, 0 0 24px #ff3c00;
+  text-shadow:
+    0 0 1px #fff,
+    0 0 3px #ffd27a,
+    0 0 7px #ff9a22,
+    0 0 13px #ff5a00,
+    0 0 24px #ff3c00;
 }
 .rz-knopf.an svg,
 .rz-knopf:active svg {
@@ -326,7 +416,11 @@
   border: 1px solid #3a2414;
   background: #070504;
   color: #f2a65a;
-  font: 300 16px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 16px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   text-align: center;
   cursor: pointer;
 }
@@ -338,7 +432,11 @@
   border: 0;
   background: none;
   color: rgba(238, 152, 90, 0.66);
-  font: 300 15px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 15px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   cursor: pointer;
 }
 .rz-leise:active {
@@ -355,7 +453,13 @@
 /* .bearer-list davor: gewinnt gegen style.scss unabhängig von der Reihenfolge im Bündel */
 .bearer-list .bearer-card,
 .bearer-list .bearer-card:hover {
-  background: radial-gradient(90% 70% at 30% 0%, rgba(255, 110, 20, 0.1), transparent 70%), #0b0806;
+  background:
+    radial-gradient(
+      90% 70% at 30% 0%,
+      rgba(255, 110, 20, 0.1),
+      transparent 70%
+    ),
+    #0b0806;
   border-color: #2f2218;
 }
 .bearer-list .bearer-card:hover {
@@ -440,7 +544,11 @@ nav.rz-kopf {
 }
 .rz-tab span:last-child {
   display: inline-block;
-  font: 300 13px/1.2 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 13px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.88);
   letter-spacing: 0.02em;
 }
@@ -456,7 +564,9 @@ nav.rz-kopf {
   height: 9px;
   border-radius: 50%;
   background: #ffb35c;
-  box-shadow: 0 0 4px #ff9a2a, 0 0 10px rgba(255, 90, 0, 0.55);
+  box-shadow:
+    0 0 4px #ff9a2a,
+    0 0 10px rgba(255, 90, 0, 0.55);
 }
 /* Platz für die Leiste, damit sie nichts verdeckt */
 body:has(.rz-reiter) {
@@ -471,7 +581,11 @@ body:has(.rz-reiter) {
   gap: 12px;
   min-height: 44px;
   border-bottom: 1px solid #2f2218;
-  font: 300 17px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 17px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   color: #ead8bf;
 }
 .rz-zeile .rz-matt {
@@ -485,7 +599,9 @@ body:has(.rz-reiter) {
   border-radius: 50%;
   flex: none;
   background: #ffb35c;
-  box-shadow: 0 0 4px #ff9a2a, 0 0 9px rgba(255, 90, 0, 0.5);
+  box-shadow:
+    0 0 4px #ff9a2a,
+    0 0 9px rgba(255, 90, 0, 0.5);
 }
 
 /* Senden (Prototyp keypadScreen / send-qr) */
@@ -497,7 +613,11 @@ body:has(.rz-reiter) {
 }
 .rz-seitenkopf h2 {
   margin: 0;
-  font: 300 22px/1.2 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 22px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
   color: #ead8bf;
@@ -513,7 +633,10 @@ body:has(.rz-reiter) {
   width: 44px;
   height: 44px;
   margin-left: -12px;
-  font: 300 32px/1 'Jost', system-ui, sans-serif;
+  font:
+    300 32px/1 'Jost',
+    system-ui,
+    sans-serif;
   color: rgba(238, 152, 90, 0.72);
   text-decoration: none;
 }
@@ -536,18 +659,37 @@ body:has(.rz-reiter) {
 }
 .rz-taste .w {
   display: inline-block;
-  font: 300 32px/1 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 32px/1 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.8);
-  text-shadow: 0 0 2px rgba(255, 112, 30, 0.35), 0 0 6px rgba(255, 80, 0, 0.14);
-  -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
-  mask-image: repeating-linear-gradient(180deg, #000 0 5px, rgba(0, 0, 0, 0.5) 5px 6.2px);
+  text-shadow:
+    0 0 2px rgba(255, 112, 30, 0.35),
+    0 0 6px rgba(255, 80, 0, 0.14);
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
+  mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
 }
 .rz-taste:active {
   background: color-mix(in srgb, #ff7a10 7%, #17110c);
 }
 .rz-taste:active .w {
   color: #fff3d6;
-  text-shadow: 0 0 2px #fff, 0 0 6px #ffc070, 0 0 13px #ff7a00, 0 0 24px #ff5000, 0 0 40px rgba(255, 60, 0, 0.8);
+  text-shadow:
+    0 0 2px #fff,
+    0 0 6px #ffc070,
+    0 0 13px #ff7a00,
+    0 0 24px #ff5000,
+    0 0 40px rgba(255, 60, 0, 0.8);
 }
 .rz-weiter {
   width: 100%;
@@ -567,10 +709,16 @@ body:has(.rz-reiter) {
 }
 .rz-ueber span {
   display: inline-block;
-  font: 300 19px/1.2 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 19px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.86);
   color: #ff6232;
-  text-shadow: 0 0 2px #ff9a6a, 0 0 7px rgba(255, 60, 20, 0.45);
+  text-shadow:
+    0 0 2px #ff9a6a,
+    0 0 7px rgba(255, 60, 20, 0.45);
 }
 /* so groß wie im Original (.qr-wrapper bis 400 px, volle Breite): mit 300 px und Polster lasen
    weder Pixel noch iPad den Schein-QR (Gerhard, 2026-10-12) — ruhige weiße Zone statt cremefarbenem
@@ -596,13 +744,19 @@ body:has(.rz-reiter) {
   gap: 8px;
   margin: 0;
   color: #ead8bf;
-  font: 300 17px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 17px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
 }
 .rz-status .rz-lampe-klein {
   animation: rz-puls 1.6s ease-in-out infinite;
 }
 @keyframes rz-puls {
-  50% { opacity: 0.35; }
+  50% {
+    opacity: 0.35;
+  }
 }
 .rz-fertig {
   padding-top: 12%;
@@ -652,14 +806,22 @@ body:has(.rz-reiter) {
 }
 .rz-option .t {
   display: block;
-  font: 300 19px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 19px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
   color: #ead8bf;
 }
 .rz-option .s {
   display: block;
-  font: 300 13px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 13px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   color: #a3907c;
 }
 .rz-option > svg {
@@ -678,7 +840,11 @@ body:has(.rz-reiter) {
   border: 1px solid #3a2414;
   background: #070504;
   color: #ead8bf;
-  font: 300 16px/1.3 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 16px/1.3 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -688,7 +854,6 @@ body:has(.rz-reiter) {
     animation: none;
   }
 }
-
 
 /* Ganze App in Jost (Prototyp --font-body: „eine für die ganze App“). Die Grundschrift selbst stellt
    style.scss ($font); hier nur, was das Original fett setzt: Jost geht im Prototyp nie über 600. */
@@ -711,7 +876,11 @@ select {
 .page > h2,
 .rz-titel {
   margin: 0 0 4px;
-  font: 300 22px/1.2 'Jost', 'Futura', system-ui, sans-serif;
+  font:
+    300 22px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
   color: #ead8bf;
@@ -778,7 +947,9 @@ select {
 .rz-setting:active .sl,
 .rz-setting:active .val {
   color: #ffefc4;
-  text-shadow: 0 0 3px #ffd27a, 0 0 8px #ff9a22;
+  text-shadow:
+    0 0 3px #ffd27a,
+    0 0 8px #ff9a22;
 }
 .rz-setting.gefahr .sl,
 .rz-setting.gefahr .val {
@@ -793,7 +964,9 @@ select {
   vertical-align: 2px;
   border-radius: 50%;
   background: #ff6232;
-  box-shadow: 0 0 4px #ff8a5c, 0 0 9px rgba(255, 60, 20, 0.55);
+  box-shadow:
+    0 0 4px #ff8a5c,
+    0 0 9px rgba(255, 60, 20, 0.55);
 }
 .rz-switch {
   position: relative;
@@ -1020,7 +1193,10 @@ select {
   border-radius: 14px;
   background: #17110c;
   color: #f4ebdf;
-  font: 15px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  font:
+    15px/1.4 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
   word-break: break-all;
   resize: vertical;
 }
@@ -1082,8 +1258,16 @@ select {
   text-align: left;
   color: #2c2a24;
   background:
-    repeating-radial-gradient(circle at 18% 120%, transparent 0 7px, rgba(44, 42, 36, 0.13) 7px 8px),
-    repeating-radial-gradient(circle at 92% -30%, transparent 0 9px, rgba(44, 42, 36, 0.13) 9px 10px),
+    repeating-radial-gradient(
+      circle at 18% 120%,
+      transparent 0 7px,
+      rgba(44, 42, 36, 0.13) 7px 8px
+    ),
+    repeating-radial-gradient(
+      circle at 92% -30%,
+      transparent 0 9px,
+      rgba(44, 42, 36, 0.13) 9px 10px
+    ),
     #f2e9d8;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
 }
@@ -1110,7 +1294,8 @@ select {
 .rz-note .n-serial,
 .rz-note .n-micro,
 .rz-note .n-stamp {
-  font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-family:
+    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 .rz-note .n-serial {
   font-size: 10.5px;
@@ -1229,7 +1414,10 @@ select {
 }
 .rz-frage h3 {
   margin: 10px 0 8px;
-  font: 300 24px/1.25 'Jost', system-ui, sans-serif;
+  font:
+    300 24px/1.25 'Jost',
+    system-ui,
+    sans-serif;
   color: #f4ebdf;
   overflow-wrap: anywhere;
 }
@@ -1248,7 +1436,10 @@ select {
   margin-top: 6px;
 }
 .rz-schluessel {
-  font: 12px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  font:
+    12px/1.4 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
   word-break: break-all;
   color: #ead8bf;
 }
@@ -1345,7 +1536,10 @@ select {
 }
 .rz-frage-kurz {
   margin: 6px 0 4px;
-  font: 300 22px/1.3 'Jost', system-ui, sans-serif;
+  font:
+    300 22px/1.3 'Jost',
+    system-ui,
+    sans-serif;
   color: #f4ebdf;
 }
 
@@ -1358,7 +1552,10 @@ select {
 }
 .rz-stelle-kopf h3 {
   margin: 0;
-  font: 300 24px/1.2 'Jost', system-ui, sans-serif;
+  font:
+    300 24px/1.2 'Jost',
+    system-ui,
+    sans-serif;
   color: #f4ebdf;
 }
 .rz-farbpunkt {
@@ -1366,7 +1563,9 @@ select {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #17110c, 0 0 0 3px #2f2218;
+  box-shadow:
+    0 0 0 2px #17110c,
+    0 0 0 3px #2f2218;
 }
 .rz-stelle-summe {
   margin: 10px 0 0;
@@ -1424,7 +1623,10 @@ select {
 .rz-rueckfrage-blatt h3 {
   margin: 4px 0 10px;
   padding-right: 36px;
-  font: 300 22px/1.25 'Jost', system-ui, sans-serif;
+  font:
+    300 22px/1.25 'Jost',
+    system-ui,
+    sans-serif;
   color: #f4ebdf;
   overflow-wrap: anywhere;
 }
@@ -1489,7 +1691,10 @@ select {
 }
 .rz-klaerung .z {
   margin: 0 0 8px;
-  font: 300 26px/1.2 'Jost', system-ui, sans-serif;
+  font:
+    300 26px/1.2 'Jost',
+    system-ui,
+    sans-serif;
   font-variant-numeric: tabular-nums;
   color: #ffefc4;
 }

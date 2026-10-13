@@ -5,7 +5,20 @@ import {createSignal, For, Show} from 'solid-js'
 
 import {rates} from '../currency'
 
-export const TASTEN = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'del'] as const
+export const TASTEN = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '000',
+  '0',
+  'del'
+] as const
 type Taste = (typeof TASTEN)[number] | ','
 export const HOECHSTENS = 9_999_999 // sieben Röhren
 
@@ -22,7 +35,8 @@ export const createBetrag = () => {
     return k ? Math.floor((eur / k) * 100_000_000) : 0
   }
 
-  const betrag = () => (wahl() === 'eur' ? satsAusEuro(euroText()) : Number(eingabe() || '0'))
+  const betrag = () =>
+    wahl() === 'eur' ? satsAusEuro(euroText()) : Number(eingabe() || '0')
 
   // wie im Prototyp: die erste Ziffer nach dem Umschalten ersetzt den umgerechneten Wert
   const taste = (t: Taste) => {
@@ -33,7 +47,10 @@ export const createBetrag = () => {
       if (t === 'del') x = x.slice(0, -1)
       else if (t === ',') {
         if (!x.includes(',')) x = (x || '0') + ','
-      } else if (!(x.includes(',') && x.split(',')[1].length >= 2) && x.replace(',', '').length < 9) {
+      } else if (
+        !(x.includes(',') && x.split(',')[1].length >= 2) &&
+        x.replace(',', '').length < 9
+      ) {
         x = (x === '0' ? '' : x) + t
       }
       if (satsAusEuro(x) <= HOECHSTENS) setEuroText(x) // passt sonst nicht mehr auf sieben Röhren
@@ -47,7 +64,11 @@ export const createBetrag = () => {
     if (w === wahl() || (w === 'eur' && !kurs())) return
     if (w === 'eur') {
       const k = kurs()!
-      setEuroText(betrag() ? ((betrag() / 100_000_000) * k).toFixed(2).replace('.', ',') : '')
+      setEuroText(
+        betrag()
+          ? ((betrag() / 100_000_000) * k).toFixed(2).replace('.', ',')
+          : ''
+      )
     } else {
       setEingabe(betrag() ? String(betrag()) : '')
     }
@@ -59,7 +80,8 @@ export const createBetrag = () => {
     setWahl('sats')
     setEingabe(String(sats))
   }
-  const euroAnzeige = () => (wahl() === 'eur' ? `${euroText() || '0'} €` : undefined)
+  const euroAnzeige = () =>
+    wahl() === 'eur' ? `${euroText() || '0'} €` : undefined
 
   return {betrag, wahl, kurs, taste, waehle, setzeSats, euroAnzeige}
 }
@@ -70,7 +92,8 @@ export const Tastatur: Component<{betrag: Betrag}> = props => (
     <For each={TASTEN}>
       {t => {
         // in Euro wird „000“ zum Komma (Prototyp)
-        const echt = (): Taste => (t === '000' && props.betrag.wahl() === 'eur' ? ',' : t)
+        const echt = (): Taste =>
+          t === '000' && props.betrag.wahl() === 'eur' ? ',' : t
         return (
           <button
             type="button"

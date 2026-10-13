@@ -20,15 +20,23 @@ describe('Passwort ändern und setzen', () => {
     await keys.saveStorageRootKey(wurzel, 'altes-passwort')
     await keys.saveCashRootKey(bargeld, 'altes-passwort')
     await setzePasswort('altes-passwort', 'neues-passwort')
-    expect([...(await keys.decryptSavedStorageRootKey('neues-passwort'))]).toEqual([...wurzel])
-    expect(await keys.decryptSavedCashRootKeyHex('neues-passwort')).toBe(bargeld)
-    await expect(keys.decryptSavedStorageRootKey('altes-passwort')).rejects.toThrow()
+    expect([
+      ...(await keys.decryptSavedStorageRootKey('neues-passwort'))
+    ]).toEqual([...wurzel])
+    expect(await keys.decryptSavedCashRootKeyHex('neues-passwort')).toBe(
+      bargeld
+    )
+    await expect(
+      keys.decryptSavedStorageRootKey('altes-passwort')
+    ).rejects.toThrow()
   })
 
   it('lässt bei falschem altem Passwort alles unverändert', async () => {
     await keys.saveStorageRootKey(wurzel, 'altes-passwort')
     const vorher = speicher.get('lnurlwallet_storage_root_key')
-    await expect(setzePasswort('falsch', 'neues-passwort')).rejects.toBeInstanceOf(FalschesPasswort)
+    await expect(
+      setzePasswort('falsch', 'neues-passwort')
+    ).rejects.toBeInstanceOf(FalschesPasswort)
     expect(speicher.get('lnurlwallet_storage_root_key')).toBe(vorher)
   })
 
@@ -39,6 +47,8 @@ describe('Passwort ändern und setzen', () => {
     await setzePasswort(undefined, 'neues-passwort')
     expect(keys.savedStorageRootKeyIsEncrypted()).toBe(true)
     expect(keys.savedCashRootKeyIsEncrypted()).toBe(true)
-    expect([...(await keys.decryptSavedStorageRootKey('neues-passwort'))]).toEqual([...wurzel])
+    expect([
+      ...(await keys.decryptSavedStorageRootKey('neues-passwort'))
+    ]).toEqual([...wurzel])
   })
 })

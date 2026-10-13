@@ -20,22 +20,44 @@ const tagesname = (ts: number): string => {
   const gleich = (a: Date, b: Date) => a.toDateString() === b.toDateString()
   if (gleich(d, heute)) return 'Heute'
   if (gleich(d, gestern)) return 'Gestern'
-  return d.toLocaleDateString('de-AT', {weekday: 'short', day: 'numeric', month: 'long'})
+  return d.toLocaleDateString('de-AT', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long'
+  })
 }
-const uhrzeit = (ts: number) => new Date(ts).toLocaleTimeString('de-AT', {hour: '2-digit', minute: '2-digit'})
+const uhrzeit = (ts: number) =>
+  new Date(ts).toLocaleTimeString('de-AT', {hour: '2-digit', minute: '2-digit'})
 
 const Pfeil: Component<{richtung: Richtung}> = props => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
     <Show
       when={props.richtung !== 'neutral'}
       fallback={<path d="M4 9h13l-3-3M20 15H7l3 3" />}
     >
-      <path d={props.richtung === 'in' ? 'M12 5v14M6 13l6 6 6-6' : 'M12 19V5M6 11l6-6 6 6'} />
+      <path
+        d={
+          props.richtung === 'in'
+            ? 'M12 5v14M6 13l6 6 6-6'
+            : 'M12 19V5M6 11l6-6 6 6'
+        }
+      />
     </Show>
   </svg>
 )
 
-const VerlaufListe: Component<{eintraege: ActivityEvent[]; onPruefen: (url: string) => void}> = props => {
+const VerlaufListe: Component<{
+  eintraege: ActivityEvent[]
+  onPruefen: (url: string) => void
+}> = props => {
   const [offen, setOffen] = createSignal<string | null>(null)
   const tage = createMemo(() => {
     const gruppen: {tag: string; eintraege: ActivityEvent[]}[] = []
@@ -73,11 +95,19 @@ const VerlaufListe: Component<{eintraege: ActivityEvent[]; onPruefen: (url: stri
                       </span>
                       <span class="mitte">
                         <span class="t">{titel(e)}</span>
-                        <span class="s">{[e.label, stelle, uhrzeit(e.createdAt)].filter(Boolean).join(' · ')}</span>
+                        <span class="s">
+                          {[e.label, stelle, uhrzeit(e.createdAt)]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
                       </span>
                       <Show when={betrag !== null}>
                         <span class={`amt ${richtung}`}>
-                          {richtung === 'in' ? '+' : richtung === 'out' ? '−' : ''}
+                          {richtung === 'in'
+                            ? '+'
+                            : richtung === 'out'
+                              ? '−'
+                              : ''}
                           {betrag!.toLocaleString('de-DE')}
                         </span>
                       </Show>
@@ -86,7 +116,11 @@ const VerlaufListe: Component<{eintraege: ActivityEvent[]; onPruefen: (url: stri
                       <div class="rz-eintrag-text">
                         <p>{text}</p>
                         <Show when={url}>
-                          <button type="button" class="rz-leise" onClick={() => props.onPruefen(url!)}>
+                          <button
+                            type="button"
+                            class="rz-leise"
+                            onClick={() => props.onPruefen(url!)}
+                          >
                             Zahlung prüfen ›
                           </button>
                         </Show>

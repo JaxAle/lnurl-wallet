@@ -30,7 +30,11 @@ export type AufladeMotor = {
   pruefbar: Accessor<boolean>
   abholbar: Accessor<boolean>
   // was die Rechnung kostet: Schein + Gebühr der Ausgabestelle
-  aufteilung: Accessor<{netMsat: number; grossMsat: number; feeMsat: number} | null>
+  aufteilung: Accessor<{
+    netMsat: number
+    grossMsat: number
+    feeMsat: number
+  } | null>
   ausgabestelle: (adresse: string) => Promise<void>
   betrag: (sats: number) => void
   rechnung: () => Promise<void>
@@ -65,7 +69,9 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
 
   const grenzen = () => {
     const info = m.payRequest()
-    return info ? {min: sats(info.minSendable), max: sats(info.maxSendable)} : null
+    return info
+      ? {min: sats(info.minSendable), max: sats(info.maxSendable)}
+      : null
   }
   const ausserhalb = () => {
     const g = grenzen()
@@ -87,16 +93,18 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
       <div class="page rz-senden rz-aufladen">
         <Show
           when={trustedMints().length > 0}
-          fallback={
-            <AusgabestelleHinzufuegen motor={m.stelle} eingebettet />
-          }
+          fallback={<AusgabestelleHinzufuegen motor={m.stelle} eingebettet />}
         >
           <Show
             when={m.invoice()}
             fallback={
               <>
                 <div class="rz-seitenkopf">
-                  <A href="/empfangen" class="rz-zurueck" aria-label="Zurück zu Empfangen">
+                  <A
+                    href="/empfangen"
+                    class="rz-zurueck"
+                    aria-label="Zurück zu Empfangen"
+                  >
                     ‹
                   </A>
                   <h2>Aufladen</h2>
@@ -115,7 +123,8 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                       <p class="rz-stelle">
                         bei <b>{ziel() ? serverOf(ziel()!.server) : ''}</b>
                         <Show when={gebuehr() > 0}>
-                          {' '}· {gebuehr()} Sat{gebuehr() === 1 ? '' : 's'} Gebühr
+                          {' '}
+                          · {gebuehr()} Sat{gebuehr() === 1 ? '' : 's'} Gebühr
                         </Show>{' '}
                         <A href="/mint" class="rz-aendern">
                           ändern
@@ -125,8 +134,8 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                   >
                     <div class="rz-ueber">
                       <span>
-                        Möglich sind {grenzen()!.min.toLocaleString('de-DE')} bis{' '}
-                        {grenzen()!.max.toLocaleString('de-DE')} Sats
+                        Möglich sind {grenzen()!.min.toLocaleString('de-DE')}{' '}
+                        bis {grenzen()!.max.toLocaleString('de-DE')} Sats
                       </span>
                     </div>
                   </Show>
@@ -135,10 +144,18 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                 <button
                   type="button"
                   class="rz-knopf an rz-weiter"
-                  disabled={!ein.betrag() || ausserhalb() || !m.payRequest() || m.busy() || offlineMode()}
+                  disabled={
+                    !ein.betrag() ||
+                    ausserhalb() ||
+                    !m.payRequest() ||
+                    m.busy() ||
+                    offlineMode()
+                  }
                   onClick={() => void m.rechnung()}
                 >
-                  <span class="lbl">{m.busy() ? 'Einen Moment …' : 'Rechnung erstellen'}</span>
+                  <span class="lbl">
+                    {m.busy() ? 'Einen Moment …' : 'Rechnung erstellen'}
+                  </span>
                 </button>
               </>
             }
@@ -146,47 +163,73 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
             {rechnung => (
               <>
                 <div class="rz-seitenkopf">
-                  <button type="button" class="rz-zurueck" aria-label="Zurück zur Wallet" onClick={zurueck}>
+                  <button
+                    type="button"
+                    class="rz-zurueck"
+                    aria-label="Zurück zur Wallet"
+                    onClick={zurueck}
+                  >
                     ‹
                   </button>
                   <h2>Aufladen</h2>
                 </div>
                 <div class="rz-qr">
-                  <Qr value={rechnung().toUpperCase()} href={`lightning:${rechnung().toUpperCase()}`} />
+                  <Qr
+                    value={rechnung().toUpperCase()}
+                    href={`lightning:${rechnung().toUpperCase()}`}
+                  />
                 </div>
                 <Zaehlwerk sats={ein.betrag()} sofort>
                   <Show when={gebuehr() > 0}>
                     <p class="rz-klein">
-                      Rechnung {sats(m.aufteilung()!.grossMsat).toLocaleString('de-DE')} Sats, davon{' '}
-                      {gebuehr()} Gebühr
+                      Rechnung{' '}
+                      {sats(m.aufteilung()!.grossMsat).toLocaleString('de-DE')}{' '}
+                      Sats, davon {gebuehr()} Gebühr
                     </p>
                   </Show>
                 </Zaehlwerk>
                 <p class="rz-status">
                   <span class="rz-lampe-klein" />{' '}
-                  {m.busy() ? 'Bezahlt — Schein wird abgeholt …' : 'Wartet auf Zahlung aus deiner anderen Wallet'}
+                  {m.busy()
+                    ? 'Bezahlt — Schein wird abgeholt …'
+                    : 'Wartet auf Zahlung aus deiner anderen Wallet'}
                 </p>
                 <div class="rz-duo rz-duo-flach">
-                  <button type="button" class="rz-leise" onClick={() => copyToClipboard(rechnung())}>
+                  <button
+                    type="button"
+                    class="rz-leise"
+                    onClick={() => copyToClipboard(rechnung())}
+                  >
                     Kopieren
                   </button>
                   <Show
                     when={m.abholbar()}
                     fallback={
-                      <button type="button" class="rz-leise" disabled={m.busy()} onClick={() => m.pruefen()}>
+                      <button
+                        type="button"
+                        class="rz-leise"
+                        disabled={m.busy()}
+                        onClick={() => m.pruefen()}
+                      >
                         Jetzt nachsehen
                       </button>
                     }
                   >
-                    <button type="button" class="rz-leise" disabled={m.busy()} onClick={() => m.abholen()}>
+                    <button
+                      type="button"
+                      class="rz-leise"
+                      disabled={m.busy()}
+                      onClick={() => m.abholen()}
+                    >
                       Bezahlt? Schein abholen
                     </button>
                   </Show>
                 </div>
                 <Show when={m.pruefbar()}>
                   <p class="rz-hinweis">
-                    Die Wallet sieht von selbst nach, solange diese Seite offen ist. Bitte nicht schließen,
-                    bis der Betrag in der Wallet steht.
+                    Die Wallet sieht von selbst nach, solange diese Seite offen
+                    ist. Bitte nicht schließen, bis der Betrag in der Wallet
+                    steht.
                   </p>
                 </Show>
               </>

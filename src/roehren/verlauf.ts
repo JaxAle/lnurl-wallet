@@ -40,7 +40,8 @@ export const titel = (e: ActivityEvent): string => {
     case 'refresh':
       if (/zurückgeholt/.test(m)) return 'Zurückgeholt'
       if (/Ungeprüften Schein .* bestätigt/.test(m)) return 'Bestätigt'
-      if (/kennt einen ungeprüften Schein/.test(m)) return 'Unbekannt — zu prüfen'
+      if (/kennt einen ungeprüften Schein/.test(m))
+        return 'Unbekannt — zu prüfen'
       return 'Erneuert'
     case 'unspent':
       return 'Markierung aufgehoben'
@@ -58,11 +59,14 @@ export const betragAus = (m: string): number | null => {
   return Number.isFinite(zahl) ? zahl : null
 }
 const HOST = /\b((?:[a-z0-9-]+\.)+[a-z]{2,})\b/i
-export const stelleAus = (m: string): string | null => m.replace(/https?:\/\/\S+/g, '').match(HOST)?.[1] ?? null
+export const stelleAus = (m: string): string | null =>
+  m.replace(/https?:\/\/\S+/g, '').match(HOST)?.[1] ?? null
 
 // „Verify:“ (Original) und „Prüfen:“ (übersetzt) — der Link gehört in den aufgeklappten Teil
 const PRUEFEN = / (?:Verify|Prüfen): (\S+?)\.$/
-export const trennePruefLink = (m: string): {text: string; url: string | null} => {
+export const trennePruefLink = (
+  m: string
+): {text: string; url: string | null} => {
   const t = m.match(PRUEFEN)
   return t ? {text: m.slice(0, t.index), url: t[1]} : {text: m, url: null}
 }

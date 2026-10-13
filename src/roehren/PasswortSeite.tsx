@@ -38,9 +38,12 @@ const PasswortSeite: Component = () => {
 
   const problem = () => {
     if (hatte && !alt()) return 'Bitte das bisherige Passwort eingeben.'
-    if (neu().length < MIN_PASSWORD_LENGTH) return `Das neue Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`
-    if (neu() !== nochmal()) return 'Die beiden neuen Passwörter stimmen nicht überein.'
-    if (hatte && neu() === alt()) return 'Das neue Passwort ist dasselbe wie das bisherige.'
+    if (neu().length < MIN_PASSWORD_LENGTH)
+      return `Das neue Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`
+    if (neu() !== nochmal())
+      return 'Die beiden neuen Passwörter stimmen nicht überein.'
+    if (hatte && neu() === alt())
+      return 'Das neue Passwort ist dasselbe wie das bisherige.'
     return null
   }
 
@@ -61,7 +64,13 @@ const PasswortSeite: Component = () => {
     }
   }
 
-  const feld = (props: {id: string; label: string; wert: () => string; setze: (v: string) => void; neu?: boolean}) => (
+  const feld = (props: {
+    id: string
+    label: string
+    wert: () => string
+    setze: (v: string) => void
+    neu?: boolean
+  }) => (
     <>
       <label class="rz-feldname" for={props.id}>
         {props.label}
@@ -83,7 +92,11 @@ const PasswortSeite: Component = () => {
     <RequireWallet>
       <div class="page rz-einstellungen">
         <div class="rz-seitenkopf">
-          <A href="/settings" class="rz-zurueck" aria-label="Zurück zu den Einstellungen">
+          <A
+            href="/settings"
+            class="rz-zurueck"
+            aria-label="Zurück zu den Einstellungen"
+          >
             ‹
           </A>
           <h2>{hatte ? 'Passwort ändern' : 'Passwort setzen'}</h2>
@@ -94,18 +107,32 @@ const PasswortSeite: Component = () => {
           fallback={
             <div class="rz-frage">
               <h3>{hatte ? 'Passwort geändert.' : 'Passwort gesetzt.'}</h3>
-              <p>Ab jetzt öffnet sich die Wallet auf diesem Gerät nur mit dem neuen Passwort.</p>
-              <p class="rz-hinweis">
-                Hast du es in einem Passwortmanager (z. B. Bitwarden) gespeichert, trag dort jetzt das neue ein.
+              <p>
+                Ab jetzt öffnet sich die Wallet auf diesem Gerät nur mit dem
+                neuen Passwort.
               </p>
               <p class="rz-hinweis">
-                Sicherungsdateien von früher öffnen sich weiter mit dem Passwort, das beim Herunterladen galt
-                {hatte ? '' : ' — oder ohne'}. Lade jetzt eine neue Sicherung herunter.
+                Hast du es in einem Passwortmanager (z. B. Bitwarden)
+                gespeichert, trag dort jetzt das neue ein.
               </p>
-              <button type="button" class="rz-knopf an rz-weiter" onClick={downloadBackupFile}>
+              <p class="rz-hinweis">
+                Sicherungsdateien von früher öffnen sich weiter mit dem
+                Passwort, das beim Herunterladen galt
+                {hatte ? '' : ' — oder ohne'}. Lade jetzt eine neue Sicherung
+                herunter.
+              </p>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                onClick={downloadBackupFile}
+              >
                 <span class="lbl">Neue Sicherung herunterladen</span>
               </button>
-              <button type="button" class="rz-leise rz-block rz-mitte" onClick={() => navigate('/settings')}>
+              <button
+                type="button"
+                class="rz-leise rz-block rz-mitte"
+                onClick={() => navigate('/settings')}
+              >
                 Fertig
               </button>
             </div>
@@ -120,26 +147,61 @@ const PasswortSeite: Component = () => {
             when={geprueft()}
             fallback={
               <>
-                {feld({id: 'pw-alt', label: 'Bisheriges Passwort', wert: alt, setze: setAlt})}
+                {feld({
+                  id: 'pw-alt',
+                  label: 'Bisheriges Passwort',
+                  wert: alt,
+                  setze: setAlt
+                })}
                 <Show when={fehler()}>
                   <p class="rz-erkannt fremd">{fehler()}</p>
                 </Show>
-                <button type="button" class="rz-knopf an rz-weiter" disabled={!alt() || arbeitet()} onClick={() => void weiter()}>
-                  <span class="lbl">{arbeitet() ? 'Einen Moment …' : 'Weiter'}</span>
+                <button
+                  type="button"
+                  class="rz-knopf an rz-weiter"
+                  disabled={!alt() || arbeitet()}
+                  onClick={() => void weiter()}
+                >
+                  <span class="lbl">
+                    {arbeitet() ? 'Einen Moment …' : 'Weiter'}
+                  </span>
                 </button>
               </>
             }
           >
-            {feld({id: 'pw-neu', label: 'Neues Passwort', wert: neu, setze: setNeu, neu: true})}
-            {feld({id: 'pw-nochmal', label: 'Neues Passwort wiederholen', wert: nochmal, setze: setNochmal, neu: true})}
+            {feld({
+              id: 'pw-neu',
+              label: 'Neues Passwort',
+              wert: neu,
+              setze: setNeu,
+              neu: true
+            })}
+            {feld({
+              id: 'pw-nochmal',
+              label: 'Neues Passwort wiederholen',
+              wert: nochmal,
+              setze: setNochmal,
+              neu: true
+            })}
             <Show when={(neu() || nochmal()) && problem()}>
               <p class="rz-hinweis">{problem()}</p>
             </Show>
             <Show when={fehler()}>
               <p class="rz-erkannt fremd">{fehler()}</p>
             </Show>
-            <button type="button" class="rz-knopf an rz-weiter" disabled={!!problem() || arbeitet()} onClick={() => void los()}>
-              <span class="lbl">{arbeitet() ? 'Einen Moment …' : hatte ? 'Passwort ändern' : 'Passwort setzen'}</span>
+            <button
+              type="button"
+              class="rz-knopf an rz-weiter"
+              disabled={!!problem() || arbeitet()}
+              onClick={() => void los()}
+            >
+              <span class="lbl">
+                {arbeitet()
+                  ? 'Einen Moment …'
+                  : hatte
+                    ? 'Passwort ändern'
+                    : 'Passwort setzen'}
+              </span>
             </button>
           </Show>
         </Show>

@@ -118,7 +118,11 @@ import FiatValue from '../components/FiatValue'
 import AddressDialog from '../components/AddressDialog'
 import RescanDialog from '../components/RescanDialog'
 import Aufladen from '../roehren/Aufladen'
-import {AusgabestelleHinzufuegen, AusgabestellenListe, StelleSeite} from '../roehren/Ausgabestellen'
+import {
+  AusgabestelleHinzufuegen,
+  AusgabestellenListe,
+  StelleSeite
+} from '../roehren/Ausgabestellen'
 
 // LUD-21 auto-poll interval, in seconds - both the countdown shown on the
 // button and the cadence of the automatic check
@@ -148,7 +152,10 @@ const mintAddressFor = (server: string): string =>
 // without a network connection - only the minting half below is gated on
 // both (see RequireWallet, and the individual offlineMode() checks on its
 // own controls).
-const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | 'stelle'}> = props => {
+const Mint: Component<{
+  aufladen?: boolean
+  ansicht?: 'liste' | 'hinzufuegen' | 'stelle'
+}> = props => {
   const {state, bearers, addBearer, logActivity} = useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
@@ -319,7 +326,9 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
     if (!document.hidden && pollTimer) void checkVerify()
   }
   document.addEventListener('visibilitychange', beiRueckkehr)
-  onCleanup(() => document.removeEventListener('visibilitychange', beiRueckkehr))
+  onCleanup(() =>
+    document.removeEventListener('visibilitychange', beiRueckkehr)
+  )
 
   const proceedWithPayRequest = (info: PayRequestInfo) => {
     setPayRequest(info)
@@ -359,7 +368,10 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
     }
     const url = resolveMintInput(mintInput())
     if (!url) {
-      notify('Bitte LNURL oder Adresse einer Ausgabestelle eingeben.', NotifyKind.ERROR)
+      notify(
+        'Bitte LNURL oder Adresse einer Ausgabestelle eingeben.',
+        NotifyKind.ERROR
+      )
       return
     }
     setPendingTrust(null)
@@ -1121,10 +1133,7 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
           NotifyKind.ERROR
         )
       } else {
-        notify(
-          `${serverOf(pending.server)} hinzugefügt.`,
-          NotifyKind.SUCCESS
-        )
+        notify(`${serverOf(pending.server)} hinzugefügt.`, NotifyKind.SUCCESS)
       }
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
@@ -1218,7 +1227,13 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
 
   // Fork: /mint ist die ruhige Liste, /mint/hinzufuegen der Weg dazu (roehren/Ausgabestellen.tsx);
   // diese ganze Seite bleibt als Werkstatt unter /mint/werkstatt
-  if (props.ansicht === 'liste') return <AusgabestellenListe alleAktualisieren={refreshAllMints} sucht={addressBusy} />
+  if (props.ansicht === 'liste')
+    return (
+      <AusgabestellenListe
+        alleAktualisieren={refreshAllMints}
+        sucht={addressBusy}
+      />
+    )
   // Seite einer Stelle: was früher die Karte hier trug; Adresse und Suche öffnen die Dialoge des Originals
   if (props.ansicht === 'stelle') {
     return (
@@ -1235,10 +1250,20 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
           }}
         />
         <Show when={addressDialogFor()}>
-          {server => <AddressDialog server={server()} onClose={() => setAddressDialogFor(null)} />}
+          {server => (
+            <AddressDialog
+              server={server()}
+              onClose={() => setAddressDialogFor(null)}
+            />
+          )}
         </Show>
         <Show when={rescanDialogFor()}>
-          {server => <RescanDialog server={server()} onClose={() => setRescanDialogFor(null)} />}
+          {server => (
+            <RescanDialog
+              server={server()}
+              onClose={() => setRescanDialogFor(null)}
+            />
+          )}
         </Show>
       </>
     )
@@ -1576,7 +1601,8 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                         }
                       >
                         <p class="warning">
-                          Diese Ausgabestelle entfernen? Ihre Scheine gelten dann nicht mehr als offline geprüft.
+                          Diese Ausgabestelle entfernen? Ihre Scheine gelten
+                          dann nicht mehr als offline geprüft.
                         </p>
                         <div class="btns">
                           <button onClick={() => removeMint(mint.server)}>
@@ -1693,7 +1719,9 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                 </p>
                 <p class="mint-pubkey">{pending().pubkey}</p>
                 <div class="btns">
-                  <button onClick={confirmAddressTrust}>Diesem Schlüssel vertrauen</button>
+                  <button onClick={confirmAddressTrust}>
+                    Diesem Schlüssel vertrauen
+                  </button>
                   <button onClick={cancelAddressTrust}>Abbrechen</button>
                 </div>
               </div>
@@ -1858,11 +1886,16 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                       <h4>Dieser Ausgabestelle vertrauen?</h4>
                       <p>
                         First time seeing a signing key from{' '}
-                        <strong>{pending().server}</strong>. Vertraust du ihr, gelten ihre Scheine mit diesem Schlüssel als offline geprüft – das lässt sich später aufheben, solange du keinen Schein von ihr hast.
+                        <strong>{pending().server}</strong>. Vertraust du ihr,
+                        gelten ihre Scheine mit diesem Schlüssel als offline
+                        geprüft – das lässt sich später aufheben, solange du
+                        keinen Schein von ihr hast.
                       </p>
                       <pre>{pending().mintPubkey}</pre>
                       <div class="btns">
-                        <button onClick={confirmTrust}>Dieser Ausgabestelle vertrauen</button>
+                        <button onClick={confirmTrust}>
+                          Dieser Ausgabestelle vertrauen
+                        </button>
                         <button onClick={cancelTrust}>Abbrechen</button>
                         <a
                           class="icon-btn"
@@ -1940,7 +1973,9 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                         {amount => (
                           <Show when={amount().feeMsat > 0}>
                             <p class="bearer-hint">
-                              Rechnung: {msatToSats(amount().grossMsat)} Sats (davon {msatToSats(amount().feeMsat)} Sat Gebühr) – Schein: {msatToSats(amount().netMsat)}{' '} Sats
+                              Rechnung: {msatToSats(amount().grossMsat)} Sats
+                              (davon {msatToSats(amount().feeMsat)} Sat Gebühr)
+                              – Schein: {msatToSats(amount().netMsat)} Sats
                               <FiatValue msat={amount().netMsat} />
                             </p>
                           </Show>
@@ -1972,7 +2007,10 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                         </button>
                       </div>
                       <Show when={invoice()}>
-                        <h4>1. Diese Rechnung mit einer beliebigen Lightning-Wallet bezahlen</h4>
+                        <h4>
+                          1. Diese Rechnung mit einer beliebigen
+                          Lightning-Wallet bezahlen
+                        </h4>
                         <Qr
                           value={invoice()!.toUpperCase()}
                           href={`lightning:${invoice()!.toUpperCase()}`}
@@ -2000,7 +2038,9 @@ const Mint: Component<{aufladen?: boolean; ansicht?: 'liste' | 'hinzufuegen' | '
                           {secret => (
                             <>
                               <label>
-                                2. Diese Rechnung ist an das Geheimnis dieser Wallet gebunden – nichts einzufügen. Nach dem Bezahlen unten abholen
+                                2. Diese Rechnung ist an das Geheimnis dieser
+                                Wallet gebunden – nichts einzufügen. Nach dem
+                                Bezahlen unten abholen
                                 <Show when={verifyUrl()}>
                                   {' '}
                                   (or wait - this mint checks automatically)

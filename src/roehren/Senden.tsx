@@ -27,7 +27,8 @@ import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
 const Senden: Component = () => {
-  const {bearers, addBearer, updateBearer, removeBearer, logActivity} = useWallet()
+  const {bearers, addBearer, updateBearer, removeBearer, logActivity} =
+    useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
 
@@ -40,10 +41,14 @@ const Senden: Component = () => {
   // gebunden: Teil eines ungeklärten Vorgangs (klaerung.ts) — nicht ein zweites Mal verwenden
   const verfuegbar = createMemo(() => {
     const g = gebunden()
-    return bearers().filter(b => !b.spent && !b.deviceId && b.verified && !g.has(b.id))
+    return bearers().filter(
+      b => !b.spent && !b.deviceId && b.verified && !g.has(b.id)
+    )
   })
-  const guthaben = () => Math.floor(verfuegbar().reduce((a, b) => a + b.amount, 0) / 1000)
-  const groesster = () => Math.floor(Math.max(0, ...verfuegbar().map(b => b.amount)) / 1000)
+  const guthaben = () =>
+    Math.floor(verfuegbar().reduce((a, b) => a + b.amount, 0) / 1000)
+  const groesster = () =>
+    Math.floor(Math.max(0, ...verfuegbar().map(b => b.amount)) / 1000)
 
   const zuViel = () => betrag() > groesster()
   const grund = () =>
@@ -75,12 +80,20 @@ const Senden: Component = () => {
           notify(nichtErreichbar(host), NotifyKind.ERROR)
           return
         }
-        let ergebnis: Awaited<ReturnType<typeof splitBearerIntoAmounts>> | undefined
+        let ergebnis:
+          Awaited<ReturnType<typeof splitBearerIntoAmounts>> | undefined
         await beobachte('teilen', [quelle], bearers, async () => {
           ergebnis = await splitBearerIntoAmounts(
             quelle,
             [{amountMsat: msat}],
-            {addBearer, updateBearer, removeBearer, logActivity, deviceClient, requireDeviceClient},
+            {
+              addBearer,
+              updateBearer,
+              removeBearer,
+              logActivity,
+              deviceClient,
+              requireDeviceClient
+            },
             {plain: false}
           )
         })
@@ -91,7 +104,10 @@ const Senden: Component = () => {
       merkeUnterwegs(ziel.id)
       setSchein(ziel)
     } catch (err) {
-      notify(`Senden geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+      notify(
+        `Senden geht gerade nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
     } finally {
       setArbeitet(false)
     }
@@ -116,11 +132,19 @@ const Senden: Component = () => {
     if (!s) return
     setHolt(true)
     try {
-      const ergebnis = await holeZurueck(s, {addBearer, updateBearer, removeBearer, logActivity})
+      const ergebnis = await holeZurueck(s, {
+        addBearer,
+        updateBearer,
+        removeBearer,
+        logActivity
+      })
       if (ergebnis === 'zurueck') setZurueck(true)
       // 'schon-eingeloest': der Schein ist nun weg, die Seite zeigt „eingelöst“
     } catch (err) {
-      notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+      notify(
+        `Zurückholen geht gerade nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
     } finally {
       setHolt(false)
     }
@@ -128,134 +152,171 @@ const Senden: Component = () => {
 
   return (
     <RequireWallet>
-    <div class="page rz-senden">
-      <Show
-        when={aktuell()}
-        fallback={
-          <>
-            <div class="rz-seitenkopf">
-              <A href="/wallet" class="rz-zurueck" aria-label="Zurück zur Wallet">
-                ‹
-              </A>
-              <h2>Senden</h2>
-            </div>
-            {/* ohne Guthaben ein Weg statt einer Meldung (Steve, 2026-10-12) */}
+      <div class="page rz-senden">
+        <Show
+          when={aktuell()}
+          fallback={
+            <>
+              <div class="rz-seitenkopf">
+                <A
+                  href="/wallet"
+                  class="rz-zurueck"
+                  aria-label="Zurück zur Wallet"
+                >
+                  ‹
+                </A>
+                <h2>Senden</h2>
+              </div>
+              {/* ohne Guthaben ein Weg statt einer Meldung (Steve, 2026-10-12) */}
+              <Show
+                when={guthaben() > 0}
+                fallback={
+                  <>
+                    <Zaehlwerk sats={0} sofort kalt>
+                      <p class="rz-zeile-matt">Noch keine Sats</p>
+                    </Zaehlwerk>
+                    <A
+                      href="/aufladen"
+                      class="rz-knopf an rz-weiter rz-link-knopf"
+                    >
+                      <span class="lbl">Aufladen</span>
+                    </A>
+                    <A href="/empfangen" class="rz-leise rz-mitte rz-block">
+                      oder einen Schein empfangen ›
+                    </A>
+                  </>
+                }
+              >
+                <Zaehlwerk
+                  sats={betrag()}
+                  sofort
+                  kalt={!betrag() || zuViel()}
+                  wahl={ein.wahl()}
+                  onWahl={ein.kurs() ? ein.waehle : undefined}
+                  euroAnzeige={ein.euroAnzeige()}
+                >
+                  <Show when={betrag() > 0 && zuViel()}>
+                    <div class="rz-ueber">
+                      <span>{grund()}</span>
+                    </div>
+                    <Show when={groesster() > 0 && betrag() <= guthaben()}>
+                      <button
+                        type="button"
+                        class="rz-leise"
+                        onClick={() => ein.setzeSats(groesster())}
+                      >
+                        {groesster().toLocaleString('de-DE')} senden
+                      </button>
+                    </Show>
+                  </Show>
+                </Zaehlwerk>
+                <Tastatur betrag={ein} />
+                <button
+                  type="button"
+                  class="rz-knopf an rz-weiter"
+                  disabled={!betrag() || zuViel() || arbeitet()}
+                  onClick={() => void weiter()}
+                >
+                  <span class="lbl">
+                    {arbeitet() ? 'Einen Moment …' : 'Weiter'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  class="rz-leise"
+                  onClick={() => navigate('/wallet?bezahlen=1')}
+                >
+                  Rechnung oder Adresse bekommen? bezahlen ›
+                </button>
+              </Show>
+            </>
+          }
+        >
+          {s => (
             <Show
-              when={guthaben() > 0}
+              when={!zurueck()}
               fallback={
-                <>
-                  <Zaehlwerk sats={0} sofort kalt>
-                    <p class="rz-zeile-matt">Noch keine Sats</p>
+                <div class="rz-fertig">
+                  {/* nichts ist weggegangen, also glüht nichts und es gibt kein Vorzeichen (Steve) */}
+                  <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt>
+                    <p class="rz-zeile-matt">Sats zurückgeholt</p>
+                    <p class="rz-klein">
+                      Der gezeigte QR ist wertlos, der Betrag bleibt bei dir.
+                    </p>
                   </Zaehlwerk>
-                  <A href="/aufladen" class="rz-knopf an rz-weiter rz-link-knopf">
-                    <span class="lbl">Aufladen</span>
-                  </A>
-                  <A href="/empfangen" class="rz-leise rz-mitte rz-block">
-                    oder einen Schein empfangen ›
-                  </A>
-                </>
-              }
-            >
-            <Zaehlwerk
-              sats={betrag()}
-              sofort
-              kalt={!betrag() || zuViel()}
-              wahl={ein.wahl()}
-              onWahl={ein.kurs() ? ein.waehle : undefined}
-              euroAnzeige={ein.euroAnzeige()}
-            >
-              <Show when={betrag() > 0 && zuViel()}>
-                <div class="rz-ueber">
-                  <span>{grund()}</span>
-                </div>
-                <Show when={groesster() > 0 && betrag() <= guthaben()}>
                   <button
                     type="button"
-                    class="rz-leise"
-                    onClick={() => ein.setzeSats(groesster())}
+                    class="rz-knopf an rz-weiter"
+                    onClick={() => navigate('/wallet')}
                   >
-                    {groesster().toLocaleString('de-DE')} senden
+                    <span class="lbl">Zur Wallet</span>
                   </button>
-                </Show>
+                </div>
+              }
+            >
+              <Show
+                when={!eingeloest()}
+                fallback={
+                  <div class="rz-fertig">
+                    {/* „−50“: eine Bewegung, kein Stand — sonst liest man es als Guthaben (Steve) */}
+                    <Zaehlwerk
+                      sats={Math.floor(s().amount / 1000)}
+                      sofort
+                      vorzeichen="−"
+                    >
+                      <p class="rz-zeile-matt">Sats gesendet</p>
+                      <p class="rz-klein">
+                        Der Empfänger hat den Schein eingelöst.
+                      </p>
+                    </Zaehlwerk>
+                    <button
+                      type="button"
+                      class="rz-knopf an rz-weiter"
+                      onClick={() => navigate('/wallet')}
+                    >
+                      <span class="lbl">Zur Wallet</span>
+                    </button>
+                  </div>
+                }
+              >
+                <div class="rz-seitenkopf">
+                  <h2>Schein zeigen</h2>
+                </div>
+                <div class="rz-qr">
+                  <Qr value={toBech32Lnurl(s().url)} />
+                </div>
+                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort />
+                <p class="rz-status">
+                  <span class="rz-lampe-klein" /> Wartet, bis der Schein
+                  eingelöst ist
+                </p>
+                <p class="rz-hinweis">
+                  Die Wallet fragt nach, solange sie offen ist. Du kannst auch
+                  schon zurück — dann steht der Schein im Verlauf unter
+                  „Unterwegs“.
+                </p>
+                <button
+                  type="button"
+                  class="rz-leise"
+                  onClick={() => navigate('/wallet')}
+                >
+                  Zurück zur Wallet
+                </button>
+                <button
+                  type="button"
+                  class="rz-leise"
+                  disabled={holt()}
+                  onClick={() => void zurueckholen()}
+                >
+                  {holt()
+                    ? 'Einen Moment …'
+                    : 'Doch nicht senden, Schein zurückholen'}
+                </button>
               </Show>
-            </Zaehlwerk>
-            <Tastatur betrag={ein} />
-            <button
-              type="button"
-              class="rz-knopf an rz-weiter"
-              disabled={!betrag() || zuViel() || arbeitet()}
-              onClick={() => void weiter()}
-            >
-              <span class="lbl">{arbeitet() ? 'Einen Moment …' : 'Weiter'}</span>
-            </button>
-            <button type="button" class="rz-leise" onClick={() => navigate('/wallet?bezahlen=1')}>
-              Rechnung oder Adresse bekommen? bezahlen ›
-            </button>
             </Show>
-          </>
-        }
-      >
-        {s => (
-          <Show
-            when={!zurueck()}
-            fallback={
-              <div class="rz-fertig">
-                {/* nichts ist weggegangen, also glüht nichts und es gibt kein Vorzeichen (Steve) */}
-                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt>
-                  <p class="rz-zeile-matt">Sats zurückgeholt</p>
-                  <p class="rz-klein">Der gezeigte QR ist wertlos, der Betrag bleibt bei dir.</p>
-                </Zaehlwerk>
-                <button type="button" class="rz-knopf an rz-weiter" onClick={() => navigate('/wallet')}>
-                  <span class="lbl">Zur Wallet</span>
-                </button>
-              </div>
-            }
-          >
-          <Show
-            when={!eingeloest()}
-            fallback={
-              <div class="rz-fertig">
-                {/* „−50“: eine Bewegung, kein Stand — sonst liest man es als Guthaben (Steve) */}
-                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort vorzeichen="−">
-                  <p class="rz-zeile-matt">Sats gesendet</p>
-                  <p class="rz-klein">Der Empfänger hat den Schein eingelöst.</p>
-                </Zaehlwerk>
-                <button type="button" class="rz-knopf an rz-weiter" onClick={() => navigate('/wallet')}>
-                  <span class="lbl">Zur Wallet</span>
-                </button>
-              </div>
-            }
-          >
-            <div class="rz-seitenkopf">
-              <h2>Schein zeigen</h2>
-            </div>
-            <div class="rz-qr">
-              <Qr value={toBech32Lnurl(s().url)} />
-            </div>
-            <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort />
-            <p class="rz-status">
-              <span class="rz-lampe-klein" /> Wartet, bis der Schein eingelöst ist
-            </p>
-            <p class="rz-hinweis">
-              Die Wallet fragt nach, solange sie offen ist. Du kannst auch schon zurück — dann
-              steht der Schein im Verlauf unter „Unterwegs“.
-            </p>
-            <button type="button" class="rz-leise" onClick={() => navigate('/wallet')}>
-              Zurück zur Wallet
-            </button>
-            <button
-              type="button"
-              class="rz-leise"
-              disabled={holt()}
-              onClick={() => void zurueckholen()}
-            >
-              {holt() ? 'Einen Moment …' : 'Doch nicht senden, Schein zurückholen'}
-            </button>
-          </Show>
-          </Show>
-        )}
-      </Show>
-    </div>
+          )}
+        </Show>
+      </div>
     </RequireWallet>
   )
 }

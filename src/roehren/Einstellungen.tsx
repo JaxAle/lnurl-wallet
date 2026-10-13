@@ -12,10 +12,20 @@ import {A, useNavigate} from '@solidjs/router'
 
 import {allAddons} from '../addons/registry'
 import {enabledAddonIds} from '../addons/enabled'
-import {AUTO_LOCK_LABEL, AUTO_LOCK_OPTIONS, autoLockMinutes, setAutoLockMinutes} from '../autoLock'
+import {
+  AUTO_LOCK_LABEL,
+  AUTO_LOCK_OPTIONS,
+  autoLockMinutes,
+  setAutoLockMinutes
+} from '../autoLock'
 import {currency, setCurrency} from '../currency'
 import type {Currency} from '../currency'
-import {GAP_LIMIT_LABEL, GAP_LIMIT_OPTIONS, gapLimit, setGapLimit} from '../gapLimit'
+import {
+  GAP_LIMIT_LABEL,
+  GAP_LIMIT_OPTIONS,
+  gapLimit,
+  setGapLimit
+} from '../gapLimit'
 import {offlineMode, setOfflineMode} from '../offlineMode'
 import {downloadBackupFile} from '../storage'
 import {trustedMints} from '../trustedMints'
@@ -34,10 +44,16 @@ const FASSUNG = new Date(__BAU_ZEIT__).toLocaleString('de-AT', {
 })
 
 const WAEHRUNGEN: Currency[] = ['eur', 'usd', 'gbp', 'none']
-const WAEHRUNG_NAME: Record<Currency, string> = {eur: 'Euro', usd: 'US-Dollar', gbp: 'Pfund', none: 'Aus'}
+const WAEHRUNG_NAME: Record<Currency, string> = {
+  eur: 'Euro',
+  usd: 'US-Dollar',
+  gbp: 'Pfund',
+  none: 'Aus'
+}
 
 // nächster Wert in der Reihe, am Ende wieder von vorn (Prototyp: autolock)
-const weiter = <T,>(reihe: readonly T[], jetzt: T): T => reihe[(reihe.indexOf(jetzt) + 1) % reihe.length]
+const weiter = <T,>(reihe: readonly T[], jetzt: T): T =>
+  reihe[(reihe.indexOf(jetzt) + 1) % reihe.length]
 
 const host = (origin: string): string => {
   try {
@@ -48,7 +64,15 @@ const host = (origin: string): string => {
 }
 
 const Pfeil: Component = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
     <path d="M9 5l7 7-7 7" />
   </svg>
 )
@@ -81,20 +105,40 @@ const Zeile: Component<ZeileProps> = props => {
     <Show
       when={props.href}
       fallback={
-        <button type="button" class="rz-setting" classList={{gefahr: props.gefahr}} onClick={() => props.onClick?.()}>
+        <button
+          type="button"
+          class="rz-setting"
+          classList={{gefahr: props.gefahr}}
+          onClick={() => props.onClick?.()}
+        >
           {innen}
         </button>
       }
     >
-      <A href={props.href!} class="rz-setting" classList={{gefahr: props.gefahr}}>
+      <A
+        href={props.href!}
+        class="rz-setting"
+        classList={{gefahr: props.gefahr}}
+      >
         {innen}
       </A>
     </Show>
   )
 }
 
-const Schalter: Component<{label: string; an: boolean; unter?: string; onClick: () => void}> = props => (
-  <button type="button" class="rz-setting" role="switch" aria-checked={props.an} onClick={() => props.onClick()}>
+const Schalter: Component<{
+  label: string
+  an: boolean
+  unter?: string
+  onClick: () => void
+}> = props => (
+  <button
+    type="button"
+    class="rz-setting"
+    role="switch"
+    aria-checked={props.an}
+    onClick={() => props.onClick()}
+  >
     <span>
       <span class="sl">{props.label}</span>
       <Show when={props.unter}>
@@ -113,14 +157,24 @@ const Gruppe: Component<{titel: string; children: JSX.Element}> = props => (
 )
 
 const Einstellungen: Component = () => {
-  const {state, encrypted, encryptionUpgraded, forgetWallet, activity, clearActivity} = useWallet()
+  const {
+    state,
+    encrypted,
+    encryptionUpgraded,
+    forgetWallet,
+    activity,
+    clearActivity
+  } = useWallet()
   const navigate = useNavigate()
   const [fragt, setFragt] = createSignal(false)
   const [verlaufFrage, setVerlaufFrage] = createSignal(false)
   const offen = () => state() === 'unlocked'
 
   // eingeschaltete Extras mit eigener Seite — im Original standen sie im Menü
-  const extras = () => allAddons().filter(a => enabledAddonIds().has(a.manifest.id) && a.manifest.nav)
+  const extras = () =>
+    allAddons().filter(
+      a => enabledAddonIds().has(a.manifest.id) && a.manifest.nav
+    )
 
   const entfernen = () => {
     forgetWallet()
@@ -136,15 +190,23 @@ const Einstellungen: Component = () => {
         <Show when={offen()}>
           <Zeile
             label={encrypted() ? 'Passwort ändern' : 'Passwort setzen'}
-            unter={encrypted() ? undefined : 'Schützt die Wallet auf diesem Gerät'}
+            unter={
+              encrypted() ? undefined : 'Schützt die Wallet auf diesem Gerät'
+            }
             href="/settings/passwort"
           />
         </Show>
         <Zeile
           label="Automatisch sperren"
           wert={AUTO_LOCK_LABEL[autoLockMinutes()]}
-          unter={encrypted() ? undefined : 'Wirkt nur, wenn die Wallet ein Passwort hat'}
-          onClick={() => setAutoLockMinutes(weiter(AUTO_LOCK_OPTIONS, autoLockMinutes()))}
+          unter={
+            encrypted()
+              ? undefined
+              : 'Wirkt nur, wenn die Wallet ein Passwort hat'
+          }
+          onClick={() =>
+            setAutoLockMinutes(weiter(AUTO_LOCK_OPTIONS, autoLockMinutes()))
+          }
         />
         <Show when={offen() && !encryptionUpgraded()}>
           <Zeile
@@ -167,31 +229,53 @@ const Einstellungen: Component = () => {
             onClick={downloadBackupFile}
           />
         </Show>
-        <Zeile label="Sicherung einspielen" href="/settings/erweitert?teil=einspielen" />
+        <Zeile
+          label="Sicherung einspielen"
+          href="/settings/erweitert?teil=einspielen"
+        />
       </Gruppe>
 
       <Gruppe titel="Extras">
         <For each={extras()}>
-          {addon => <Zeile label={addon.manifest.nav!.label} href={addon.manifest.nav!.route ?? `/addons/${addon.manifest.id}`} />}
+          {addon => (
+            <Zeile
+              label={addon.manifest.nav!.label}
+              href={addon.manifest.nav!.route ?? `/addons/${addon.manifest.id}`}
+            />
+          )}
         </For>
         <Show when={vaultEnabled()}>
           <Zeile label="Hardware-Tresor" href="/vault" />
         </Show>
         <Zeile
           label="Extras"
-          wert={extras().length > 0 ? `${extras().length} an` : 'Geschenkkarte, Zeitschloss …'}
+          wert={
+            extras().length > 0
+              ? `${extras().length} an`
+              : 'Geschenkkarte, Zeitschloss …'
+          }
           href="/settings/erweitert?teil=extras"
         />
       </Gruppe>
 
       <Gruppe titel="Anzeige">
-        <Zeile label="Währung" wert={WAEHRUNG_NAME[currency()]} onClick={() => setCurrency(weiter(WAEHRUNGEN, currency()))} />
+        <Zeile
+          label="Währung"
+          wert={WAEHRUNG_NAME[currency()]}
+          onClick={() => setCurrency(weiter(WAEHRUNGEN, currency()))}
+        />
       </Gruppe>
 
       <Gruppe titel="Ausgabestellen">
         <Zeile
           label={trustedMints().length > 1 ? 'Ausgabestellen' : 'Ausgabestelle'}
-          wert={trustedMints().length > 0 ? trustedMints().map(m => host(m.server)).join(', ') : 'keine'}
+          wert={
+            trustedMints().length > 0
+              ? trustedMints()
+                  .map(m => host(m.server))
+                  .join(', ')
+              : 'keine'
+          }
           href="/mint"
         />
       </Gruppe>
@@ -218,10 +302,16 @@ const Einstellungen: Component = () => {
             an={vaultEnabled()}
             onClick={() => setVaultEnabled(!vaultEnabled())}
           />
-          <Zeile label="Alle Einstellungen des Originals" href="/settings/erweitert" />
+          <Zeile
+            label="Alle Einstellungen des Originals"
+            href="/settings/erweitert"
+          />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />
           <Show when={offen() && activity().length > 0}>
-            <Zeile label="Verlauf löschen" onClick={() => setVerlaufFrage(true)} />
+            <Zeile
+              label="Verlauf löschen"
+              onClick={() => setVerlaufFrage(true)}
+            />
             <Show when={verlaufFrage()}>
               <Rueckfrage
                 titel="Verlauf löschen?"
@@ -232,7 +322,10 @@ const Einstellungen: Component = () => {
                 }}
                 onNein={() => setVerlaufFrage(false)}
               >
-                <p>Nur die Liste im Verlauf verschwindet — deine Scheine bleiben unberührt.</p>
+                <p>
+                  Nur die Liste im Verlauf verschwindet — deine Scheine bleiben
+                  unberührt.
+                </p>
               </Rueckfrage>
             </Show>
           </Show>
@@ -259,8 +352,9 @@ const Einstellungen: Component = () => {
               }}
             >
               <p>
-                Hast du eine Sicherung? Ohne sie sind die Scheine auf diesem Gerät verloren — die zwölf Wörter allein
-                bringen sie nicht zurück.
+                Hast du eine Sicherung? Ohne sie sind die Scheine auf diesem
+                Gerät verloren — die zwölf Wörter allein bringen sie nicht
+                zurück.
               </p>
             </Rueckfrage>
           </Show>

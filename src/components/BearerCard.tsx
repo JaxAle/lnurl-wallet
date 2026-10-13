@@ -227,7 +227,10 @@ const BearerCard: Component<BearerCardProps> = props => {
       `Markierung aufgehoben: ${msatToSats(props.bearer.amount)} Sats von ${serverOf(props.bearer.url)}.`,
       props.bearer.label
     )
-    notify('Markierung aufgehoben – alle Aktionen wieder möglich.', NotifyKind.SUCCESS)
+    notify(
+      'Markierung aufgehoben – alle Aktionen wieder möglich.',
+      NotifyKind.SUCCESS
+    )
   }
 
   // opens the hand-over panel - browser-only notes reveal immediately
@@ -585,7 +588,12 @@ const BearerCard: Component<BearerCardProps> = props => {
       </Show>
       <Show when={confirmUnspend()}>
         <p class="warning">
-          Dieser Schein ist vielleicht schon endgültig weg – wurde er bezahlt oder vom Empfänger eingelöst, bringt das Aufheben ihn nicht zurück (es ist nur eine Markierung hier, keine Abfrage). Und hast du ihn weitergegeben und diese Wallet gibt ihn vor dem Empfänger aus oder erneuert ihn, wird dessen Kopie wertlos statt deiner. Trotzdem aufheben?
+          Dieser Schein ist vielleicht schon endgültig weg – wurde er bezahlt
+          oder vom Empfänger eingelöst, bringt das Aufheben ihn nicht zurück (es
+          ist nur eine Markierung hier, keine Abfrage). Und hast du ihn
+          weitergegeben und diese Wallet gibt ihn vor dem Empfänger aus oder
+          erneuert ihn, wird dessen Kopie wertlos statt deiner. Trotzdem
+          aufheben?
         </p>
         <div class="btns">
           <button onClick={unspend}>Trotzdem aufheben</button>
@@ -594,7 +602,8 @@ const BearerCard: Component<BearerCardProps> = props => {
       </Show>
       <Show when={confirmDelete()}>
         <p class="warning">
-          Diesen ausgegebenen Schein aus der Wallet entfernen? War er doch nicht ausgegeben, sind die Sats weg, außer du hast ihn anderswo gesichert.
+          Diesen ausgegebenen Schein aus der Wallet entfernen? War er doch nicht
+          ausgegeben, sind die Sats weg, außer du hast ihn anderswo gesichert.
         </p>
         <div class="btns">
           <button

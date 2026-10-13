@@ -66,11 +66,22 @@ const zahl = (n: number) => n.toLocaleString('de-DE')
 const FARBEN = 'abcdef'
 const farbe = (host: string) => {
   const i = trustedMints().findIndex(t => serverOf(t.server) === host)
-  return FARBEN[(i >= 0 ? i : [...host].reduce((a, c) => a + c.charCodeAt(0), 0)) % FARBEN.length]
+  return FARBEN[
+    (i >= 0 ? i : [...host].reduce((a, c) => a + c.charCodeAt(0), 0)) %
+      FARBEN.length
+  ]
 }
 
 const Symbol: Component<{d: string}> = props => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
     <path d={props.d} />
   </svg>
 )
@@ -84,23 +95,34 @@ const PFADE = {
 }
 
 // klein: Kachel im Reiter (zwei je Reihe) — nur Stelle und Betrag; groß erst im Blatt (Steve)
-export const Schein: Component<{schein: Bearer; gewaehlt?: boolean; klein?: boolean}> = props => {
+export const Schein: Component<{
+  schein: Bearer
+  gewaehlt?: boolean
+  klein?: boolean
+}> = props => {
   const host = () => serverOf(props.schein.url)
   return (
     <div
       class={`rz-note hue-${farbe(host())}`}
-      classList={{sel: props.gewaehlt, klein: props.klein, ungeprueft: offenZurPruefung(props.schein)}}
+      classList={{
+        sel: props.gewaehlt,
+        klein: props.klein,
+        ungeprueft: offenZurPruefung(props.schein)
+      }}
     >
       <div class="n-top">
         <span class="n-mint">{host()}</span>
-        <span class="n-serial">Nr. {props.schein.id.slice(0, 6).toUpperCase()}</span>
+        <span class="n-serial">
+          Nr. {props.schein.id.slice(0, 6).toUpperCase()}
+        </span>
       </div>
       <div class="n-amt">
         {zahl(sats(props.schein))}
         <small>SATS</small>
       </div>
       <div class="n-micro">
-        INHABERSCHEIN · LUD·25 · {host().toUpperCase()} · INHABERSCHEIN · LUD·25 · {host().toUpperCase()}
+        INHABERSCHEIN · LUD·25 · {host().toUpperCase()} · INHABERSCHEIN · LUD·25
+        · {host().toUpperCase()}
       </div>
       <span class="n-stamp">
         LUD
@@ -137,13 +159,18 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
     for (const b of m.scheine()) {
       if (ids.has(b.id) || g.has(b.id)) continue
       const h = serverOf(b.url)
-      je.set(h, [...(je.get(h) ?? []), b].sort((x, y) => y.amount - x.amount))
+      je.set(
+        h,
+        [...(je.get(h) ?? []), b].sort((x, y) => y.amount - x.amount)
+      )
     }
     return [...je.entries()].map(([host, scheine]) => ({
       host,
       scheine,
       // nur Gesichertes zählt; Ungeprüftes steht als „wird geprüft …“ an der Kachel
-      summe: scheine.filter(b => !offenZurPruefung(b)).reduce((a, b) => a + sats(b), 0)
+      summe: scheine
+        .filter(b => !offenZurPruefung(b))
+        .reduce((a, b) => a + sats(b), 0)
     }))
   })
   const wahl = () => m.ausgewaehlt().size
@@ -165,7 +192,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   }
   const teilBetrag = () => Math.trunc(Number(text()) || 0)
   const teilMal = () => Math.max(1, Math.trunc(Number(mal()) || 1))
-  const teilGeht = (s: Bearer) => teilBetrag() >= 1 && teilBetrag() * teilMal() < sats(s)
+  const teilGeht = (s: Bearer) =>
+    teilBetrag() >= 1 && teilBetrag() * teilMal() < sats(s)
   const ausOffen = () => m.ausgegebene().find(b => b.id === ausBlatt()) ?? null
 
   // Blatt eines gezeigten Scheins: derselbe QR noch einmal, sonst nur Zurückholen
@@ -176,11 +204,23 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const zurueckholen = async (b: Bearer) => {
     setHolt(true)
     try {
-      const e = await holeZurueck(b, {addBearer, updateBearer, removeBearer, logActivity})
-      notify(e === 'zurueck' ? 'Zurückgeholt — der gezeigte QR ist wertlos.' : 'Schon eingelöst.')
+      const e = await holeZurueck(b, {
+        addBearer,
+        updateBearer,
+        removeBearer,
+        logActivity
+      })
+      notify(
+        e === 'zurueck'
+          ? 'Zurückgeholt — der gezeigte QR ist wertlos.'
+          : 'Schon eingelöst.'
+      )
       setGezeigt(null)
     } catch (err) {
-      notify(`Zurückholen geht gerade nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+      notify(
+        `Zurückholen geht gerade nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
     } finally {
       setHolt(false)
     }
@@ -223,7 +263,11 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
       <div class="rz-titelzeile">
         <h2 class="rz-titel">Scheine</h2>
         <Show when={wahl() > 0}>
-          <button type="button" class="rz-aendern" onClick={() => m.leereAuswahl()}>
+          <button
+            type="button"
+            class="rz-aendern"
+            onClick={() => m.leereAuswahl()}
+          >
             Auswahl aufheben
           </button>
         </Show>
@@ -242,14 +286,18 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               </span>
               <span>
                 <span class="t">Empfangen</span>
-                <span class="s">Scannen, einfügen oder per Lightning aufladen</span>
+                <span class="s">
+                  Scannen, einfügen oder per Lightning aufladen
+                </span>
               </span>
               <Symbol d={PFADE.chev} />
             </A>
           </>
         }
       >
-        <p class="rz-hinweis">Antippen für Werkzeuge, lange antippen zum Auswählen.</p>
+        <p class="rz-hinweis">
+          Antippen für Werkzeuge, lange antippen zum Auswählen.
+        </p>
 
         {/* ungeklärte Vorgänge: eine Karte je Vorgang, die Scheine darin gebunden (Steve, 2026-10-13) */}
         <For each={m.vorgaenge()}>
@@ -257,9 +305,14 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
             <section class="rz-gruppe">
               <div class="rz-klaerung">
                 <span class="rz-eyebrow">{v.host}</span>
-                <p class="t">{v.art === 'teilen' ? 'Teilen wird geklärt' : 'Zusammenlegen wird geklärt'}</p>
+                <p class="t">
+                  {v.art === 'teilen'
+                    ? 'Teilen wird geklärt'
+                    : 'Zusammenlegen wird geklärt'}
+                </p>
                 <p class="z">
-                  {v.eingangSats.map(zahl).join(' + ')} → {v.ergebnisSats.map(zahl).join(' + ')} ?
+                  {v.eingangSats.map(zahl).join(' + ')} →{' '}
+                  {v.ergebnisSats.map(zahl).join(' + ')} ?
                 </p>
                 <p class="rz-status">
                   <span class="rz-lampe-klein" />{' '}
@@ -268,7 +321,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                     : 'Die Wallet fragt bei der Stelle nach …'}
                 </p>
                 <p class="rz-hinweis">
-                  Bis dahin sind diese Scheine gebunden — nicht auswählen, teilen oder senden.
+                  Bis dahin sind diese Scheine gebunden — nicht auswählen,
+                  teilen oder senden.
                 </p>
               </div>
             </section>
@@ -278,7 +332,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
         <Show when={draussen().length > 0}>
           <section class="rz-gruppe rz-draussen">
             <span class="rz-eyebrow">
-              Unterwegs · {draussen().length} {draussen().length === 1 ? 'Schein' : 'Scheine'} ·{' '}
+              Unterwegs · {draussen().length}{' '}
+              {draussen().length === 1 ? 'Schein' : 'Scheine'} ·{' '}
               {zahl(draussen().reduce((a, b) => a + sats(b), 0))} Sats
             </span>
             <div class="rz-notes">
@@ -305,48 +360,65 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
 
         <For each={gruppen()}>
           {g => (
-            <section class="rz-gruppe" classList={{zu: !!gewaehlteStelle() && gewaehlteStelle() !== g.host}}>
+            <section
+              class="rz-gruppe"
+              classList={{
+                zu: !!gewaehlteStelle() && gewaehlteStelle() !== g.host
+              }}
+            >
               <Show
                 when={!gewaehlteStelle() || gewaehlteStelle() === g.host}
                 fallback={
-                  <button type="button" class="rz-eyebrow rz-gruppe-zu" onClick={() => m.leereAuswahl()}>
-                    {g.host} · {g.scheine.length} {g.scheine.length === 1 ? 'Schein' : 'Scheine'} · {zahl(g.summe)} Sats ›
+                  <button
+                    type="button"
+                    class="rz-eyebrow rz-gruppe-zu"
+                    onClick={() => m.leereAuswahl()}
+                  >
+                    {g.host} · {g.scheine.length}{' '}
+                    {g.scheine.length === 1 ? 'Schein' : 'Scheine'} ·{' '}
+                    {zahl(g.summe)} Sats ›
                   </button>
                 }
               >
-              <span class="rz-eyebrow">
-                {g.host} · {g.scheine.length} {g.scheine.length === 1 ? 'Schein' : 'Scheine'} · {zahl(g.summe)} Sats
-              </span>
-              <div class="rz-notes">
-              <For each={g.scheine}>
-                {b => (
-                  <div class="rz-note-platz">
-                    <button
-                      type="button"
-                      class="rz-note-knopf"
-                      aria-label={`Schein über ${zahl(sats(b))} Sats`}
-                      onPointerDown={e => druck(b.id, e)}
-                      onPointerMove={bewegt}
-                      onPointerCancel={los}
-                      onPointerUp={los}
-                      onPointerLeave={los}
-                      onContextMenu={e => e.preventDefault()}
-                      onClick={() => tipp(b.id)}
-                    >
-                      <Schein schein={b} gewaehlt={m.ausgewaehlt().has(b.id)} klein />
-                    </button>
-                    <Show when={offenZurPruefung(b)}>
-                      <div class="rz-etikett rz-unterwegs-zeile">
-                        <span class="rz-lampe-klein" /> wird geprüft …
+                <span class="rz-eyebrow">
+                  {g.host} · {g.scheine.length}{' '}
+                  {g.scheine.length === 1 ? 'Schein' : 'Scheine'} ·{' '}
+                  {zahl(g.summe)} Sats
+                </span>
+                <div class="rz-notes">
+                  <For each={g.scheine}>
+                    {b => (
+                      <div class="rz-note-platz">
+                        <button
+                          type="button"
+                          class="rz-note-knopf"
+                          aria-label={`Schein über ${zahl(sats(b))} Sats`}
+                          onPointerDown={e => druck(b.id, e)}
+                          onPointerMove={bewegt}
+                          onPointerCancel={los}
+                          onPointerUp={los}
+                          onPointerLeave={los}
+                          onContextMenu={e => e.preventDefault()}
+                          onClick={() => tipp(b.id)}
+                        >
+                          <Schein
+                            schein={b}
+                            gewaehlt={m.ausgewaehlt().has(b.id)}
+                            klein
+                          />
+                        </button>
+                        <Show when={offenZurPruefung(b)}>
+                          <div class="rz-etikett rz-unterwegs-zeile">
+                            <span class="rz-lampe-klein" /> wird geprüft …
+                          </div>
+                        </Show>
+                        <Show when={b.label}>
+                          <div class="rz-etikett">{b.label}</div>
+                        </Show>
                       </div>
-                    </Show>
-                    <Show when={b.label}>
-                      <div class="rz-etikett">{b.label}</div>
-                    </Show>
-                  </div>
-                )}
-              </For>
-              </div>
+                    )}
+                  </For>
+                </div>
               </Show>
             </section>
           )}
@@ -365,25 +437,41 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
           <button
             type="button"
             class="rz-knopf an"
-            disabled={wahl() < 2 || !gleicheStelle() || !m.kannZusammenlegen() || m.arbeitet()}
+            disabled={
+              wahl() < 2 ||
+              !gleicheStelle() ||
+              !m.kannZusammenlegen() ||
+              m.arbeitet()
+            }
             onClick={() => void m.zusammenlegen()}
           >
-            <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Zusammenlegen'}</span>
+            <span class="lbl">
+              {m.arbeitet() ? 'Einen Moment …' : 'Zusammenlegen'}
+            </span>
           </button>
         </div>
       </Show>
-
 
       <Show when={m.scheine().length > 0 || m.ausgegebene().length > 0}>
         <div class="rz-gruppe rz-alle">
           <span class="rz-eyebrow">Für alle Scheine</span>
           <Show when={m.scheine().length > 0}>
-            <button type="button" class="rz-setting" disabled={m.erneuertAlle()} onClick={() => void m.alleErneuern()}>
+            <button
+              type="button"
+              class="rz-setting"
+              disabled={m.erneuertAlle()}
+              onClick={() => void m.alleErneuern()}
+            >
               <span>
                 <span class="sl">Alle erneuern</span>
-                <span class="s">Nach dem Einspielen einer alten Sicherung — alte Kopien entwerten</span>
+                <span class="s">
+                  Nach dem Einspielen einer alten Sicherung — alte Kopien
+                  entwerten
+                </span>
               </span>
-              <span class="val">{m.erneuertAlle() ? '…' : <Symbol d={PFADE.chev} />}</span>
+              <span class="val">
+                {m.erneuertAlle() ? '…' : <Symbol d={PFADE.chev} />}
+              </span>
             </button>
           </Show>
           <Show when={m.ausgegebene().length > 0}>
@@ -392,13 +480,18 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 Zu prüfen ({m.ausgegebene().length}) <Symbol d={PFADE.chev} />
               </summary>
               <p class="rz-hinweis">
-                Eingelöste Scheine verschwinden von selbst. Hier bleibt nur, worüber du entscheiden solltest.
+                Eingelöste Scheine verschwinden von selbst. Hier bleibt nur,
+                worüber du entscheiden solltest.
               </p>
               <div class="rz-notes rz-ausgegeben">
                 <For each={m.ausgegebene()}>
                   {b => (
                     <div class="rz-note-platz">
-                      <button type="button" class="rz-note-knopf" onClick={() => setAusBlatt(b.id)}>
+                      <button
+                        type="button"
+                        class="rz-note-knopf"
+                        onClick={() => setAusBlatt(b.id)}
+                      >
                         <Schein schein={b} klein />
                       </button>
                       <div class="rz-etikett">
@@ -415,7 +508,11 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               <Show
                 when={entfernenFrage()}
                 fallback={
-                  <button type="button" class="rz-aendern rz-block" onClick={() => setEntfernenFrage(true)}>
+                  <button
+                    type="button"
+                    class="rz-aendern rz-block"
+                    onClick={() => setEntfernenFrage(true)}
+                  >
                     Alle endgültig entfernen
                   </button>
                 }
@@ -429,7 +526,10 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   }}
                   onNein={() => setEntfernenFrage(false)}
                 >
-                  <p>Diese Scheine verschwinden aus der Wallet. Der Verlauf bleibt.</p>
+                  <p>
+                    Diese Scheine verschwinden aus der Wallet. Der Verlauf
+                    bleibt.
+                  </p>
                 </Rueckfrage>
               </Show>
             </details>
@@ -445,10 +545,18 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 <Qr value={toBech32Lnurl(s().url)} />
               </div>
               <p class="rz-status">
-                <span class="rz-lampe-klein" /> Gezeigt, noch nicht eingelöst · {zahl(sats(s()))} Sats
+                <span class="rz-lampe-klein" /> Gezeigt, noch nicht eingelöst ·{' '}
+                {zahl(sats(s()))} Sats
               </p>
-              <button type="button" class="rz-leise rz-block rz-mitte" disabled={holt()} onClick={() => void zurueckholen(s())}>
-                {holt() ? 'Einen Moment …' : 'Zurückholen — der QR wird wertlos'}
+              <button
+                type="button"
+                class="rz-leise rz-block rz-mitte"
+                disabled={holt()}
+                onClick={() => void zurueckholen(s())}
+              >
+                {holt()
+                  ? 'Einen Moment …'
+                  : 'Zurückholen — der QR wird wertlos'}
               </button>
             </div>
           </Dialog>
@@ -462,24 +570,28 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               <Schein schein={s()} />
               <Show when={s().spentGrund === 'unbekannt'}>
                 <p class="rz-hinweis">
-                  Die Ausgabestelle kennt diesen Schein nicht (mehr). Meist ist es eine der zwei Möglichkeiten, die die
-                  Wallet nach einer unklaren Antwort vorsorglich abgelegt hat — der echte Schein liegt bei deinen
-                  anderen. Er ist nichts wert und kann weg.
+                  Die Ausgabestelle kennt diesen Schein nicht (mehr). Meist ist
+                  es eine der zwei Möglichkeiten, die die Wallet nach einer
+                  unklaren Antwort vorsorglich abgelegt hat — der echte Schein
+                  liegt bei deinen anderen. Er ist nichts wert und kann weg.
                 </p>
               </Show>
               <Show
                 when={s().spentGrund === 'markiert'}
                 fallback={
                   <p class="rz-hinweis" hidden={s().spentGrund === 'unbekannt'}>
-                    Die Ausgabestelle meldet diesen Schein als eingelöst. Hast du ihn gesendet oder gezeigt, ist alles in
-                    Ordnung — dann kannst du ihn entfernen. Wenn nicht, hatte jemand anderes eine Kopie, etwa aus einer
-                    alten Sicherung oder einem geteilten Bild; das Geld bringt dann nichts mehr zurück.
+                    Die Ausgabestelle meldet diesen Schein als eingelöst. Hast
+                    du ihn gesendet oder gezeigt, ist alles in Ordnung — dann
+                    kannst du ihn entfernen. Wenn nicht, hatte jemand anderes
+                    eine Kopie, etwa aus einer alten Sicherung oder einem
+                    geteilten Bild; das Geld bringt dann nichts mehr zurück.
                   </p>
                 }
               >
                 <p class="rz-hinweis">
-                  Von dir als ausgegeben markiert. Hebst du die Markierung auf, prüft die Wallet den Schein beim nächsten
-                  Erneuern wieder bei der Stelle.
+                  Von dir als ausgegeben markiert. Hebst du die Markierung auf,
+                  prüft die Wallet den Schein beim nächsten Erneuern wieder bei
+                  der Stelle.
                 </p>
               </Show>
               <Show when={s().spentGrund === 'markiert'}>
@@ -529,7 +641,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   </span>
                   <span>
                     <span class="t">Teilen</span>
-                    <span class="s">In zwei Scheine aufteilen, z. B. 100 in 50 + 50</span>
+                    <span class="s">
+                      In zwei Scheine aufteilen, z. B. 100 in 50 + 50
+                    </span>
                   </span>
                   <Symbol d={PFADE.chev} />
                 </button>
@@ -563,7 +677,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   </span>
                   <span>
                     <span class="t">Beschriften</span>
-                    <span class="s">{s().label || 'Eine Notiz nur für dich'}</span>
+                    <span class="s">
+                      {s().label || 'Eine Notiz nur für dich'}
+                    </span>
                   </span>
                   <Symbol d={PFADE.chev} />
                 </button>
@@ -578,7 +694,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   </span>
                   <span>
                     <span class="t">Erneuern</span>
-                    <span class="s">Nach einer alten Sicherung: alte Kopien entwerten</span>
+                    <span class="s">
+                      Nach einer alten Sicherung: alte Kopien entwerten
+                    </span>
                   </span>
                   <Symbol d={PFADE.chev} />
                 </button>
@@ -586,25 +704,46 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   <summary>
                     Weitere Werkzeuge <Symbol d={PFADE.chev} />
                   </summary>
-                  <button type="button" class="rz-setting" onClick={() => m.qrBild(s())}>
+                  <button
+                    type="button"
+                    class="rz-setting"
+                    onClick={() => m.qrBild(s())}
+                  >
                     <span>
                       <span class="sl">Als QR-Bild sichern</span>
-                      <span class="s">Zum Ausdrucken oder Weitergeben — wer es hat, kann einlösen</span>
+                      <span class="s">
+                        Zum Ausdrucken oder Weitergeben — wer es hat, kann
+                        einlösen
+                      </span>
                     </span>
                     <span class="val">
                       <Symbol d={PFADE.chev} />
                     </span>
                   </button>
-                  <button type="button" class="rz-setting" onClick={() => m.alsText(s())}>
+                  <button
+                    type="button"
+                    class="rz-setting"
+                    onClick={() => m.alsText(s())}
+                  >
                     <span>
                       <span class="sl">Als Text sichern</span>
-                      <span class="s">Eine Datei mit dem Schein (LNURL) — wie bares Geld behandeln</span>
+                      <span class="s">
+                        Eine Datei mit dem Schein (LNURL) — wie bares Geld
+                        behandeln
+                      </span>
                     </span>
                     <span class="val">
                       <Symbol d={PFADE.chev} />
                     </span>
                   </button>
-                  <button type="button" class="rz-setting" onClick={() => { m.umziehen(s()); schliessen() }}>
+                  <button
+                    type="button"
+                    class="rz-setting"
+                    onClick={() => {
+                      m.umziehen(s())
+                      schliessen()
+                    }}
+                  >
                     <span>
                       <span class="sl">Zu anderer Ausgabestelle umziehen</span>
                       <span class="s">Kostet eine kleine Gebühr</span>
@@ -613,30 +752,53 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                       <Symbol d={PFADE.chev} />
                     </span>
                   </button>
-                  <button type="button" class="rz-setting" onClick={() => { m.anSchluessel(s()); schliessen() }}>
+                  <button
+                    type="button"
+                    class="rz-setting"
+                    onClick={() => {
+                      m.anSchluessel(s())
+                      schliessen()
+                    }}
+                  >
                     <span>
                       <span class="sl">An einen Schlüssel übertragen</span>
-                      <span class="s">Nur der Inhaber dieses Schlüssels kann einlösen</span>
+                      <span class="s">
+                        Nur der Inhaber dieses Schlüssels kann einlösen
+                      </span>
                     </span>
                     <span class="val">
                       <Symbol d={PFADE.chev} />
                     </span>
                   </button>
                   <Show when={m.absicherbar(s())}>
-                    <button type="button" class="rz-setting" onClick={() => void ausfuehren(() => m.absichern(s()))}>
+                    <button
+                      type="button"
+                      class="rz-setting"
+                      onClick={() => void ausfuehren(() => m.absichern(s()))}
+                    >
                       <span>
                         <span class="sl">Wiederherstellbar machen</span>
-                        <span class="s">Älterer Schein — danach auch über die zwölf Wörter wiederzufinden</span>
+                        <span class="s">
+                          Älterer Schein — danach auch über die zwölf Wörter
+                          wiederzufinden
+                        </span>
                       </span>
                       <span class="val">
                         <Symbol d={PFADE.chev} />
                       </span>
                     </button>
                   </Show>
-                  <button type="button" class="rz-setting" onClick={() => void ausfuehren(() => m.markieren(s()))}>
+                  <button
+                    type="button"
+                    class="rz-setting"
+                    onClick={() => void ausfuehren(() => m.markieren(s()))}
+                  >
                     <span>
                       <span class="sl">Als ausgegeben markieren</span>
-                      <span class="s">Wenn er woanders schon eingelöst wurde — lässt sich wieder aufheben</span>
+                      <span class="s">
+                        Wenn er woanders schon eingelöst wurde — lässt sich
+                        wieder aufheben
+                      </span>
                     </span>
                     <span class="val">
                       <Symbol d={PFADE.chev} />
@@ -647,7 +809,8 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
 
               <Show when={eingabe() === 'teilen'}>
                 <label class="rz-feldname" for="rz-teil">
-                  Wie viele Sats soll der neue Schein haben? (weniger als {zahl(sats(s()))})
+                  Wie viele Sats soll der neue Schein haben? (weniger als{' '}
+                  {zahl(sats(s()))})
                 </label>
                 <input
                   id="rz-teil"
@@ -673,7 +836,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 />
                 <p class="rz-hinweis">
                   Danach: {teilMal() > 1 ? `${teilMal()} × ` : ''}
-                  {zahl(teilBetrag())} + {zahl(Math.max(0, sats(s()) - teilBetrag() * teilMal()))} Sats.{' '}
+                  {zahl(teilBetrag())} +{' '}
+                  {zahl(Math.max(0, sats(s()) - teilBetrag() * teilMal()))}{' '}
+                  Sats.{' '}
                   {teilGebuehr(serverOf(s().url))
                     ? `Gebühr bei ${serverOf(s().url)}: ${teilGebuehr(serverOf(s().url))} je Teilung, vom Rest.`
                     : `Ob ${serverOf(s().url)} fürs Teilen etwas verlangt, zeigt sich erst beim Teilen.`}
@@ -682,9 +847,15 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   type="button"
                   class="rz-knopf an rz-weiter"
                   disabled={!teilGeht(s()) || m.arbeitet()}
-                  onClick={() => void ausfuehren(() => m.teilen(s(), teilBetrag(), teilMal()))}
+                  onClick={() =>
+                    void ausfuehren(() =>
+                      m.teilen(s(), teilBetrag(), teilMal())
+                    )
+                  }
                 >
-                  <span class="lbl">{m.arbeitet() ? 'Einen Moment …' : 'Teilen'}</span>
+                  <span class="lbl">
+                    {m.arbeitet() ? 'Einen Moment …' : 'Teilen'}
+                  </span>
                 </button>
               </Show>
 
@@ -703,7 +874,9 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 <button
                   type="button"
                   class="rz-knopf an rz-weiter"
-                  onClick={() => void ausfuehren(() => m.beschriften(s(), text()))}
+                  onClick={() =>
+                    void ausfuehren(() => m.beschriften(s(), text()))
+                  }
                 >
                   <span class="lbl">Speichern</span>
                 </button>

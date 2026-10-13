@@ -30,7 +30,10 @@ describe('Einlösen erkennen', () => {
   it('beobachtet weiter, solange der Schein lebt oder keine Auskunft kommt', async () => {
     merkeUnterwegs('a', 1000)
     merkeUnterwegs('b', 1000)
-    const antworten: Record<string, 'live' | 'unknown'> = {'lnurl-a': 'live', 'lnurl-b': 'unknown'}
+    const antworten: Record<string, 'live' | 'unknown'> = {
+      'lnurl-a': 'live',
+      'lnurl-b': 'unknown'
+    }
     const eingeloest = await pruefeRunde(
       [
         {id: 'a', url: 'lnurl-a'},

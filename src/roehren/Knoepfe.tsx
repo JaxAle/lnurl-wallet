@@ -21,7 +21,11 @@ const Pfeil: Component<{d: string}> = props => (
 )
 
 // leer: bei 0 Sats glüht Empfangen, Senden ist aus — man kann nur das eine tun (Steve)
-const Knoepfe: Component<{onSenden: () => void; onEmpfangen: () => void; leer?: boolean}> = props => (
+const Knoepfe: Component<{
+  onSenden: () => void
+  onEmpfangen: () => void
+  leer?: boolean
+}> = props => (
   <div class="rz-duo">
     <button
       type="button"

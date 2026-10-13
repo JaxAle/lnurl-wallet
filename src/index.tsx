@@ -95,15 +95,30 @@ const cleanup = render(
       <Route path="/wallet" component={Wallet} />
       {/* Fork: Reiter „Scheine“ (Profi-Modus) — dieselbe Seite, nur die Liste */}
       <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />
-      <Route path="/scheine/werkstatt" component={() => <Wallet ansicht="werkstatt" />} />
+      <Route
+        path="/scheine/werkstatt"
+        component={() => <Wallet ansicht="werkstatt" />}
+      />
       <Route path="/senden" component={Senden} />
       <Route path="/empfangen" component={Empfangen} />
-      <Route path="/empfangen/scannen" component={() => <Empfangen weg="scannen" />} />
-      <Route path="/empfangen/einfuegen" component={() => <Empfangen weg="einfuegen" />} />
+      <Route
+        path="/empfangen/scannen"
+        component={() => <Empfangen weg="scannen" />}
+      />
+      <Route
+        path="/empfangen/einfuegen"
+        component={() => <Empfangen weg="einfuegen" />}
+      />
       <Route path="/setup" component={Setup} />
       <Route path="/mint" component={() => <Mint ansicht="liste" />} />
-      <Route path="/mint/hinzufuegen" component={() => <Mint ansicht="hinzufuegen" />} />
-      <Route path="/mint/stelle/:host" component={() => <Mint ansicht="stelle" />} />
+      <Route
+        path="/mint/hinzufuegen"
+        component={() => <Mint ansicht="hinzufuegen" />}
+      />
+      <Route
+        path="/mint/stelle/:host"
+        component={() => <Mint ansicht="stelle" />}
+      />
       <Route path="/mint/werkstatt" component={Mint} />
       <Route path="/aufladen" component={() => <Mint aufladen />} />
       {/* /mints merged into /mint (trusted-mint management now lives at

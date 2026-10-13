@@ -59,7 +59,8 @@ export const aendere = (id: string, f: (v: Vorgang) => Vorgang | null) =>
   )
 
 // alle Scheine, die an einem offenen Vorgang hängen
-export const gebunden = (): Set<string> => new Set(vorgaenge().flatMap(v => [...v.eingang, ...v.ergebnis]))
+export const gebunden = (): Set<string> =>
+  new Set(vorgaenge().flatMap(v => [...v.eingang, ...v.ergebnis]))
 
 const sats = (b: Bearer) => Math.floor(b.amount / 1000)
 
@@ -76,7 +77,9 @@ export const beobachte = async (
     await tu()
   } finally {
     const neu = alle().filter(b => !vorher.has(b.id) && !b.verified && !b.spent)
-    const noch = eingang.filter(e => alle().some(b => b.id === e.id && !b.spent))
+    const noch = eingang.filter(e =>
+      alle().some(b => b.id === e.id && !b.spent)
+    )
     if (neu.length > 0 && noch.length > 0) {
       schreibe([
         ...vorgaenge(),
@@ -101,7 +104,9 @@ export const beobachte = async (
 // blieb unklar liegen (Gerhard, 2026-10-13). Nichts anfangen, was nicht fertig werden kann.
 export const erreichbar = async (host: string): Promise<boolean> => {
   const t = trustedMints().find(m => serverOf(m.server) === host)
-  const url = resolveMintInput((t && getTrustedMintAddress(t.server)) || `mint@${host}`)
+  const url = resolveMintInput(
+    (t && getTrustedMintAddress(t.server)) || `mint@${host}`
+  )
   if (!url) return true // nichts zu fragen — nicht blockieren
   try {
     await Promise.race([

@@ -1,5 +1,14 @@
 import type {Component} from 'solid-js'
-import {Show, For, createSignal, createMemo, createEffect, on, onMount, onCleanup} from 'solid-js'
+import {
+  Show,
+  For,
+  createSignal,
+  createMemo,
+  createEffect,
+  on,
+  onMount,
+  onCleanup
+} from 'solid-js'
 import {render} from 'solid-js/web'
 import {A, useNavigate, useSearchParams} from '@solidjs/router'
 import {QRCodeSVG, ErrorCorrectionLevel} from 'solid-qr-code'
@@ -96,11 +105,19 @@ import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
 import {offenZurPruefung} from '../roehren/Pruefwache'
-import {beobachte, erreichbar, gebunden, nichtErreichbar, vorgaenge} from '../roehren/klaerung'
+import {
+  beobachte,
+  erreichbar,
+  gebunden,
+  nichtErreichbar,
+  vorgaenge
+} from '../roehren/klaerung'
 import {merkeTeilGebuehr} from '../roehren/gebuehren'
 import type {ScheineMotor} from '../roehren/Scheine'
 
-const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props => {
+const Wallet: Component<{
+  ansicht?: 'start' | 'scheine' | 'werkstatt'
+}> = props => {
   // Fork: /scheine (Reiter im Profi-Modus) zeigt nur die Liste, /wallet nur Zählwerk und Schalter
   // Fork: die Werkstatt (/scheine/werkstatt) ist das Original des Reiters, ohne unsere Kacheln
   const werkstatt = () => props.ansicht === 'werkstatt'
@@ -282,9 +299,13 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     const ids = new Set(unterwegs())
     return bearers().filter(b => ids.has(b.id) && !b.spent)
   })
-  createEffect(on(openDialog, d => d === 'melt' && setBlatt(null), {defer: true}))
   createEffect(
-    on(heroReceiving, (jetzt, vorher) => vorher && !jetzt && setBlatt(null), {defer: true})
+    on(openDialog, d => d === 'melt' && setBlatt(null), {defer: true})
+  )
+  createEffect(
+    on(heroReceiving, (jetzt, vorher) => vorher && !jetzt && setBlatt(null), {
+      defer: true
+    })
   )
   // same idea as meltHandoffInvoice above, for a scanned/pasted Lightning
   // Address that doesn't have an invoice yet - MeltDialog resolves it via
@@ -426,7 +447,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
   const mintCount = createMemo(() => groupByServer(spendableBearers()).length)
   // Fork: die große Zahl zeigt nur, was sicher ist — Ungeprüftes steht leise darunter (Steve, 2026-10-12)
   const pruefSumme = createMemo(() =>
-    bearers().filter(offenZurPruefung).reduce((sum, b) => sum + b.amount, 0)
+    bearers()
+      .filter(offenZurPruefung)
+      .reduce((sum, b) => sum + b.amount, 0)
   )
   // Ungeprüftes, das zu einem ungeklärten Vorgang gehört, ist kein Zuwachs — die Eingänge zählen schon
   const pruefSummeFrei = createMemo(() => {
@@ -758,7 +781,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
           `${msatToSats(info.maxWithdrawable)} Sats von ${serverOf(migrated.url)} erneuert – auf den Tresor verschoben.`,
           bearer.label
         )
-        notify('Schein erneuert und auf den Tresor verschoben.', NotifyKind.SUCCESS)
+        notify(
+          'Schein erneuert und auf den Tresor verschoben.',
+          NotifyKind.SUCCESS
+        )
         return
       }
 
@@ -1037,14 +1063,14 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
       return
     }
     if (!Number.isFinite(times) || times < 1) {
-      notify('Bitte eingeben, wie oft geteilt wird (1 oder mehr).', NotifyKind.ERROR)
+      notify(
+        'Bitte eingeben, wie oft geteilt wird (1 oder mehr).',
+        NotifyKind.ERROR
+      )
       return
     }
     if (msat * times >= bearer.amount) {
-      notify(
-        'Die Summe muss kleiner sein als der Schein.',
-        NotifyKind.ERROR
-      )
+      notify('Die Summe muss kleiner sein als der Schein.', NotifyKind.ERROR)
       return
     }
     setSplittingSingle(true)
@@ -1247,7 +1273,10 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     }
     const sum = picked.reduce((s, b) => s + b.amount, 0)
     if (msat >= sum) {
-      notify('Der abgeteilte Betrag muss kleiner sein als die Summe.', NotifyKind.ERROR)
+      notify(
+        'Der abgeteilte Betrag muss kleiner sein als die Summe.',
+        NotifyKind.ERROR
+      )
       return
     }
     setSplitting(true)
@@ -1400,7 +1429,6 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     }
   }
 
-
   // Fork: Reiter Scheine im Bild des Prototyps (roehren/Scheine.tsx) — die Arbeit tun die
   // Funktionen oben; die volle Werkzeugleiste des Originals ist die Scheine-Werkstatt
   // (Einstellungen › Erweitert) — im Reiter selbst war sie eine Falltür (Gerhard am Pixel)
@@ -1416,7 +1444,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     // vorher: ist die Stelle erreichbar? danach: unklar geendet → als Vorgang festhalten (klaerung.ts)
     teilen: async (schein, sats, mal = 1) => {
       const host = serverOf(schein.url)
-      if (!(await erreichbar(host))) return notify(nichtErreichbar(host), NotifyKind.ERROR)
+      if (!(await erreichbar(host)))
+        return notify(nichtErreichbar(host), NotifyKind.ERROR)
       nurDieser(schein.id)
       setSplitSingleSats(String(sats))
       setSplitSingleTimes(String(mal))
@@ -1426,7 +1455,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
       const eingang = selectedEligible()
       if (eingang.length === 0) return
       const host = serverOf(eingang[0].url)
-      if (!(await erreichbar(host))) return notify(nichtErreichbar(host), NotifyKind.ERROR)
+      if (!(await erreichbar(host)))
+        return notify(nichtErreichbar(host), NotifyKind.ERROR)
       await beobachte('zusammenlegen', eingang, bearers, combineSelected)
     },
     beschriften: (schein, text) => {
@@ -1460,7 +1490,8 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
     // und „Zu prüfen“ leer (Gerhard am Pixel, 2026-10-12)
     markieren: async schein => {
       await updateBearer(schein.id, {spent: true, spentGrund: 'markiert'})
-      if (schein.deviceId) await markDeviceNoteSpent(deviceClient(), schein.deviceId)
+      if (schein.deviceId)
+        await markDeviceNoteSpent(deviceClient(), schein.deviceId)
       logActivity(
         'spent',
         `${msatToSats(schein.amount)} Sats von ${serverOf(schein.url)} als ausgegeben markiert.`,
@@ -1488,7 +1519,9 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
         <div id="wallet" class="page">
           <div class="setup-card">
             <h2>Auf diesem Gerät gibt es noch keine Wallet</h2>
-            <p>Leg eine an oder stell sie mit deinen zwölf Wörtern wieder her.</p>
+            <p>
+              Leg eine an oder stell sie mit deinen zwölf Wörtern wieder her.
+            </p>
             <div class="btns">
               <A href="/setup" class="hero-btn hero-btn-primary">
                 Wallet anlegen
@@ -1562,152 +1595,170 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
               </Dialog>
             </Show>
             <Show when={!scheineAnsicht()}>
-            <section class="wallet-hero">
-              {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
-              <Zaehlwerk sats={Math.floor(sicherTotal() / 1000)}>
-                {/* Fork: Rückmeldung beim Einlösen eines gescannten/eingefügten Scheins — ohne sie
+              <section class="wallet-hero">
+                {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
+                <Zaehlwerk sats={Math.floor(sicherTotal() / 1000)}>
+                  {/* Fork: Rückmeldung beim Einlösen eines gescannten/eingefügten Scheins — ohne sie
                 sah man am Pixel nicht, ob der Scan angekommen war (Gerhard, 2026-10-11) */}
-                <Show when={heroReceiving()}>
-                  <p class="rz-status">
-                    <span class="rz-lampe-klein" /> Schein wird eingelöst …
-                  </p>
-                </Show>
-                <Show when={vorgaenge().length > 0}>
-                  <button type="button" class="rz-hinweiszeile" onClick={() => navigate('/scheine')}>
-                    {vorgaenge().length === 1 ? '1 Vorgang wird geklärt' : `${vorgaenge().length} Vorgänge werden geklärt`} ›
-                  </button>
-                </Show>
-                <Show when={pruefSummeFrei() > 0}>
-                  <p class="rz-status">
-                    <span class="rz-lampe-klein" /> +{' '}
-                    {Math.floor(pruefSummeFrei() / 1000).toLocaleString('de-DE')} Sats werden geprüft
-                  </p>
-                </Show>
-                <Show when={unterwegsScheine().length > 0}>
-                  <button
-                    type="button"
-                    class="rz-hinweiszeile"
-                    onClick={() => navigate('/activity')}
-                  >
-                    {unterwegsScheine().length === 1
-                      ? '1 Schein unterwegs'
-                      : `${unterwegsScheine().length} Scheine unterwegs`}
-                    {' · '}
-                    {Math.floor(
-                      unterwegsScheine().reduce((a, b) => a + b.amount, 0) / 1000
-                    ).toLocaleString('de-DE')}{' '}
-                    Sats ›
-                  </button>
-                </Show>
-              </Zaehlwerk>
-              {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
-              <Knoepfe
-                leer={spendableTotal() === 0}
-                onSenden={() => navigate('/senden')}
-                onEmpfangen={() => navigate('/empfangen')}
-              />
-              <Show when={blatt()}>
-                <Dialog onClose={() => setBlatt(null)}>
-                  <div class="rz-blatt">
-                    <Show
-                      when={blatt() === 'senden'}
-                      fallback={
-                        <>
-                          <h3>Empfangen</h3>
-                          <p class="rz-hinweis">
-                            Schein scannen oder einfügen — oder per Lightning aufladen.
-                          </p>
-                        </>
-                      }
-                    >
-                      <h3>Bezahlen</h3>
-                      <p class="rz-hinweis">
-                        Rechnung oder Lightning-Adresse scannen oder einfügen.
-                      </p>
-                    </Show>
-                <div class="paste-widget hero-paste-widget">
-                  <div class="paste-input-row">
-                    <ScanToggle onScan={onHeroScan} accept={isValidHeroInput} />
-                    <NfcToggle onScan={onHeroScan} accept={isValidHeroInput} />
+                  <Show when={heroReceiving()}>
+                    <p class="rz-status">
+                      <span class="rz-lampe-klein" /> Schein wird eingelöst …
+                    </p>
+                  </Show>
+                  <Show when={vorgaenge().length > 0}>
                     <button
                       type="button"
-                      class="icon-btn paste-icon-btn"
-                      title="Aus der Zwischenablage einfügen"
-                      onClick={pasteHero}
+                      class="rz-hinweiszeile"
+                      onClick={() => navigate('/scheine')}
                     >
-                      <IoClipboardSharp />
+                      {vorgaenge().length === 1
+                        ? '1 Vorgang wird geklärt'
+                        : `${vorgaenge().length} Vorgänge werden geklärt`}{' '}
+                      ›
                     </button>
-                    <Show when={storeableMeltAddresses().length > 0}>
-                      <button
-                        type="button"
-                        class="icon-btn paste-at-btn"
-                        title="Gespeicherte Adresse bezahlen"
-                        onClick={() => setShowSavedAddresses(true)}
+                  </Show>
+                  <Show when={pruefSummeFrei() > 0}>
+                    <p class="rz-status">
+                      <span class="rz-lampe-klein" /> +{' '}
+                      {Math.floor(pruefSummeFrei() / 1000).toLocaleString(
+                        'de-DE'
+                      )}{' '}
+                      Sats werden geprüft
+                    </p>
+                  </Show>
+                  <Show when={unterwegsScheine().length > 0}>
+                    <button
+                      type="button"
+                      class="rz-hinweiszeile"
+                      onClick={() => navigate('/activity')}
+                    >
+                      {unterwegsScheine().length === 1
+                        ? '1 Schein unterwegs'
+                        : `${unterwegsScheine().length} Scheine unterwegs`}
+                      {' · '}
+                      {Math.floor(
+                        unterwegsScheine().reduce((a, b) => a + b.amount, 0) /
+                          1000
+                      ).toLocaleString('de-DE')}{' '}
+                      Sats ›
+                    </button>
+                  </Show>
+                </Zaehlwerk>
+                {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
+                <Knoepfe
+                  leer={spendableTotal() === 0}
+                  onSenden={() => navigate('/senden')}
+                  onEmpfangen={() => navigate('/empfangen')}
+                />
+                <Show when={blatt()}>
+                  <Dialog onClose={() => setBlatt(null)}>
+                    <div class="rz-blatt">
+                      <Show
+                        when={blatt() === 'senden'}
+                        fallback={
+                          <>
+                            <h3>Empfangen</h3>
+                            <p class="rz-hinweis">
+                              Schein scannen oder einfügen — oder per Lightning
+                              aufladen.
+                            </p>
+                          </>
+                        }
                       >
-                        <IoAtCircleSharp />
-                      </button>
-                    </Show>
-                    <button
-                      type="button"
-                      class="icon-btn paste-keyboard-btn"
-                      title="Stattdessen eintippen"
-                      onClick={() => setShowHeroKeyboard(v => !v)}
-                    >
-                      <MdSharpKeyboard />
-                    </button>
-                    <div
-                      class="paste-input-wrapper"
-                      classList={{'mobile-open': showHeroKeyboard()}}
-                    >
-                      <input
-                        ref={el => (heroPasteRef = el)}
-                        type="text"
-                        class="paste-input"
-                        placeholder="Schein, Rechnung oder Lightning-Adresse …"
-                        value={heroValue()}
-                        onInput={e => setHeroValue(e.currentTarget.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleHero()}
-                      />
-                      <Show when={heroValue() !== ''}>
-                        <button
-                          type="button"
-                          class="icon-btn paste-clear-btn"
-                          title="Leeren"
-                          onClick={() => setHeroValue('')}
-                        >
-                          <IoCloseSharp />
-                        </button>
+                        <h3>Bezahlen</h3>
+                        <p class="rz-hinweis">
+                          Rechnung oder Lightning-Adresse scannen oder einfügen.
+                        </p>
+                      </Show>
+                      <div class="paste-widget hero-paste-widget">
+                        <div class="paste-input-row">
+                          <ScanToggle
+                            onScan={onHeroScan}
+                            accept={isValidHeroInput}
+                          />
+                          <NfcToggle
+                            onScan={onHeroScan}
+                            accept={isValidHeroInput}
+                          />
+                          <button
+                            type="button"
+                            class="icon-btn paste-icon-btn"
+                            title="Aus der Zwischenablage einfügen"
+                            onClick={pasteHero}
+                          >
+                            <IoClipboardSharp />
+                          </button>
+                          <Show when={storeableMeltAddresses().length > 0}>
+                            <button
+                              type="button"
+                              class="icon-btn paste-at-btn"
+                              title="Gespeicherte Adresse bezahlen"
+                              onClick={() => setShowSavedAddresses(true)}
+                            >
+                              <IoAtCircleSharp />
+                            </button>
+                          </Show>
+                          <button
+                            type="button"
+                            class="icon-btn paste-keyboard-btn"
+                            title="Stattdessen eintippen"
+                            onClick={() => setShowHeroKeyboard(v => !v)}
+                          >
+                            <MdSharpKeyboard />
+                          </button>
+                          <div
+                            class="paste-input-wrapper"
+                            classList={{'mobile-open': showHeroKeyboard()}}
+                          >
+                            <input
+                              ref={el => (heroPasteRef = el)}
+                              type="text"
+                              class="paste-input"
+                              placeholder="Schein, Rechnung oder Lightning-Adresse …"
+                              value={heroValue()}
+                              onInput={e => setHeroValue(e.currentTarget.value)}
+                              onKeyDown={e => e.key === 'Enter' && handleHero()}
+                            />
+                            <Show when={heroValue() !== ''}>
+                              <button
+                                type="button"
+                                class="icon-btn paste-clear-btn"
+                                title="Leeren"
+                                onClick={() => setHeroValue('')}
+                              >
+                                <IoCloseSharp />
+                              </button>
+                            </Show>
+                          </div>
+                          <button
+                            type="button"
+                            class="icon-btn paste-confirm-btn"
+                            classList={{'mobile-open': showHeroKeyboard()}}
+                            title="Schein empfangen oder Rechnung/Adresse bezahlen"
+                            disabled={heroValue() === '' || heroReceiving()}
+                            onClick={handleHero}
+                          >
+                            <Show
+                              when={heroReceiving()}
+                              fallback={<IoReturnDownForwardSharp />}
+                            >
+                              <IoRefreshSharp class="spin" />
+                            </Show>
+                          </button>
+                        </div>
+                      </div>
+                      <Show when={blatt() === 'empfangen'}>
+                        <div class="rz-abschnitt">
+                          <A href="/aufladen" class="link-btn wallet-hero-btn">
+                            <IoAddCircleSharp />
+                            &nbsp;Aufladen per Lightning
+                          </A>
+                        </div>
                       </Show>
                     </div>
-                    <button
-                      type="button"
-                      class="icon-btn paste-confirm-btn"
-                      classList={{'mobile-open': showHeroKeyboard()}}
-                      title="Schein empfangen oder Rechnung/Adresse bezahlen"
-                      disabled={heroValue() === '' || heroReceiving()}
-                      onClick={handleHero}
-                    >
-                      <Show
-                        when={heroReceiving()}
-                        fallback={<IoReturnDownForwardSharp />}
-                      >
-                        <IoRefreshSharp class="spin" />
-                      </Show>
-                    </button>
-                  </div>
-                </div>
-                    <Show when={blatt() === 'empfangen'}>
-                      <div class="rz-abschnitt">
-                        <A href="/aufladen" class="link-btn wallet-hero-btn">
-                          <IoAddCircleSharp />
-                          &nbsp;Aufladen per Lightning
-                        </A>
-                      </div>
-                    </Show>
-                  </div>
-                </Dialog>
-              </Show>
-            </section>
+                  </Dialog>
+                </Show>
+              </section>
             </Show>
             <Show when={showMelt()}>
               <MeltDialog
@@ -1725,673 +1776,697 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
                 fallback={<Scheine motor={scheineMotor} />}
               >
                 <div class="rz-seitenkopf">
-                  <A href="/settings" class="rz-zurueck" aria-label="Zurück zu den Einstellungen">
+                  <A
+                    href="/settings"
+                    class="rz-zurueck"
+                    aria-label="Zurück zu den Einstellungen"
+                  >
                     ‹
                   </A>
                   <h2>Scheine-Werkstatt</h2>
                 </div>
-                <p class="rz-hinweis">Werkzeuge der Original-Wallet, teils englisch.</p>
+                <p class="rz-hinweis">
+                  Werkzeuge der Original-Wallet, teils englisch.
+                </p>
               </Show>
             </Show>
             <Show when={werkstatt()}>
-            <section class="list-controls">
-              <div class="list-controls-row">
-                <Show
-                  when={showSearch()}
-                  fallback={
-                    <button
-                      type="button"
-                      class="search-toggle-btn"
-                      title="Scheine nach Ausgabestelle oder Betrag suchen"
-                      onClick={() => setShowSearch(true)}
-                    >
+              <section class="list-controls">
+                <div class="list-controls-row">
+                  <Show
+                    when={showSearch()}
+                    fallback={
+                      <button
+                        type="button"
+                        class="search-toggle-btn"
+                        title="Scheine nach Ausgabestelle oder Betrag suchen"
+                        onClick={() => setShowSearch(true)}
+                      >
+                        <IoSearchSharp />
+                        <span class="btn-label">&nbsp;Suchen</span>
+                      </button>
+                    }
+                  >
+                    <div class="search-input-wrapper">
                       <IoSearchSharp />
-                      <span class="btn-label">&nbsp;Suchen</span>
-                    </button>
-                  }
-                >
-                  <div class="search-input-wrapper">
-                    <IoSearchSharp />
-                    <input
-                      ref={el => {
-                        searchInputRef = el
-                        el.focus()
-                      }}
-                      type="text"
-                      class="search-input"
-                      placeholder="Ausgabestelle oder Betrag …"
-                      value={searchQuery()}
-                      onInput={e => setSearchQuery(e.currentTarget.value)}
-                    />
-                    <Show when={searchQuery() !== ''}>
+                      <input
+                        ref={el => {
+                          searchInputRef = el
+                          el.focus()
+                        }}
+                        type="text"
+                        class="search-input"
+                        placeholder="Ausgabestelle oder Betrag …"
+                        value={searchQuery()}
+                        onInput={e => setSearchQuery(e.currentTarget.value)}
+                      />
+                      <Show when={searchQuery() !== ''}>
+                        <button
+                          type="button"
+                          class="icon-btn"
+                          title="Suche leeren"
+                          onClick={() => {
+                            setSearchQuery('')
+                            searchInputRef?.focus()
+                          }}
+                        >
+                          <IoCloseSharp />
+                        </button>
+                      </Show>
                       <button
                         type="button"
                         class="icon-btn"
-                        title="Suche leeren"
+                        title="Suche schließen"
                         onClick={() => {
+                          setShowSearch(false)
                           setSearchQuery('')
-                          searchInputRef?.focus()
                         }}
                       >
-                        <IoCloseSharp />
-                      </button>
-                    </Show>
-                    <button
-                      type="button"
-                      class="icon-btn"
-                      title="Suche schließen"
-                      onClick={() => {
-                        setShowSearch(false)
-                        setSearchQuery('')
-                      }}
-                    >
-                      <IoCloseCircleSharp />
-                    </button>
-                  </div>
-                </Show>
-                <div class="sort-menu" ref={el => (sortMenuRef = el)}>
-                  <button
-                    type="button"
-                    class="sort-toggle-btn"
-                    title={`Sort by ${sortKey()} (${sortDesc() ? 'descending' : 'ascending'})`}
-                    onClick={() => setShowSortMenu(v => !v)}
-                  >
-                    <IoSwapVerticalSharp />
-                    &nbsp;{sortKey() === 'amount' ? 'Amount' : 'Updated'}
-                    &nbsp;
-                    <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
-                      <IoArrowDownSharp />
-                    </Show>
-                  </button>
-                  <Show when={showSortMenu()}>
-                    <div class="more-menu-panel">
-                      <button
-                        type="button"
-                        classList={{active: sortKey() === 'amount'}}
-                        onClick={() => {
-                          toggleSort('amount')
-                          setShowSortMenu(false)
-                        }}
-                      >
-                        Betrag
-                        <Show when={sortKey() === 'amount'}>
-                          &nbsp;
-                          <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
-                            <IoArrowDownSharp />
-                          </Show>
-                        </Show>
-                      </button>
-                      <button
-                        type="button"
-                        classList={{active: sortKey() === 'updated'}}
-                        onClick={() => {
-                          toggleSort('updated')
-                          setShowSortMenu(false)
-                        }}
-                      >
-                        Zuletzt
-                        <Show when={sortKey() === 'updated'}>
-                          &nbsp;
-                          <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
-                            <IoArrowDownSharp />
-                          </Show>
-                        </Show>
+                        <IoCloseCircleSharp />
                       </button>
                     </div>
                   </Show>
-                </div>
-                <Show when={spentCount() > 0}>
+                  <div class="sort-menu" ref={el => (sortMenuRef = el)}>
+                    <button
+                      type="button"
+                      class="sort-toggle-btn"
+                      title={`Sort by ${sortKey()} (${sortDesc() ? 'descending' : 'ascending'})`}
+                      onClick={() => setShowSortMenu(v => !v)}
+                    >
+                      <IoSwapVerticalSharp />
+                      &nbsp;{sortKey() === 'amount' ? 'Amount' : 'Updated'}
+                      &nbsp;
+                      <Show when={sortDesc()} fallback={<IoArrowUpSharp />}>
+                        <IoArrowDownSharp />
+                      </Show>
+                    </button>
+                    <Show when={showSortMenu()}>
+                      <div class="more-menu-panel">
+                        <button
+                          type="button"
+                          classList={{active: sortKey() === 'amount'}}
+                          onClick={() => {
+                            toggleSort('amount')
+                            setShowSortMenu(false)
+                          }}
+                        >
+                          Betrag
+                          <Show when={sortKey() === 'amount'}>
+                            &nbsp;
+                            <Show
+                              when={sortDesc()}
+                              fallback={<IoArrowUpSharp />}
+                            >
+                              <IoArrowDownSharp />
+                            </Show>
+                          </Show>
+                        </button>
+                        <button
+                          type="button"
+                          classList={{active: sortKey() === 'updated'}}
+                          onClick={() => {
+                            toggleSort('updated')
+                            setShowSortMenu(false)
+                          }}
+                        >
+                          Zuletzt
+                          <Show when={sortKey() === 'updated'}>
+                            &nbsp;
+                            <Show
+                              when={sortDesc()}
+                              fallback={<IoArrowUpSharp />}
+                            >
+                              <IoArrowDownSharp />
+                            </Show>
+                          </Show>
+                        </button>
+                      </div>
+                    </Show>
+                  </div>
+                  <Show when={spentCount() > 0}>
+                    <button
+                      type="button"
+                      class="spent-btn"
+                      classList={{active: showSpent()}}
+                      title="Ausgegebene Scheine sind hier gesperrt (bezahlt oder von Hand markiert) – das blendet sie nur ein oder aus, an ihnen ändert sich nichts"
+                      onClick={() => setShowSpent(v => !v)}
+                    >
+                      <IoBanSharp />
+                      <span class="btn-label">&nbsp;Ausgegeben</span>
+                      <Show when={!showSpent()}>&nbsp;({spentCount()})</Show>
+                    </button>
+                  </Show>
                   <button
                     type="button"
-                    class="spent-btn"
-                    classList={{active: showSpent()}}
-                    title="Ausgegebene Scheine sind hier gesperrt (bezahlt oder von Hand markiert) – das blendet sie nur ein oder aus, an ihnen ändert sich nichts"
-                    onClick={() => setShowSpent(v => !v)}
+                    class="group-btn"
+                    classList={{active: groupByMint()}}
+                    title="Scheine nach Ausgabestelle gruppieren statt als eine Liste"
+                    onClick={() => setGroupByMint(!groupByMint())}
                   >
-                    <IoBanSharp />
-                    <span class="btn-label">&nbsp;Ausgegeben</span>
-                    <Show when={!showSpent()}>&nbsp;({spentCount()})</Show>
+                    <IoLayersSharp />
+                    <span class="btn-label">&nbsp;Gruppieren</span>
                   </button>
-                </Show>
-                <button
-                  type="button"
-                  class="group-btn"
-                  classList={{active: groupByMint()}}
-                  title="Scheine nach Ausgabestelle gruppieren statt als eine Liste"
-                  onClick={() => setGroupByMint(!groupByMint())}
-                >
-                  <IoLayersSharp />
-                  <span class="btn-label">&nbsp;Gruppieren</span>
-                </button>
-                <Show when={availableTags().length > 0}>
-                  <div class="more-menu" ref={el => (tagMenuRef = el)}>
+                  <Show when={availableTags().length > 0}>
+                    <div class="more-menu" ref={el => (tagMenuRef = el)}>
+                      <button
+                        type="button"
+                        class="icon-btn list-more-btn"
+                        classList={{active: selectedTags().size > 0}}
+                        title={
+                          selectedTags().size > 0
+                            ? `Filtering by ${selectedTags().size} tag${selectedTags().size === 1 ? '' : 's'} - click to change`
+                            : 'Nach Markierung filtern'
+                        }
+                        onClick={() => setShowTagMenu(v => !v)}
+                      >
+                        <IoPricetagsSharp />
+                      </button>
+                      <Show when={showTagMenu()}>
+                        <div class="more-menu-panel tag-menu-panel">
+                          <For each={availableTags()}>
+                            {tag => (
+                              <button
+                                type="button"
+                                classList={{active: selectedTags().has(tag)}}
+                                onClick={() => toggleTag(tag)}
+                              >
+                                {decodeTag(tag)}
+                              </button>
+                            )}
+                          </For>
+                        </div>
+                      </Show>
+                    </div>
+                  </Show>
+                  <div class="more-menu" ref={el => (listMoreMenuRef = el)}>
                     <button
                       type="button"
                       class="icon-btn list-more-btn"
-                      classList={{active: selectedTags().size > 0}}
-                      title={
-                        selectedTags().size > 0
-                          ? `Filtering by ${selectedTags().size} tag${selectedTags().size === 1 ? '' : 's'} - click to change`
-                          : 'Nach Markierung filtern'
-                      }
-                      onClick={() => setShowTagMenu(v => !v)}
-                    >
-                      <IoPricetagsSharp />
-                    </button>
-                    <Show when={showTagMenu()}>
-                      <div class="more-menu-panel tag-menu-panel">
-                        <For each={availableTags()}>
-                          {tag => (
-                            <button
-                              type="button"
-                              classList={{active: selectedTags().has(tag)}}
-                              onClick={() => toggleTag(tag)}
-                            >
-                              {decodeTag(tag)}
-                            </button>
-                          )}
-                        </For>
-                      </div>
-                    </Show>
-                  </div>
-                </Show>
-                <div class="more-menu" ref={el => (listMoreMenuRef = el)}>
-                  <button
-                    type="button"
-                    class="icon-btn list-more-btn"
-                    title="Weitere Aktionen – alle erneuern, ausgegebene entfernen"
-                    onClick={() => setShowListMoreMenu(v => !v)}
-                  >
-                    <IoEllipsisVerticalSharp />
-                  </button>
-                  <Show when={showListMoreMenu()}>
-                    <div class="more-menu-panel">
-                      <button
-                        type="button"
-                        disabled={
-                          refreshingAll() ||
-                          offlineMode() ||
-                          spendableBearers().length === 0
-                        }
-                        title={
-                          offlineMode()
-                            ? 'Offline-Modus ist an'
-                            : 'Alle nicht ausgegebenen Scheine nacheinander erneuern'
-                        }
-                        onClick={() => {
-                          refreshAllNotes()
-                          setShowListMoreMenu(false)
-                        }}
-                      >
-                        <Show
-                          when={refreshingAll()}
-                          fallback={<IoRefreshSharp />}
-                        >
-                          <IoRefreshSharp class="spin" />
-                        </Show>
-                        &nbsp;Alle erneuern
-                      </button>
-                      <Show when={spentCount() > 0}>
-                        <button
-                          type="button"
-                          title={`Clear all ${spentCount()} spent note${spentCount() === 1 ? '' : 's'} from the wallet`}
-                          onClick={() => {
-                            setConfirmClearSpent(true)
-                            setShowListMoreMenu(false)
-                          }}
-                        >
-                          <IoTrashSharp />
-                          &nbsp;Ausgegebene entfernen
-                        </button>
-                      </Show>
-                    </div>
-                  </Show>
-                </div>
-              </div>
-            </section>
-
-            <Show when={selected().size > 0}>
-              <section class="selection-toolbar">
-                <div class="btns">
-                  <button
-                    class="icon-btn refresh-btn"
-                    disabled={
-                      !canRefreshSelected() || refreshing() || offlineMode()
-                    }
-                    title={
-                      offlineMode()
-                        ? 'Offline-Modus ist an'
-                        : canRefreshSelected()
-                          ? 'Aktuellen Wert bei der Ausgabestelle abfragen, dann erneuern – nacheinander für jeden ausgewählten Schein'
-                          : 'Scheine zum Erneuern auswählen'
-                    }
-                    onClick={refreshSelected}
-                  >
-                    <Show when={refreshing()} fallback={<IoRefreshSharp />}>
-                      <IoRefreshSharp class="spin" />
-                    </Show>
-                    <span class="btn-label">
-                      &nbsp;Erneuern
-                      <Show when={selectedBearers().length > 1}>
-                        &nbsp;({selectedBearers().length})
-                      </Show>
-                    </span>
-                  </button>
-                  <button
-                    class="icon-btn split-single-btn"
-                    disabled={!canSplitSingle() || offlineMode()}
-                    title={
-                      offlineMode()
-                        ? 'Offline-Modus ist an'
-                        : canSplitSingle()
-                          ? 'Ausgewählten Schein in zwei teilen'
-                          : 'Genau 1 geprüften, nicht ausgegebenen Schein zum Teilen auswählen'
-                    }
-                    onClick={() => setShowSplitSingleInput(v => !v)}
-                  >
-                    <IoGitBranchSharp />
-                    <span class="btn-label">&nbsp;Teilen</span>
-                  </button>
-                  <button
-                    class="icon-btn combine-btn"
-                    disabled={!canCombine() || combining() || offlineMode()}
-                    title={
-                      offlineMode()
-                        ? 'Offline-Modus ist an'
-                        : canCombine()
-                          ? 'Ausgewählte Scheine zu einem zusammenlegen. Verlangt die Ausgabestelle Gebühren, bekommst du beim Zusammenlegen alle bis auf eine Grundgebühr zurück.'
-                          : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
-                    }
-                    onClick={combineSelected}
-                  >
-                    <Show when={combining()} fallback={<IoGitMergeSharp />}>
-                      <IoRefreshSharp class="spin" />
-                    </Show>
-                    <span class="btn-label">&nbsp;Zusammenlegen</span>
-                  </button>
-                  <button
-                    class="icon-btn split-btn"
-                    disabled={!canCombine() || splitting() || offlineMode()}
-                    title={
-                      offlineMode()
-                        ? 'Offline-Modus ist an'
-                        : canCombine()
-                          ? 'Ausgewählte Scheine zusammenlegen und einen Betrag abteilen, der Rest bleibt als Wechselgeld. Verlangt die Ausgabestelle Gebühren, bekommst du alle bis auf eine Grundgebühr zurück.'
-                          : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
-                    }
-                    onClick={() => setShowSplitInput(v => !v)}
-                  >
-                    <Show when={splitting()} fallback={<IoGitBranchSharp />}>
-                      <IoRefreshSharp class="spin" />
-                    </Show>
-                    <span class="btn-label">&nbsp;Zusammenlegen &amp; teilen</span>
-                  </button>
-                  <label
-                    class="plain-secret-toggle"
-                    title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={plainSecret()}
-                      onChange={e => setPlainSecret(e.currentTarget.checked)}
-                    />
-                    &nbsp;Zufallsgeheimnis
-                  </label>
-                  <button
-                    class="icon-btn transfer-btn"
-                    disabled={!canTransfer() || offlineMode()}
-                    title={
-                      offlineMode()
-                        ? 'Offline-Modus ist an'
-                        : canTransfer()
-                          ? 'Ausgewählten Schein zu einer anderen Ausgabestelle umziehen'
-                          : 'Genau 1 Schein zum Umziehen auswählen'
-                    }
-                    onClick={() => setTransferSource(selectedEligible()[0])}
-                  >
-                    <IoSwapHorizontalSharp />
-                    <span class="btn-label">&nbsp;Umziehen</span>
-                  </button>
-                  <div class="more-menu" ref={el => (moreMenuRef = el)}>
-                    <button
-                      type="button"
-                      class="icon-btn more-btn"
-                      title="Weitere Aktionen – Bezeichnung, als ausgegeben markieren, exportieren"
-                      onClick={() => setShowMoreMenu(v => !v)}
+                      title="Weitere Aktionen – alle erneuern, ausgegebene entfernen"
+                      onClick={() => setShowListMoreMenu(v => !v)}
                     >
                       <IoEllipsisVerticalSharp />
                     </button>
-                    <Show when={showMoreMenu()}>
+                    <Show when={showListMoreMenu()}>
                       <div class="more-menu-panel">
                         <button
-                          class="icon-btn send-pubkey-btn"
-                          disabled={!canSendToPubkey() || offlineMode()}
+                          type="button"
+                          disabled={
+                            refreshingAll() ||
+                            offlineMode() ||
+                            spendableBearers().length === 0
+                          }
                           title={
                             offlineMode()
                               ? 'Offline-Modus ist an'
-                              : canSendToPubkey()
-                                ? 'Ausgewählte Scheine zusammenlegen und/oder teilen – zu einem Schein für einen eingefügten cp1-Pubkey'
-                                : 'Mindestens 1 geprüften, nicht ausgegebenen Schein (nicht auf dem Tresor) derselben Ausgabestelle auswählen'
+                              : 'Alle nicht ausgegebenen Scheine nacheinander erneuern'
                           }
                           onClick={() => {
-                            setSendToPubkeySource(selectedEligible())
-                            setShowMoreMenu(false)
+                            refreshAllNotes()
+                            setShowListMoreMenu(false)
                           }}
                         >
-                          <IoKeySharp />
-                          &nbsp;An Pubkey senden
-                          <Show when={selectedEligible().length > 1}>
-                            &nbsp;({selectedEligible().length})
+                          <Show
+                            when={refreshingAll()}
+                            fallback={<IoRefreshSharp />}
+                          >
+                            <IoRefreshSharp class="spin" />
                           </Show>
+                          &nbsp;Alle erneuern
                         </button>
-                        <button
-                          class="icon-btn label-btn"
-                          disabled={!canLabelSelected()}
-                          title={
-                            canLabelSelected()
-                              ? 'Ausgewählten Scheinen eine Bezeichnung geben (nur für dich)'
-                              : 'Scheine zum Bezeichnen auswählen'
-                          }
-                          onClick={() => {
-                            openLabelInput()
-                            setShowMoreMenu(false)
-                          }}
-                        >
-                          <IoPencilSharp />
-                          &nbsp;Bezeichnung
-                          <Show when={selectedBearers().length > 1}>
-                            &nbsp;({selectedBearers().length})
-                          </Show>
-                        </button>
-                        <button
-                          class="icon-btn mark-spent-btn"
-                          disabled={!canMarkSpentSelected()}
-                          title={
-                            canMarkSpentSelected()
-                              ? 'Ausgewählte Scheine als ausgegeben markieren – sperrt sie, ohne sie zu löschen, z. B. wenn du sie anders weitergegeben hast'
-                              : 'Scheine zum Markieren auswählen'
-                          }
-                          onClick={() => {
-                            markSpentSelected()
-                            setShowMoreMenu(false)
-                          }}
-                        >
-                          <IoBanSharp />
-                          &nbsp;Als ausgegeben markieren
-                          <Show when={selectedBearers().length > 1}>
-                            &nbsp;({selectedBearers().length})
-                          </Show>
-                        </button>
-                        <button
-                          class="icon-btn export-btn"
-                          disabled={selected().size === 0}
-                          title={
-                            selected().size === 0
-                              ? 'Scheine zum Exportieren auswählen'
-                              : 'Ausgewählte Scheine als Textdatei herunterladen (bech32, einer je Zeile)'
-                          }
-                          onClick={() => {
-                            exportSelected()
-                            setShowMoreMenu(false)
-                          }}
-                        >
-                          <IoDownloadSharp />
-                          &nbsp;Exportieren
-                          <Show when={selected().size > 0}>
-                            &nbsp;({selected().size})
-                          </Show>
-                        </button>
-                        <button
-                          class="icon-btn qr-export-btn"
-                          disabled={selected().size === 0}
-                          title={
-                            selected().size === 0
-                              ? 'Scheine für QR-Codes auswählen'
-                              : 'Für jeden ausgewählten Schein einen QR-Code (SVG) herunterladen'
-                          }
-                          onClick={() => {
-                            downloadQrSelected()
-                            setShowMoreMenu(false)
-                          }}
-                        >
-                          <IoQrCodeSharp />
-                          &nbsp;QR
-                          <Show when={selected().size > 0}>
-                            &nbsp;({selected().size})
-                          </Show>
-                        </button>
+                        <Show when={spentCount() > 0}>
+                          <button
+                            type="button"
+                            title={`Clear all ${spentCount()} spent note${spentCount() === 1 ? '' : 's'} from the wallet`}
+                            onClick={() => {
+                              setConfirmClearSpent(true)
+                              setShowListMoreMenu(false)
+                            }}
+                          >
+                            <IoTrashSharp />
+                            &nbsp;Ausgegebene entfernen
+                          </button>
+                        </Show>
                       </div>
                     </Show>
                   </div>
-                  <Show when={selected().size > 0}>
-                    <button
-                      type="button"
-                      class="icon-btn clear-selection-btn"
-                      title="Auswahl aufheben"
-                      onClick={() => setSelected(new Set<string>())}
-                    >
-                      <IoCloseCircleSharp />
-                      <span class="btn-label">&nbsp;Auswahl aufheben</span>
-                      &nbsp;({selected().size})
-                    </button>
-                  </Show>
                 </div>
-                <Show when={showSplitInput() && canCombine()}>
-                  <Dialog
-                    onClose={() => {
-                      setShowSplitInput(false)
-                      setSplitSats('')
-                    }}
-                  >
-                    <h4>Zusammenlegen &amp; teilen</h4>
-                    <label>
-                      Split off (sats, of{' '}
-                      {msatToSats(
-                        selectedEligible().reduce((s, b) => s + b.amount, 0)
-                      )}
-                      )
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      placeholder="Betrag in Sats"
-                      value={splitSats()}
-                      onInput={e => setSplitSats(e.currentTarget.value)}
-                    />
-                    <p class="bearer-hint">
-                      Burns the {selectedEligible().length} selected notes and
-                      mints two: this amount, and a change note for the rest. If
-                      this mint charges a fee, it's deducted from the change,
-                      not the amount split off.
-                    </p>
-                    <label
-                      class="plain-secret-toggle"
-                      title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={plainSecret()}
-                        onChange={e => setPlainSecret(e.currentTarget.checked)}
-                      />
-                      &nbsp;Zufallsgeheimnis
-                    </label>
-                    <div class="btns">
-                      <button
-                        disabled={splitting() || offlineMode()}
-                        onClick={combineAndSplit}
-                      >
-                        <Show when={splitting()}>
-                          <IoRefreshSharp class="spin" />
-                          &nbsp;
-                        </Show>
-                        Teilen
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowSplitInput(false)
-                          setSplitSats('')
-                        }}
-                      >
-                        Abbrechen
-                      </button>
-                    </div>
-                  </Dialog>
-                </Show>
-                <Show when={showLabelInput() && canLabelSelected()}>
-                  <Dialog
-                    onClose={() => {
-                      setShowLabelInput(false)
-                      setLabelInputValue('')
-                    }}
-                  >
-                    <h4>Bezeichnung</h4>
-                    <label>
-                      Label {selectedBearers().length} note
-                      {selectedBearers().length === 1 ? '' : 's'} (private, for
-                      your own reference)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="z. B. Miete, Geschenk für Alex"
-                      value={labelInputValue()}
-                      onInput={e => setLabelInputValue(e.currentTarget.value)}
-                      onKeyDown={e => e.key === 'Enter' && saveLabelSelected()}
-                    />
-                    <div class="btns">
-                      <button onClick={saveLabelSelected}>Speichern</button>
-                      <button
-                        onClick={() => {
-                          setShowLabelInput(false)
-                          setLabelInputValue('')
-                        }}
-                      >
-                        Abbrechen
-                      </button>
-                    </div>
-                  </Dialog>
-                </Show>
-                <Show when={showSplitSingleInput() && canSplitSingle()}>
-                  <Dialog
-                    onClose={() => {
-                      setShowSplitSingleInput(false)
-                      setSplitSingleSats('')
-                      setSplitSingleTimes('1')
-                    }}
-                  >
-                    <h4>Teilen</h4>
-                    <label>
-                      Split off (sats, of{' '}
-                      {msatToSats(selectedBearers()[0].amount)})
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      placeholder="Betrag in Sats"
-                      value={splitSingleSats()}
-                      onInput={e => setSplitSingleSats(e.currentTarget.value)}
-                    />
-                    <label>Wie oft</label>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      placeholder="1"
-                      value={splitSingleTimes()}
-                      onInput={e => setSplitSingleTimes(e.currentTarget.value)}
-                    />
-                    <p class="bearer-hint">
-                      Verlangt die Ausgabestelle eine Gebühr, geht sie vom Rest ab, nicht vom abgeteilten Betrag – bleibt dafür zu wenig übrig, schlägt das Teilen fehl.
-                    </p>
-                    <Show when={Number(splitSingleTimes()) > 1}>
-                      <p class="bearer-hint">
-                        Chains {Number(splitSingleTimes())} split requests one
-                        after another - if one fails partway through, whichever
-                        notes already came back are kept, and you'd need to try
-                        again for the rest.
-                      </p>
-                    </Show>
-                    <label
-                      class="plain-secret-toggle"
-                      title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={plainSecret()}
-                        onChange={e => setPlainSecret(e.currentTarget.checked)}
-                      />
-                      &nbsp;Zufallsgeheimnis
-                    </label>
-                    <div class="btns">
-                      <button
-                        disabled={splittingSingle() || offlineMode()}
-                        onClick={splitSingleSelected}
-                      >
-                        <Show when={splittingSingle()}>
-                          <IoRefreshSharp class="spin" />
-                          &nbsp;
-                        </Show>
-                        Teilen
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowSplitSingleInput(false)
-                          setSplitSingleSats('')
-                          setSplitSingleTimes('1')
-                        }}
-                      >
-                        Abbrechen
-                      </button>
-                    </div>
-                  </Dialog>
-                </Show>
               </section>
-            </Show>
 
-            <Show
-              when={groupByMint()}
-              fallback={
-                <div class="bearer-list">
-                  <For each={sortedBearers()}>
-                    {bearer => (
-                      <BearerCard
-                        bearer={bearer}
-                        selected={selected().has(bearer.id)}
-                        onSelect={isSelected =>
-                          toggleSelect(bearer.id, isSelected)
-                        }
-                        onRefresh={refreshOneBearer}
-                        onUpgrade={upgradeOneBearer}
+              <Show when={selected().size > 0}>
+                <section class="selection-toolbar">
+                  <div class="btns">
+                    <button
+                      class="icon-btn refresh-btn"
+                      disabled={
+                        !canRefreshSelected() || refreshing() || offlineMode()
+                      }
+                      title={
+                        offlineMode()
+                          ? 'Offline-Modus ist an'
+                          : canRefreshSelected()
+                            ? 'Aktuellen Wert bei der Ausgabestelle abfragen, dann erneuern – nacheinander für jeden ausgewählten Schein'
+                            : 'Scheine zum Erneuern auswählen'
+                      }
+                      onClick={refreshSelected}
+                    >
+                      <Show when={refreshing()} fallback={<IoRefreshSharp />}>
+                        <IoRefreshSharp class="spin" />
+                      </Show>
+                      <span class="btn-label">
+                        &nbsp;Erneuern
+                        <Show when={selectedBearers().length > 1}>
+                          &nbsp;({selectedBearers().length})
+                        </Show>
+                      </span>
+                    </button>
+                    <button
+                      class="icon-btn split-single-btn"
+                      disabled={!canSplitSingle() || offlineMode()}
+                      title={
+                        offlineMode()
+                          ? 'Offline-Modus ist an'
+                          : canSplitSingle()
+                            ? 'Ausgewählten Schein in zwei teilen'
+                            : 'Genau 1 geprüften, nicht ausgegebenen Schein zum Teilen auswählen'
+                      }
+                      onClick={() => setShowSplitSingleInput(v => !v)}
+                    >
+                      <IoGitBranchSharp />
+                      <span class="btn-label">&nbsp;Teilen</span>
+                    </button>
+                    <button
+                      class="icon-btn combine-btn"
+                      disabled={!canCombine() || combining() || offlineMode()}
+                      title={
+                        offlineMode()
+                          ? 'Offline-Modus ist an'
+                          : canCombine()
+                            ? 'Ausgewählte Scheine zu einem zusammenlegen. Verlangt die Ausgabestelle Gebühren, bekommst du beim Zusammenlegen alle bis auf eine Grundgebühr zurück.'
+                            : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
+                      }
+                      onClick={combineSelected}
+                    >
+                      <Show when={combining()} fallback={<IoGitMergeSharp />}>
+                        <IoRefreshSharp class="spin" />
+                      </Show>
+                      <span class="btn-label">&nbsp;Zusammenlegen</span>
+                    </button>
+                    <button
+                      class="icon-btn split-btn"
+                      disabled={!canCombine() || splitting() || offlineMode()}
+                      title={
+                        offlineMode()
+                          ? 'Offline-Modus ist an'
+                          : canCombine()
+                            ? 'Ausgewählte Scheine zusammenlegen und einen Betrag abteilen, der Rest bleibt als Wechselgeld. Verlangt die Ausgabestelle Gebühren, bekommst du alle bis auf eine Grundgebühr zurück.'
+                            : 'Mindestens 2 geprüfte, nicht ausgegebene Scheine derselben Ausgabestelle auswählen'
+                      }
+                      onClick={() => setShowSplitInput(v => !v)}
+                    >
+                      <Show when={splitting()} fallback={<IoGitBranchSharp />}>
+                        <IoRefreshSharp class="spin" />
+                      </Show>
+                      <span class="btn-label">
+                        &nbsp;Zusammenlegen &amp; teilen
+                      </span>
+                    </button>
+                    <label
+                      class="plain-secret-toggle"
+                      title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={plainSecret()}
+                        onChange={e => setPlainSecret(e.currentTarget.checked)}
                       />
-                    )}
-                  </For>
-                </div>
-              }
-            >
-              <For each={groupedBearers()}>
-                {([server, group]) => (
-                  <section class="mint-group-section">
-                    <h4 class="mint-group-heading">{server}</h4>
-                    <div class="bearer-list">
-                      <For each={group}>
-                        {bearer => (
-                          <BearerCard
-                            bearer={bearer}
-                            selected={selected().has(bearer.id)}
-                            onSelect={isSelected =>
-                              toggleSelect(bearer.id, isSelected)
+                      &nbsp;Zufallsgeheimnis
+                    </label>
+                    <button
+                      class="icon-btn transfer-btn"
+                      disabled={!canTransfer() || offlineMode()}
+                      title={
+                        offlineMode()
+                          ? 'Offline-Modus ist an'
+                          : canTransfer()
+                            ? 'Ausgewählten Schein zu einer anderen Ausgabestelle umziehen'
+                            : 'Genau 1 Schein zum Umziehen auswählen'
+                      }
+                      onClick={() => setTransferSource(selectedEligible()[0])}
+                    >
+                      <IoSwapHorizontalSharp />
+                      <span class="btn-label">&nbsp;Umziehen</span>
+                    </button>
+                    <div class="more-menu" ref={el => (moreMenuRef = el)}>
+                      <button
+                        type="button"
+                        class="icon-btn more-btn"
+                        title="Weitere Aktionen – Bezeichnung, als ausgegeben markieren, exportieren"
+                        onClick={() => setShowMoreMenu(v => !v)}
+                      >
+                        <IoEllipsisVerticalSharp />
+                      </button>
+                      <Show when={showMoreMenu()}>
+                        <div class="more-menu-panel">
+                          <button
+                            class="icon-btn send-pubkey-btn"
+                            disabled={!canSendToPubkey() || offlineMode()}
+                            title={
+                              offlineMode()
+                                ? 'Offline-Modus ist an'
+                                : canSendToPubkey()
+                                  ? 'Ausgewählte Scheine zusammenlegen und/oder teilen – zu einem Schein für einen eingefügten cp1-Pubkey'
+                                  : 'Mindestens 1 geprüften, nicht ausgegebenen Schein (nicht auf dem Tresor) derselben Ausgabestelle auswählen'
                             }
-                            onRefresh={refreshOneBearer}
-                            onUpgrade={upgradeOneBearer}
-                          />
-                        )}
-                      </For>
+                            onClick={() => {
+                              setSendToPubkeySource(selectedEligible())
+                              setShowMoreMenu(false)
+                            }}
+                          >
+                            <IoKeySharp />
+                            &nbsp;An Pubkey senden
+                            <Show when={selectedEligible().length > 1}>
+                              &nbsp;({selectedEligible().length})
+                            </Show>
+                          </button>
+                          <button
+                            class="icon-btn label-btn"
+                            disabled={!canLabelSelected()}
+                            title={
+                              canLabelSelected()
+                                ? 'Ausgewählten Scheinen eine Bezeichnung geben (nur für dich)'
+                                : 'Scheine zum Bezeichnen auswählen'
+                            }
+                            onClick={() => {
+                              openLabelInput()
+                              setShowMoreMenu(false)
+                            }}
+                          >
+                            <IoPencilSharp />
+                            &nbsp;Bezeichnung
+                            <Show when={selectedBearers().length > 1}>
+                              &nbsp;({selectedBearers().length})
+                            </Show>
+                          </button>
+                          <button
+                            class="icon-btn mark-spent-btn"
+                            disabled={!canMarkSpentSelected()}
+                            title={
+                              canMarkSpentSelected()
+                                ? 'Ausgewählte Scheine als ausgegeben markieren – sperrt sie, ohne sie zu löschen, z. B. wenn du sie anders weitergegeben hast'
+                                : 'Scheine zum Markieren auswählen'
+                            }
+                            onClick={() => {
+                              markSpentSelected()
+                              setShowMoreMenu(false)
+                            }}
+                          >
+                            <IoBanSharp />
+                            &nbsp;Als ausgegeben markieren
+                            <Show when={selectedBearers().length > 1}>
+                              &nbsp;({selectedBearers().length})
+                            </Show>
+                          </button>
+                          <button
+                            class="icon-btn export-btn"
+                            disabled={selected().size === 0}
+                            title={
+                              selected().size === 0
+                                ? 'Scheine zum Exportieren auswählen'
+                                : 'Ausgewählte Scheine als Textdatei herunterladen (bech32, einer je Zeile)'
+                            }
+                            onClick={() => {
+                              exportSelected()
+                              setShowMoreMenu(false)
+                            }}
+                          >
+                            <IoDownloadSharp />
+                            &nbsp;Exportieren
+                            <Show when={selected().size > 0}>
+                              &nbsp;({selected().size})
+                            </Show>
+                          </button>
+                          <button
+                            class="icon-btn qr-export-btn"
+                            disabled={selected().size === 0}
+                            title={
+                              selected().size === 0
+                                ? 'Scheine für QR-Codes auswählen'
+                                : 'Für jeden ausgewählten Schein einen QR-Code (SVG) herunterladen'
+                            }
+                            onClick={() => {
+                              downloadQrSelected()
+                              setShowMoreMenu(false)
+                            }}
+                          >
+                            <IoQrCodeSharp />
+                            &nbsp;QR
+                            <Show when={selected().size > 0}>
+                              &nbsp;({selected().size})
+                            </Show>
+                          </button>
+                        </div>
+                      </Show>
                     </div>
-                  </section>
-                )}
-              </For>
-            </Show>
+                    <Show when={selected().size > 0}>
+                      <button
+                        type="button"
+                        class="icon-btn clear-selection-btn"
+                        title="Auswahl aufheben"
+                        onClick={() => setSelected(new Set<string>())}
+                      >
+                        <IoCloseCircleSharp />
+                        <span class="btn-label">&nbsp;Auswahl aufheben</span>
+                        &nbsp;({selected().size})
+                      </button>
+                    </Show>
+                  </div>
+                  <Show when={showSplitInput() && canCombine()}>
+                    <Dialog
+                      onClose={() => {
+                        setShowSplitInput(false)
+                        setSplitSats('')
+                      }}
+                    >
+                      <h4>Zusammenlegen &amp; teilen</h4>
+                      <label>
+                        Split off (sats, of{' '}
+                        {msatToSats(
+                          selectedEligible().reduce((s, b) => s + b.amount, 0)
+                        )}
+                        )
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="Betrag in Sats"
+                        value={splitSats()}
+                        onInput={e => setSplitSats(e.currentTarget.value)}
+                      />
+                      <p class="bearer-hint">
+                        Burns the {selectedEligible().length} selected notes and
+                        mints two: this amount, and a change note for the rest.
+                        If this mint charges a fee, it's deducted from the
+                        change, not the amount split off.
+                      </p>
+                      <label
+                        class="plain-secret-toggle"
+                        title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={plainSecret()}
+                          onChange={e =>
+                            setPlainSecret(e.currentTarget.checked)
+                          }
+                        />
+                        &nbsp;Zufallsgeheimnis
+                      </label>
+                      <div class="btns">
+                        <button
+                          disabled={splitting() || offlineMode()}
+                          onClick={combineAndSplit}
+                        >
+                          <Show when={splitting()}>
+                            <IoRefreshSharp class="spin" />
+                            &nbsp;
+                          </Show>
+                          Teilen
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSplitInput(false)
+                            setSplitSats('')
+                          }}
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    </Dialog>
+                  </Show>
+                  <Show when={showLabelInput() && canLabelSelected()}>
+                    <Dialog
+                      onClose={() => {
+                        setShowLabelInput(false)
+                        setLabelInputValue('')
+                      }}
+                    >
+                      <h4>Bezeichnung</h4>
+                      <label>
+                        Label {selectedBearers().length} note
+                        {selectedBearers().length === 1 ? '' : 's'} (private,
+                        for your own reference)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="z. B. Miete, Geschenk für Alex"
+                        value={labelInputValue()}
+                        onInput={e => setLabelInputValue(e.currentTarget.value)}
+                        onKeyDown={e =>
+                          e.key === 'Enter' && saveLabelSelected()
+                        }
+                      />
+                      <div class="btns">
+                        <button onClick={saveLabelSelected}>Speichern</button>
+                        <button
+                          onClick={() => {
+                            setShowLabelInput(false)
+                            setLabelInputValue('')
+                          }}
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    </Dialog>
+                  </Show>
+                  <Show when={showSplitSingleInput() && canSplitSingle()}>
+                    <Dialog
+                      onClose={() => {
+                        setShowSplitSingleInput(false)
+                        setSplitSingleSats('')
+                        setSplitSingleTimes('1')
+                      }}
+                    >
+                      <h4>Teilen</h4>
+                      <label>
+                        Split off (sats, of{' '}
+                        {msatToSats(selectedBearers()[0].amount)})
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="Betrag in Sats"
+                        value={splitSingleSats()}
+                        onInput={e => setSplitSingleSats(e.currentTarget.value)}
+                      />
+                      <label>Wie oft</label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="1"
+                        value={splitSingleTimes()}
+                        onInput={e =>
+                          setSplitSingleTimes(e.currentTarget.value)
+                        }
+                      />
+                      <p class="bearer-hint">
+                        Verlangt die Ausgabestelle eine Gebühr, geht sie vom
+                        Rest ab, nicht vom abgeteilten Betrag – bleibt dafür zu
+                        wenig übrig, schlägt das Teilen fehl.
+                      </p>
+                      <Show when={Number(splitSingleTimes()) > 1}>
+                        <p class="bearer-hint">
+                          Chains {Number(splitSingleTimes())} split requests one
+                          after another - if one fails partway through,
+                          whichever notes already came back are kept, and you'd
+                          need to try again for the rest.
+                        </p>
+                      </Show>
+                      <label
+                        class="plain-secret-toggle"
+                        title="Beim Teilen/Zusammenlegen Zufallsgeheimnisse statt aus den zwölf Wörtern abgeleiteter Schlüssel verwenden – nicht mit den Wörtern wiederherstellbar"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={plainSecret()}
+                          onChange={e =>
+                            setPlainSecret(e.currentTarget.checked)
+                          }
+                        />
+                        &nbsp;Zufallsgeheimnis
+                      </label>
+                      <div class="btns">
+                        <button
+                          disabled={splittingSingle() || offlineMode()}
+                          onClick={splitSingleSelected}
+                        >
+                          <Show when={splittingSingle()}>
+                            <IoRefreshSharp class="spin" />
+                            &nbsp;
+                          </Show>
+                          Teilen
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSplitSingleInput(false)
+                            setSplitSingleSats('')
+                            setSplitSingleTimes('1')
+                          }}
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    </Dialog>
+                  </Show>
+                </section>
+              </Show>
+
+              <Show
+                when={groupByMint()}
+                fallback={
+                  <div class="bearer-list">
+                    <For each={sortedBearers()}>
+                      {bearer => (
+                        <BearerCard
+                          bearer={bearer}
+                          selected={selected().has(bearer.id)}
+                          onSelect={isSelected =>
+                            toggleSelect(bearer.id, isSelected)
+                          }
+                          onRefresh={refreshOneBearer}
+                          onUpgrade={upgradeOneBearer}
+                        />
+                      )}
+                    </For>
+                  </div>
+                }
+              >
+                <For each={groupedBearers()}>
+                  {([server, group]) => (
+                    <section class="mint-group-section">
+                      <h4 class="mint-group-heading">{server}</h4>
+                      <div class="bearer-list">
+                        <For each={group}>
+                          {bearer => (
+                            <BearerCard
+                              bearer={bearer}
+                              selected={selected().has(bearer.id)}
+                              onSelect={isSelected =>
+                                toggleSelect(bearer.id, isSelected)
+                              }
+                              onRefresh={refreshOneBearer}
+                              onUpgrade={upgradeOneBearer}
+                            />
+                          )}
+                        </For>
+                      </div>
+                    </section>
+                  )}
+                </For>
+              </Show>
             </Show>
           </div>
         </Show>

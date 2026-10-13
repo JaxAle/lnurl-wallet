@@ -107,7 +107,10 @@ const Setup: Component = () => {
         <h2>Wallet einrichten</h2>
         <Show when={state() !== 'none'}>
           <p class="warning">
-            Auf diesem Gerät gibt es schon eine Wallet – eine neue ersetzt ihren Schlüssel. Mit dem alten Schlüssel verschlüsselte Scheine bleiben gespeichert, sind aber unlesbar, bis die alten zwölf Wörter wieder eingespielt werden.
+            Auf diesem Gerät gibt es schon eine Wallet – eine neue ersetzt ihren
+            Schlüssel. Mit dem alten Schlüssel verschlüsselte Scheine bleiben
+            gespeichert, sind aber unlesbar, bis die alten zwölf Wörter wieder
+            eingespielt werden.
           </p>
         </Show>
         <div class="tabs">
@@ -131,7 +134,9 @@ const Setup: Component = () => {
               fallback={
                 <>
                   <p>
-                    Im Browser entstehen zwölf neue Wörter – sie sind der Hauptschlüssel deiner Wallet und der einzige Weg, deine Scheine auf einem anderen Gerät wiederherzustellen.
+                    Im Browser entstehen zwölf neue Wörter – sie sind der
+                    Hauptschlüssel deiner Wallet und der einzige Weg, deine
+                    Scheine auf einem anderen Gerät wiederherzustellen.
                   </p>
                   <div class="btns">
                     <button onClick={generate}>Zwölf Wörter erzeugen</button>
@@ -140,7 +145,8 @@ const Setup: Component = () => {
               }
             >
               <label>
-                Deine zwölf Wörter – schreib sie auf, gespeichert werden sie nirgends:
+                Deine zwölf Wörter – schreib sie auf, gespeichert werden sie
+                nirgends:
               </label>
               <pre>{seedPhrase()}</pre>
               <label>
@@ -209,7 +215,9 @@ const Setup: Component = () => {
             </div>
           </Show>
           <p>
-            Wiederherstellen aus einer Sicherungsdatei – ohne die zwölf Wörter, solange du ihr Passwort kennst – geht in den{' '} <A href="/settings/erweitert?teil=einspielen">Einstellungen</A>.
+            Wiederherstellen aus einer Sicherungsdatei – ohne die zwölf Wörter,
+            solange du ihr Passwort kennst – geht in den{' '}
+            <A href="/settings/erweitert?teil=einspielen">Einstellungen</A>.
           </p>
         </div>
       </div>
@@ -238,7 +246,8 @@ const EncryptChoice: Component<{
       when={props.encrypt}
       fallback={
         <p class="warning">
-          Ohne Passwort liegt der Schlüssel offen im Browser – wer dieses Browserprofil benutzt, kann deine Scheine ausgeben.
+          Ohne Passwort liegt der Schlüssel offen im Browser – wer dieses
+          Browserprofil benutzt, kann deine Scheine ausgeben.
         </p>
       }
     >
@@ -267,7 +276,8 @@ const EncryptChoice: Component<{
         }
       >
         <p class="warning">
-          Mindestens {MIN_PASSWORD_LENGTH} Zeichen – dieses Passwort ist das Einzige, was deine Scheine vor einem Durchprobieren schützt.
+          Mindestens {MIN_PASSWORD_LENGTH} Zeichen – dieses Passwort ist das
+          Einzige, was deine Scheine vor einem Durchprobieren schützt.
         </p>
       </Show>
       <Show
@@ -315,7 +325,10 @@ const MintRecovery: Component<{onDone: () => void}> = props => {
     const value = customInput().trim()
     if (!value) return
     if (!resolveMintInput(value)) {
-      notify('Keine erkennbare Adresse einer Ausgabestelle und kein LNURL.', NotifyKind.ERROR)
+      notify(
+        'Keine erkennbare Adresse einer Ausgabestelle und kein LNURL.',
+        NotifyKind.ERROR
+      )
       return
     }
     if (!customMints().includes(value)) {

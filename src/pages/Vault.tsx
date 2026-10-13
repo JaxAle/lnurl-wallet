@@ -218,7 +218,10 @@ const Vault: Component = () => {
               Vault is still an alpha feature, opt-in only - turn it on in
               Settings to pair a hardware device.
             </p>
-            <A href="/settings/erweitert?teil=extras" class="hero-btn hero-btn-primary">
+            <A
+              href="/settings/erweitert?teil=extras"
+              class="hero-btn hero-btn-primary"
+            >
               Go to Settings
             </A>
           </div>

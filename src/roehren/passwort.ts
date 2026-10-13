@@ -25,7 +25,11 @@ import {
   savedStorageRootKeyIsEncrypted
 } from '../keys'
 
-const EINTRAEGE = ['lnurlwallet_storage_root_key', 'lnurlwallet_linking_key', 'lnurlwallet_cash_root_key']
+const EINTRAEGE = [
+  'lnurlwallet_storage_root_key',
+  'lnurlwallet_linking_key',
+  'lnurlwallet_cash_root_key'
+]
 
 type Offen = {
   speicher?: Uint8Array
@@ -55,7 +59,8 @@ const oeffne = async (passwort: string | undefined): Promise<Offen> => {
 }
 
 const gleich = (a?: Uint8Array, b?: Uint8Array) =>
-  (!a && !b) || (!!a && !!b && a.length === b.length && a.every((x, i) => x === b[i]))
+  (!a && !b) ||
+  (!!a && !!b && a.length === b.length && a.every((x, i) => x === b[i]))
 
 export class FalschesPasswort extends Error {
   constructor() {
@@ -74,14 +79,18 @@ export const pruefePasswort = async (alt: string): Promise<boolean> => {
 }
 
 // alt: bisheriges Passwort, oder undefined, wenn die Wallet keines hat (Setzen)
-export const setzePasswort = async (alt: string | undefined, neu: string): Promise<void> => {
+export const setzePasswort = async (
+  alt: string | undefined,
+  neu: string
+): Promise<void> => {
   let offen: Offen
   try {
     offen = await oeffne(alt)
   } catch {
     throw new FalschesPasswort()
   }
-  if (!offen.speicher && !offen.verknuepfung) throw new Error('Auf diesem Gerät ist keine Wallet.')
+  if (!offen.speicher && !offen.verknuepfung)
+    throw new Error('Auf diesem Gerät ist keine Wallet.')
 
   const vorher = new Map(EINTRAEGE.map(k => [k, localStorage.getItem(k)]))
   const zurueck = () => {
@@ -95,11 +104,29 @@ export const setzePasswort = async (alt: string | undefined, neu: string): Promi
     // Zeitpunkt, an dem ein Schlüssel das neue und ein anderer das alte Passwort hat
     const neuVerschluesselt: [string, string][] = []
     if (offen.speicher)
-      neuVerschluesselt.push([EINTRAEGE[0], JSON.stringify({enc: true, ...(await encryptSecretParts(bytesToHex(offen.speicher), neu))})])
+      neuVerschluesselt.push([
+        EINTRAEGE[0],
+        JSON.stringify({
+          enc: true,
+          ...(await encryptSecretParts(bytesToHex(offen.speicher), neu))
+        })
+      ])
     if (offen.verknuepfung)
-      neuVerschluesselt.push([EINTRAEGE[1], JSON.stringify({enc: true, ...(await encryptSecretParts(bytesToHex(offen.verknuepfung), neu))})])
+      neuVerschluesselt.push([
+        EINTRAEGE[1],
+        JSON.stringify({
+          enc: true,
+          ...(await encryptSecretParts(bytesToHex(offen.verknuepfung), neu))
+        })
+      ])
     if (offen.bargeld)
-      neuVerschluesselt.push([EINTRAEGE[2], JSON.stringify({enc: true, ...(await encryptSecretParts(offen.bargeld, neu))})])
+      neuVerschluesselt.push([
+        EINTRAEGE[2],
+        JSON.stringify({
+          enc: true,
+          ...(await encryptSecretParts(offen.bargeld, neu))
+        })
+      ])
     for (const [k, v] of neuVerschluesselt) localStorage.setItem(k, v)
     // Probe: mit dem neuen Passwort muss genau dasselbe herauskommen
     const probe = await oeffne(neu)
@@ -112,6 +139,8 @@ export const setzePasswort = async (alt: string | undefined, neu: string): Promi
     }
   } catch (err) {
     zurueck()
-    throw new Error(`Passwort nicht geändert — alles ist wie vorher. (${(err as Error).message})`)
+    throw new Error(
+      `Passwort nicht geändert — alles ist wie vorher. (${(err as Error).message})`
+    )
   }
 }

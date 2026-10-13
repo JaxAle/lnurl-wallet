@@ -2,7 +2,15 @@
 // Immer sieben Röhren, rechtsbündig; links der Zahl bleiben sie dunkel (keine führenden
 // Nullen), ihre Tausenderpunkte auch. Steigt das Guthaben, glühen die geänderten Ziffern auf.
 import type {Component, JSX} from 'solid-js'
-import {createEffect, createMemo, createSignal, For, on, onCleanup, Show} from 'solid-js'
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  on,
+  onCleanup,
+  Show
+} from 'solid-js'
 
 import {currency, satsToFiat} from '../currency'
 // Jost, die Schrift der Röhren — im Paket, nicht von Google Fonts (die App lädt nichts nach)
@@ -21,7 +29,9 @@ const zellen = (sats: number, vorher: number | null): Zelle[] => {
   const alt =
     vorher === null
       ? null
-      : String(Math.max(0, Math.floor(vorher))).slice(-ROEHREN).padStart(ROEHREN, ' ')
+      : String(Math.max(0, Math.floor(vorher)))
+          .slice(-ROEHREN)
+          .padStart(ROEHREN, ' ')
   const steigt = vorher !== null && sats > vorher
   const ergebnis: Zelle[] = []
   for (let i = 0; i < ROEHREN; i++) {
@@ -43,7 +53,10 @@ const fiatText = (sats: number): string | null => {
   const wert = satsToFiat(sats)
   const c = currency()
   if (wert === null || c === 'none') return null
-  const zahl = wert.toLocaleString('de-AT', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+  const zahl = wert.toLocaleString('de-AT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
   return c === 'eur' ? `≈ ${zahl} €` : `≈ ${zahl} ${c.toUpperCase()}`
 }
 
@@ -82,7 +95,9 @@ const Zaehlwerk: Component<{
   onWahl?: (w: 'sats' | 'eur') => void
   euroAnzeige?: string
 }> = props => {
-  const [angezeigt, setAngezeigtRoh] = createSignal(props.sofort ? props.sats : (zuletzt ?? props.sats))
+  const [angezeigt, setAngezeigtRoh] = createSignal(
+    props.sofort ? props.sats : (zuletzt ?? props.sats)
+  )
   const setAngezeigt = (wert: number) => {
     if (!props.sofort) zuletzt = wert
     setAngezeigtRoh(wert)
@@ -135,46 +150,48 @@ const Zaehlwerk: Component<{
         aria-pressed={props.onWahl ? props.wahl === 'sats' : undefined}
         onClick={() => props.onWahl?.('sats')}
       >
-      <Show when={stand()} keyed>
-        {s => (
-          <div
-            class="bal-tubes"
-            classList={{
-              cold: s.sats === 0 || !!props.kalt,
-              signed: !!props.vorzeichen,
-              idle: props.wahl === 'eur'
-            }}
-            role="img"
-            aria-label={`Guthaben ${anzeige()} Sats`}
-          >
-            <Show when={props.vorzeichen}>
-              <span class="sign">{props.vorzeichen}</span>
-            </Show>
-            {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
-            <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
-              {zelle =>
-                zelle.art === 'punkt' ? (
-                  <span class="dot" classList={{unlit: !zelle.an}} />
-                ) : zelle.ziffer === null ? (
-                  <span class="tube unlit">
-                    <span class="glow" />
-                  </span>
-                ) : (
-                  <span class="tube" classList={{up: zelle.neu}}>
-                    <span class="glow" />
-                    <span class={`ch ch-${zelle.ziffer}`}>{zelle.ziffer}</span>
-                  </span>
-                )
-              }
-            </For>
-            <span class="satsym" aria-hidden="true">
-              <svg viewBox="0 0 12 24">
-                <path d="M6 1.5v21M1.5 7.5h9M1.5 12h9M1.5 16.5h9" />
-              </svg>
-            </span>
-          </div>
-        )}
-      </Show>
+        <Show when={stand()} keyed>
+          {s => (
+            <div
+              class="bal-tubes"
+              classList={{
+                cold: s.sats === 0 || !!props.kalt,
+                signed: !!props.vorzeichen,
+                idle: props.wahl === 'eur'
+              }}
+              role="img"
+              aria-label={`Guthaben ${anzeige()} Sats`}
+            >
+              <Show when={props.vorzeichen}>
+                <span class="sign">{props.vorzeichen}</span>
+              </Show>
+              {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
+              <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
+                {zelle =>
+                  zelle.art === 'punkt' ? (
+                    <span class="dot" classList={{unlit: !zelle.an}} />
+                  ) : zelle.ziffer === null ? (
+                    <span class="tube unlit">
+                      <span class="glow" />
+                    </span>
+                  ) : (
+                    <span class="tube" classList={{up: zelle.neu}}>
+                      <span class="glow" />
+                      <span class={`ch ch-${zelle.ziffer}`}>
+                        {zelle.ziffer}
+                      </span>
+                    </span>
+                  )
+                }
+              </For>
+              <span class="satsym" aria-hidden="true">
+                <svg viewBox="0 0 12 24">
+                  <path d="M6 1.5v21M1.5 7.5h9M1.5 12h9M1.5 16.5h9" />
+                </svg>
+              </span>
+            </div>
+          )}
+        </Show>
       </div>
       <div
         class="rz-eurrow"
@@ -184,22 +201,23 @@ const Zaehlwerk: Component<{
         aria-pressed={props.onWahl ? props.wahl === 'eur' : undefined}
         onClick={() => props.onWahl?.('eur')}
       >
-      <Show
-        when={gebuehr()}
-        fallback={
-          <Show when={props.euroAnzeige ?? fiat()}>
-            <div>
-              <span class="rz-euro">{props.euroAnzeige ?? fiat()}</span>
-            </div>
-          </Show>
-        }
-      >
-        <div>
-          <span class="rz-euro">
-            {gebuehr()!.toLocaleString('de-DE')} {gebuehr() === 1 ? 'Sat' : 'Sats'} Gebühr
-          </span>
-        </div>
-      </Show>
+        <Show
+          when={gebuehr()}
+          fallback={
+            <Show when={props.euroAnzeige ?? fiat()}>
+              <div>
+                <span class="rz-euro">{props.euroAnzeige ?? fiat()}</span>
+              </div>
+            </Show>
+          }
+        >
+          <div>
+            <span class="rz-euro">
+              {gebuehr()!.toLocaleString('de-DE')}{' '}
+              {gebuehr() === 1 ? 'Sat' : 'Sats'} Gebühr
+            </span>
+          </div>
+        </Show>
       </div>
       {/* fester Platz: hier steht die Hinweiszeile, wenn etwas offen ist — sonst bleibt er leer,
       damit die Schalter nicht springen */}

@@ -64,7 +64,9 @@ type Schein = {id: string; url: string; spent?: boolean; deviceId?: string}
 export const pruefeRunde = async (
   scheine: Schein[],
   markiere: (id: string) => Promise<void>,
-  frage: (url: string) => Promise<'live' | 'gone' | 'unknown'> = probeBurnedNote,
+  frage: (
+    url: string
+  ) => Promise<'live' | 'gone' | 'unknown'> = probeBurnedNote,
   jetzt = Date.now()
 ): Promise<string[]> => {
   const u = lies()
@@ -72,7 +74,12 @@ export const pruefeRunde = async (
   for (const [id, seit] of Object.entries(u)) {
     const schein = scheine.find(s => s.id === id)
     // weg, schon ausgegeben, zu alt, oder Geheimnis liegt auf einem Gerät (keine k1 in der url)
-    if (!schein || schein.spent || schein.deviceId || jetzt - seit > HOECHSTENS_MS) {
+    if (
+      !schein ||
+      schein.spent ||
+      schein.deviceId ||
+      jetzt - seit > HOECHSTENS_MS
+    ) {
       vergiss(id)
       continue
     }
