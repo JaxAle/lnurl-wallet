@@ -22,12 +22,16 @@ import {teilGebuehr} from './gebuehren'
 import {unterwegs} from './einloesen'
 import Rueckfrage from './Rueckfrage'
 import {offenZurPruefung} from './Pruefwache'
+import {gebunden} from './klaerung'
+import type {Vorgang} from './klaerung'
 import {holeZurueck} from './zurueckholen'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
 export type ScheineMotor = {
   scheine: Accessor<Bearer[]>
+  // ungeklärte Vorgänge (klaerung.ts): ihre Scheine stehen gebunden in einer eigenen Karte
+  vorgaenge: Accessor<Vorgang[]>
   ausgewaehlt: Accessor<Set<string>>
   waehle: (id: string, an: boolean) => void
   leereAuswahl: () => void
@@ -123,13 +127,15 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   // der Ort“ (Steve, 2026-10-12); eingelöst verschwindet er, zurückgeholt wandert er in seine Gruppe
   const draussen = createMemo(() => {
     const ids = new Set(unterwegs())
-    return m.scheine().filter(b => ids.has(b.id))
+    const g = gebunden()
+    return m.scheine().filter(b => ids.has(b.id) && !g.has(b.id))
   })
   const gruppen = createMemo(() => {
     const je = new Map<string, Bearer[]>()
     const ids = new Set(unterwegs())
+    const g = gebunden()
     for (const b of m.scheine()) {
-      if (ids.has(b.id)) continue
+      if (ids.has(b.id) || g.has(b.id)) continue
       const h = serverOf(b.url)
       je.set(h, [...(je.get(h) ?? []), b].sort((x, y) => y.amount - x.amount))
     }
@@ -244,6 +250,30 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
         }
       >
         <p class="rz-hinweis">Antippen für Werkzeuge, lange antippen zum Auswählen.</p>
+
+        {/* ungeklärte Vorgänge: eine Karte je Vorgang, die Scheine darin gebunden (Steve, 2026-10-13) */}
+        <For each={m.vorgaenge()}>
+          {v => (
+            <section class="rz-gruppe">
+              <div class="rz-klaerung">
+                <span class="rz-eyebrow">{v.host}</span>
+                <p class="t">{v.art === 'teilen' ? 'Teilen wird geklärt' : 'Zusammenlegen wird geklärt'}</p>
+                <p class="z">
+                  {v.eingangSats.map(zahl).join(' + ')} → {v.ergebnisSats.map(zahl).join(' + ')} ?
+                </p>
+                <p class="rz-status">
+                  <span class="rz-lampe-klein" />{' '}
+                  {v.ohneAntwort >= 2
+                    ? `${v.host} antwortet gerade nicht — wird geklärt, sobald das Netz es zulässt`
+                    : 'Die Wallet fragt bei der Stelle nach …'}
+                </p>
+                <p class="rz-hinweis">
+                  Bis dahin sind diese Scheine gebunden — nicht auswählen, teilen oder senden.
+                </p>
+              </div>
+            </section>
+          )}
+        </For>
 
         <Show when={draussen().length > 0}>
           <section class="rz-gruppe rz-draussen">

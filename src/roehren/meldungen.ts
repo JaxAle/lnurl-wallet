@@ -11,6 +11,11 @@ const REGELN: [RegExp, string, Art][] = [
     'ruhig'
   ],
   [
+    /^Das Zusammenlegen ist vielleicht angekommen, aber nicht bestätigt/,
+    'Die Antwort der Ausgabestelle war unklar. Die Wallet klärt gleich selbst, ob zusammengelegt wurde.',
+    'ruhig'
+  ],
+  [
     /may (still )?have gone through/,
     'Die Antwort der Ausgabestelle war unklar. Die Wallet prüft das gleich selbst.',
     'ruhig'

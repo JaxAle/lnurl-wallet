@@ -20,6 +20,7 @@ import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs} from './einloesen'
 import {merkeTeilGebuehr} from './gebuehren'
+import {beobachte, erreichbar, gebunden, nichtErreichbar} from './klaerung'
 import {holeZurueck} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
 import Zaehlwerk from './Zaehlwerk'
@@ -36,7 +37,11 @@ const Senden: Component = () => {
   const [schein, setSchein] = createSignal<Bearer | null>(null)
 
   // nur Scheine, deren Geheimnis in diesem Browser liegt (kein Vault) — die lassen sich spalten
-  const verfuegbar = createMemo(() => bearers().filter(b => !b.spent && !b.deviceId))
+  // gebunden: Teil eines ungeklärten Vorgangs (klaerung.ts) — nicht ein zweites Mal verwenden
+  const verfuegbar = createMemo(() => {
+    const g = gebunden()
+    return bearers().filter(b => !b.spent && !b.deviceId && b.verified && !g.has(b.id))
+  })
   const guthaben = () => Math.floor(verfuegbar().reduce((a, b) => a + b.amount, 0) / 1000)
   const groesster = () => Math.floor(Math.max(0, ...verfuegbar().map(b => b.amount)) / 1000)
 
@@ -65,14 +70,23 @@ const Senden: Component = () => {
     try {
       let ziel = quelle
       if (quelle.amount !== msat) {
-        const {parts, lastFeeMsat} = await splitBearerIntoAmounts(
-          quelle,
-          [{amountMsat: msat}],
-          {addBearer, updateBearer, removeBearer, logActivity, deviceClient, requireDeviceClient},
-          {plain: false}
-        )
-        ziel = parts[0]
-        merkeTeilGebuehr(serverOf(quelle.url), lastFeeMsat)
+        const host = serverOf(quelle.url)
+        if (!(await erreichbar(host))) {
+          notify(nichtErreichbar(host), NotifyKind.ERROR)
+          return
+        }
+        let ergebnis: Awaited<ReturnType<typeof splitBearerIntoAmounts>> | undefined
+        await beobachte('teilen', [quelle], bearers, async () => {
+          ergebnis = await splitBearerIntoAmounts(
+            quelle,
+            [{amountMsat: msat}],
+            {addBearer, updateBearer, removeBearer, logActivity, deviceClient, requireDeviceClient},
+            {plain: false}
+          )
+        })
+        if (!ergebnis) return
+        ziel = ergebnis.parts[0]
+        merkeTeilGebuehr(serverOf(quelle.url), ergebnis.lastFeeMsat)
       }
       merkeUnterwegs(ziel.id)
       setSchein(ziel)

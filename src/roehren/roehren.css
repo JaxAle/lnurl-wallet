@@ -1474,3 +1474,26 @@ select {
   outline: 1.5px dashed rgba(240, 131, 42, 0.7);
   outline-offset: 2px;
 }
+
+/* Vorgang in Klärung (klaerung.ts) */
+.rz-klaerung {
+  padding: 14px 16px;
+  border: 1.5px dashed rgba(240, 131, 42, 0.6);
+  border-radius: 14px;
+  background: #17110c;
+}
+.rz-klaerung .t {
+  margin: 4px 0 2px;
+  font-size: 18px;
+  color: #f4ebdf;
+}
+.rz-klaerung .z {
+  margin: 0 0 8px;
+  font: 300 26px/1.2 'Jost', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #ffefc4;
+}
+.rz-klaerung .rz-status {
+  justify-content: flex-start;
+  margin: 0 0 4px;
+}

@@ -13,7 +13,10 @@ import {onCleanup, onMount} from 'solid-js'
 
 import {notify} from '../helpers'
 import {fetchNoteInfo, NoteSpentError, NoteUnknownError, serverOf} from '../lnurlcash'
+import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
+import {aendere, gebunden, vorgaenge} from './klaerung'
+import type {Vorgang} from './klaerung'
 
 const ABSTAND_MS = 15_000
 const RUHEZEIT_MS = 60_000
@@ -22,16 +25,73 @@ export const offenZurPruefung = (b: {verified: boolean; spent?: boolean; deviceI
   !b.verified && !b.spent && !b.deviceId
 
 const Pruefwache: Component = () => {
-  const {state, bearers, updateBearer, logActivity} = useWallet()
+  const {state, bearers, updateBearer, removeBearer, logActivity} = useWallet()
+
+  type Antwort = {b: Bearer; info?: Awaited<ReturnType<typeof fetchNoteInfo>>; fremd?: boolean}
+  const frage = async (b: Bearer): Promise<Antwort> => {
+    try {
+      return {b, info: await fetchNoteInfo(b.url)}
+    } catch (err) {
+      if (err instanceof NoteSpentError || err instanceof NoteUnknownError) return {b, fremd: true}
+      return {b} // keine Antwort
+    }
+  }
+  const summe = (xs: number[]) => xs.map(x => x.toLocaleString('de-DE')).join(' + ')
+
+  // einen Vorgang „in Klärung“ als Ganzes auflösen (klaerung.ts)
+  const klaere = async (v: Vorgang) => {
+    const ergebnis = v.ergebnis.map(id => bearers().find(b => b.id === id)).filter((b): b is Bearer => !!b)
+    if (ergebnis.length === 0) return aendere(v.id, () => null)
+    const antworten = await Promise.all(ergebnis.map(frage))
+    if (antworten.some(a => !a.info && !a.fremd)) {
+      aendere(v.id, x => ({...x, ohneAntwort: x.ohneAntwort + 1}))
+      return
+    }
+    const echt = antworten.filter(a => a.info)
+    const name = v.art === 'teilen' ? 'Teilen' : 'Zusammenlegen'
+    if (echt.length === 0) {
+      // nie stattgefunden: die möglichen Ergebnisse sind nichts wert, die Eingänge wieder frei
+      for (const a of antworten) removeBearer(a.b.id)
+      const text = `${name} hat nicht stattgefunden — deine Scheine (${summe(v.eingangSats)} Sats) sind wieder frei.`
+      logActivity('refresh', `${text} (${v.host})`)
+      notify(text)
+    } else {
+      // stattgefunden: Ergebnisse bestätigen, Eingänge sind bei der Stelle verbraucht
+      for (const a of echt) {
+        await updateBearer(a.b.id, {
+          verified: true,
+          amount: a.info!.maxWithdrawable,
+          callback: a.info!.callback,
+          mintPubkey: a.info!.mintPubkey ?? a.b.mintPubkey
+        })
+      }
+      for (const a of antworten.filter(x => x.fremd)) removeBearer(a.b.id)
+      for (const id of v.eingang) removeBearer(id)
+      const neu = echt.map(a => Math.floor(a.info!.maxWithdrawable / 1000))
+      const text = v.art === 'teilen' ? `Geteilt: ${summe(neu)} Sats.` : `Zusammengelegt: ${summe(neu)} Sats.`
+      logActivity('refresh', `${text} Nach unklarer Antwort bestätigt (${v.host}).`)
+      notify(text)
+    }
+    aendere(v.id, () => null)
+  }
   let laeuft = false
   let uhr: ReturnType<typeof setInterval> | undefined
 
   const runde = async () => {
     if (laeuft || document.hidden || state() !== 'unlocked') return
     const jetzt = Date.now()
-    const offen = bearers().filter(b => offenZurPruefung(b) && jetzt - b.updatedAt > RUHEZEIT_MS)
-    if (offen.length === 0) return
+    const faellig = vorgaenge().filter(v => jetzt - v.seit > 5000)
+    const bindung = gebunden()
+    const offen = bearers().filter(
+      b => offenZurPruefung(b) && !bindung.has(b.id) && jetzt - b.updatedAt > RUHEZEIT_MS
+    )
+    if (offen.length === 0 && faellig.length === 0) return
     laeuft = true
+    try {
+      for (const v of faellig) await klaere(v)
+    } catch {
+      // nächste Runde
+    }
     let bestaetigt = 0
     let bestaetigtSats = 0
     let fremd = 0

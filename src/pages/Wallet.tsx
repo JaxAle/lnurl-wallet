@@ -96,6 +96,7 @@ import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
 import {offenZurPruefung} from '../roehren/Pruefwache'
+import {beobachte, erreichbar, gebunden, nichtErreichbar, vorgaenge} from '../roehren/klaerung'
 import {merkeTeilGebuehr} from '../roehren/gebuehren'
 import type {ScheineMotor} from '../roehren/Scheine'
 
@@ -427,6 +428,13 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
   const pruefSumme = createMemo(() =>
     bearers().filter(offenZurPruefung).reduce((sum, b) => sum + b.amount, 0)
   )
+  // Ungeprüftes, das zu einem ungeklärten Vorgang gehört, ist kein Zuwachs — die Eingänge zählen schon
+  const pruefSummeFrei = createMemo(() => {
+    const g = gebunden()
+    return bearers()
+      .filter(b => offenZurPruefung(b) && !g.has(b.id))
+      .reduce((sum, b) => sum + b.amount, 0)
+  })
   const sicherTotal = () => spendableTotal() - pruefSumme()
 
   // notes no longer live in per-mint sections - one flat list for the
@@ -1399,18 +1407,28 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
   const nurDieser = (id: string) => setSelected(new Set([id]))
   const scheineMotor: ScheineMotor = {
     scheine: () => bearers().filter(b => !b.spent),
+    vorgaenge,
     ausgewaehlt: selected,
     waehle: toggleSelect,
     leereAuswahl: () => setSelected(new Set<string>()),
     kannZusammenlegen: canCombine,
     arbeitet: () => splittingSingle() || combining() || refreshing(),
+    // vorher: ist die Stelle erreichbar? danach: unklar geendet → als Vorgang festhalten (klaerung.ts)
     teilen: async (schein, sats, mal = 1) => {
+      const host = serverOf(schein.url)
+      if (!(await erreichbar(host))) return notify(nichtErreichbar(host), NotifyKind.ERROR)
       nurDieser(schein.id)
       setSplitSingleSats(String(sats))
       setSplitSingleTimes(String(mal))
-      await splitSingleSelected()
+      await beobachte('teilen', [schein], bearers, splitSingleSelected)
     },
-    zusammenlegen: combineSelected,
+    zusammenlegen: async () => {
+      const eingang = selectedEligible()
+      if (eingang.length === 0) return
+      const host = serverOf(eingang[0].url)
+      if (!(await erreichbar(host))) return notify(nichtErreichbar(host), NotifyKind.ERROR)
+      await beobachte('zusammenlegen', eingang, bearers, combineSelected)
+    },
     beschriften: (schein, text) => {
       nurDieser(schein.id)
       setLabelInputValue(text)
@@ -1554,10 +1572,15 @@ const Wallet: Component<{ansicht?: 'start' | 'scheine' | 'werkstatt'}> = props =
                     <span class="rz-lampe-klein" /> Schein wird eingelöst …
                   </p>
                 </Show>
-                <Show when={pruefSumme() > 0}>
+                <Show when={vorgaenge().length > 0}>
+                  <button type="button" class="rz-hinweiszeile" onClick={() => navigate('/scheine')}>
+                    {vorgaenge().length === 1 ? '1 Vorgang wird geklärt' : `${vorgaenge().length} Vorgänge werden geklärt`} ›
+                  </button>
+                </Show>
+                <Show when={pruefSummeFrei() > 0}>
                   <p class="rz-status">
                     <span class="rz-lampe-klein" /> +{' '}
-                    {Math.floor(pruefSumme() / 1000).toLocaleString('de-DE')} Sats werden geprüft
+                    {Math.floor(pruefSummeFrei() / 1000).toLocaleString('de-DE')} Sats werden geprüft
                   </p>
                 </Show>
                 <Show when={unterwegsScheine().length > 0}>
