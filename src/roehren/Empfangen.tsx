@@ -157,6 +157,12 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
                     </Match>
                     <Match when={e().art === 'unbekannt'}>
                       Das ist kein Schein, keine Rechnung und keine Adresse.
+                      {/* zur Fehlersuche: was ist tatsächlich angekommen? (Gerhard am Pixel, 2026-10-14) */}
+                      <span class="rz-klein rz-block">
+                        Erkannt wurden {ausText(text()).length} Zeichen, Anfang
+                        „{ausText(text()).slice(0, 12)}“, Ende „
+                        {ausText(text()).slice(-6)}“.
+                      </span>
                     </Match>
                   </Switch>
                 </p>
@@ -169,9 +175,9 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
               onClick={() => uebernimm(text())}
             >
               <span class="lbl">
-                {erkannt()?.art === 'schein' || !erkannt()
-                  ? 'Einlösen'
-                  : 'Weiter zum Bezahlen'}
+                {erkannt()?.art === 'rechnung' || erkannt()?.art === 'adresse'
+                  ? 'Weiter zum Bezahlen'
+                  : 'Einlösen'}
               </span>
             </button>
           </Match>

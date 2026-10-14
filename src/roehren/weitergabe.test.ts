@@ -17,6 +17,14 @@ describe('Weitergeben als Link', () => {
     expect(text).toContain('lightning:' + toBech32Lnurl(url))
     expect(resolveNoteInput(ausText(text))).toBeTruthy()
   })
+  it('findet den Schein auch mit unsichtbaren Trennzeichen eines Messengers', () => {
+    const b = toBech32Lnurl(url)
+    const zerstueckelt =
+      b.slice(0, 40) + '\u200b' + b.slice(40, 80) + '\u00ad' + b.slice(80)
+    expect(
+      resolveNoteInput(ausText('Für dich: lightning:' + zerstueckelt))
+    ).toBeTruthy()
+  })
   it('lässt reine Eingaben unverändert', () => {
     const b = toBech32Lnurl(url)
     expect(ausText(b)).toBe(b)

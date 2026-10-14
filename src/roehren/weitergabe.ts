@@ -37,12 +37,17 @@ export const schickeLink = async (
 }
 
 // aus einem geteilten Text den Schein (oder die Rechnung/Adresse) herauslösen — der Empfänger fügt
-// meist die ganze Nachricht ein, nicht nur den Link
+// meist die ganze Nachricht ein, nicht nur den Link. Messenger fügen in lange Wörter gern unsichtbare
+// Trennzeichen (Null-Breite, weiches Trennzeichen) ein; die fallen hier weg
+// (Gerhard am Pixel, 2026-10-14: eingefügter Link wurde nicht erkannt).
+const UNSICHTBAR = /[\u00ad\u180e\u200b-\u200f\u2060\ufeff]/g
+const BECH32 = '02-9ac-hj-np-z'
+
 export const ausText = (text: string): string => {
-  const t = text.trim()
-  const lnurl = t.match(/(?:lightning:)?(lnurl1[02-9ac-hj-np-z]+)/i)
-  if (lnurl && t.length > lnurl[0].length) return lnurl[1]
+  const t = text.replace(UNSICHTBAR, '').trim()
+  const lnurl = t.match(new RegExp(`lnurl1[${BECH32}]{20,}`, 'i'))
+  if (lnurl) return lnurl[0]
   const w = t.match(/lnurlw:\/\/\S+/i)
-  if (w && t.length > w[0].length) return w[0]
-  return t
+  if (w) return w[0]
+  return t.replace(/^lightning:/i, '')
 }
