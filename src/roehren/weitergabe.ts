@@ -11,19 +11,24 @@ import {merkeUnterwegs} from './einloesen'
 export const WARNUNG =
   'Wer den Link hat, hat das Geld. Schick ihn nur direkt an die Person, nie in eine Gruppe.'
 
-export const linkText = (b: Bearer): string => {
-  const sats = Math.floor(b.amount / 1000).toLocaleString('de-DE')
-  return `${sats} Sats für dich (LNURLcash-Schein von ${serverOf(b.url)}). Antippen oder in einer Lightning-Wallet einfügen:\n\nlightning:${toBech32Lnurl(b.url)}`
-}
+// Nur der reine Link geht in die Nachricht (Gerhard, 2026-10-14): die Original-Wallet und die meisten
+// anderen lesen beim Einfügen genau einen Schein, keinen Satz davor. Form nach LUD-01 (bech32, groß —
+// so lesen ihn alle, BETRIEB/0017) mit dem Schema „lightning:“, damit Antippen eine Wallet öffnet.
+export const nurLink = (b: Bearer): string =>
+  `lightning:${toBech32Lnurl(b.url)}`
+
+// der erklärende Satz nur als Betreff — E-Mail zeigt ihn, Messenger lassen ihn meist weg
+export const betreff = (b: Bearer): string =>
+  `${Math.floor(b.amount / 1000).toLocaleString('de-DE')} Sats für dich (LNURLcash-Schein von ${serverOf(b.url)})`
 
 // 'geteilt' | 'kopiert' | 'abgebrochen'
 export const schickeLink = async (
   b: Bearer
 ): Promise<'geteilt' | 'kopiert' | 'abgebrochen'> => {
-  const text = linkText(b)
+  const text = nurLink(b)
   if (typeof navigator.share === 'function') {
     try {
-      await navigator.share({text})
+      await navigator.share({title: betreff(b), text})
       merkeUnterwegs(b.id)
       return 'geteilt'
     } catch (err) {
