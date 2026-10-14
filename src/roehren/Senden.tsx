@@ -20,6 +20,7 @@ import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs} from './einloesen'
 import {merkeTeilGebuehr} from './gebuehren'
+import {schickeLink, WARNUNG} from './weitergabe'
 import {beobachte, erreichbar, gebunden, nichtErreichbar} from './klaerung'
 import {holeZurueck} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
@@ -36,6 +37,15 @@ const Senden: Component = () => {
   const betrag = ein.betrag
   const [arbeitet, setArbeitet] = createSignal(false)
   const [schein, setSchein] = createSignal<Bearer | null>(null)
+  // wie weitergeben (Prototyp send-how): erst wählen, dann zeigen oder als Link schicken
+  const [weg, setWeg] = createSignal<'zeigen' | 'link' | null>(null)
+  const linkSchicken = async (b: Bearer) => {
+    const e = await schickeLink(b)
+    if (e === 'abgebrochen') return
+    if (e === 'kopiert')
+      notify('Link kopiert — füg ihn in deine Nachricht ein.')
+    setWeg('link')
+  }
 
   // nur Scheine, deren Geheimnis in diesem Browser liegt (kein Vault) — die lassen sich spalten
   // gebunden: Teil eines ungeklärten Vorgangs (klaerung.ts) — nicht ein zweites Mal verwenden
@@ -101,7 +111,6 @@ const Senden: Component = () => {
         ziel = ergebnis.parts[0]
         merkeTeilGebuehr(serverOf(quelle.url), ergebnis.lastFeeMsat)
       }
-      merkeUnterwegs(ziel.id)
       setSchein(ziel)
     } catch (err) {
       notify(
@@ -279,39 +288,110 @@ const Senden: Component = () => {
                   </div>
                 }
               >
-                <div class="rz-seitenkopf">
-                  <h2>Schein zeigen</h2>
-                </div>
-                <div class="rz-qr">
-                  <Qr value={toBech32Lnurl(s().url)} />
-                </div>
-                <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort />
-                <p class="rz-status">
-                  <span class="rz-lampe-klein" /> Wartet, bis der Schein
-                  eingelöst ist
-                </p>
-                <p class="rz-hinweis">
-                  Die Wallet fragt nach, solange sie offen ist. Du kannst auch
-                  schon zurück — dann steht der Schein im Verlauf unter
-                  „Unterwegs“.
-                </p>
-                <button
-                  type="button"
-                  class="rz-leise"
-                  onClick={() => navigate('/wallet')}
+                <Show
+                  when={weg() !== null}
+                  fallback={
+                    <>
+                      <div class="rz-seitenkopf">
+                        <h2>
+                          {Math.floor(s().amount / 1000).toLocaleString(
+                            'de-DE'
+                          )}{' '}
+                          Sats senden
+                        </h2>
+                      </div>
+                      <p class="rz-hinweis">
+                        Wie soll der Schein zur anderen Person?
+                      </p>
+                      <button
+                        type="button"
+                        class="rz-option"
+                        onClick={() => {
+                          merkeUnterwegs(s().id)
+                          setWeg('zeigen')
+                        }}
+                      >
+                        <span>
+                          <span class="t">Zeigen</span>
+                          <span class="s">
+                            Die Person steht neben dir und scannt
+                          </span>
+                        </span>
+                        <span aria-hidden="true">›</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="rz-option"
+                        onClick={() => void linkSchicken(s())}
+                      >
+                        <span>
+                          <span class="t">Als Link schicken</span>
+                          <span class="s">
+                            Per Signal, Telegram oder E-Mail
+                          </span>
+                        </span>
+                        <span aria-hidden="true">›</span>
+                      </button>
+                      <p class="rz-hinweis">{WARNUNG}</p>
+                      <button
+                        type="button"
+                        class="rz-leise"
+                        onClick={() => navigate('/wallet')}
+                      >
+                        Abbrechen — der Schein bleibt bei dir
+                      </button>
+                    </>
+                  }
                 >
-                  Zurück zur Wallet
-                </button>
-                <button
-                  type="button"
-                  class="rz-leise"
-                  disabled={holt()}
-                  onClick={() => void zurueckholen()}
-                >
-                  {holt()
-                    ? 'Einen Moment …'
-                    : 'Doch nicht senden, Schein zurückholen'}
-                </button>
+                  <div class="rz-seitenkopf">
+                    <h2>
+                      {weg() === 'link' ? 'Link geschickt' : 'Schein zeigen'}
+                    </h2>
+                  </div>
+                  <Show
+                    when={weg() === 'zeigen'}
+                    fallback={
+                      <button
+                        type="button"
+                        class="rz-leise"
+                        onClick={() => void linkSchicken(s())}
+                      >
+                        Link noch einmal schicken
+                      </button>
+                    }
+                  >
+                    <div class="rz-qr">
+                      <Qr value={toBech32Lnurl(s().url)} />
+                    </div>
+                  </Show>
+                  <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort />
+                  <p class="rz-status">
+                    <span class="rz-lampe-klein" /> Wartet, bis der Schein
+                    eingelöst ist
+                  </p>
+                  <p class="rz-hinweis">
+                    Die Wallet fragt nach, solange sie offen ist. Du kannst auch
+                    schon zurück — dann steht der Schein im Verlauf unter
+                    „Unterwegs“.
+                  </p>
+                  <button
+                    type="button"
+                    class="rz-leise"
+                    onClick={() => navigate('/wallet')}
+                  >
+                    Zurück zur Wallet
+                  </button>
+                  <button
+                    type="button"
+                    class="rz-leise"
+                    disabled={holt()}
+                    onClick={() => void zurueckholen()}
+                  >
+                    {holt()
+                      ? 'Einen Moment …'
+                      : 'Doch nicht senden, Schein zurückholen'}
+                  </button>
+                </Show>
               </Show>
             </Show>
           )}

@@ -19,6 +19,7 @@ import {
   resolveNoteInput
 } from '../lnurlcash'
 import {setEingang} from './uebergabe'
+import {ausText} from './weitergabe'
 import './roehren.css'
 
 // Symbole wörtlich aus dem Prototyp (Konstante I: scan, paste, bolt, chev)
@@ -50,7 +51,8 @@ type Erkannt =
 
 // nur am Text, ohne Netz: was ist das? (Prototyp: „Sieht aus wie ein Schein über 1.500 Sats“)
 const erkenne = (wert: string): Erkannt | null => {
-  const w = wert.trim()
+  // eine ganze geteilte Nachricht („50 Sats für dich … lightning:LNURL1…“) → nur den Schein
+  const w = ausText(wert)
   if (!w) return null
   const schein = resolveNoteInput(w)
   if (schein) {
@@ -86,7 +88,7 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
   const erkannt = () => erkenne(text())
 
   const uebernimm = (wert: string) => {
-    const w = wert.trim()
+    const w = ausText(wert)
     if (!w) return
     setEingang(w)
     navigate('/wallet')

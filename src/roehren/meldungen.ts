@@ -3,6 +3,7 @@
 type Art = 'fehler' | 'ruhig' | null
 
 const REGELN: [RegExp, string, Art][] = [
+  [/^Copied to clipboard!?$/, 'In die Zwischenablage kopiert.', null],
   [
     /^This note has already been spent/,
     'Dieser Schein wurde schon eingelöst.',

@@ -25,6 +25,8 @@ import {offenZurPruefung} from './Pruefwache'
 import {gebunden} from './klaerung'
 import type {Vorgang} from './klaerung'
 import {holeZurueck} from './zurueckholen'
+import {merkeUnterwegs} from './einloesen'
+import {schickeLink, WARNUNG} from './weitergabe'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -42,8 +44,6 @@ export type ScheineMotor = {
   beschriften: (schein: Bearer, text: string) => void
   erneuern: (schein: Bearer) => Promise<void>
   // seltene Werkzeuge, früher nur in der Werkstatt des Originals — im Blatt unter „Weitere Werkzeuge“
-  qrBild: (schein: Bearer) => void
-  alsText: (schein: Bearer) => void
   umziehen: (schein: Bearer) => void
   anSchluessel: (schein: Bearer) => void
   absicherbar: (schein: Bearer) => boolean
@@ -86,6 +86,13 @@ const Symbol: Component<{d: string}> = props => (
   </svg>
 )
 const PFADE = {
+  weiter: 'M4 12h13M13 6l6 6-6 6',
+  zeigen:
+    'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  umziehen: 'M4 8h13l-3-3M20 16H7l3 3',
+  schluessel: 'M15 7a4 4 0 1 1-3.9 5H4v3h3v-2h2v2h2.1A4 4 0 0 1 15 7z',
+  markiert: 'M5 12l4 4 10-10',
   teilen: 'M12 3v7M12 10l-6 6v5M12 10l6 6v5',
   zusammen: 'M6 3v5l6 6v7M18 3v5l-6 6',
   etikett: 'M3 12V4h8l10 10-8 8L3 12zM7.5 7.5h.01',
@@ -93,6 +100,31 @@ const PFADE = {
   chev: 'M9 5l7 7-7 7',
   empfangen: 'M12 4v12M6 10l6 6 6-6M5 20h14'
 }
+
+// ein Werkzeug im Blatt — alle gleich gebaut, auch die unter „Weitere Werkzeuge“ (Gerhard am Pixel)
+const Werkzeug: Component<{
+  pfad: string
+  titel: string
+  unter: string
+  onClick: () => void
+  aus?: boolean
+}> = props => (
+  <button
+    type="button"
+    class="rz-option"
+    disabled={props.aus}
+    onClick={() => props.onClick()}
+  >
+    <span class="ic">
+      <Symbol d={props.pfad} />
+    </span>
+    <span>
+      <span class="t">{props.titel}</span>
+      <span class="s">{props.unter}</span>
+    </span>
+    <Symbol d={PFADE.chev} />
+  </button>
+)
 
 // klein: Kachel im Reiter (zwei je Reihe) — nur Stelle und Betrag; groß erst im Blatt (Steve)
 export const Schein: Component<{
@@ -136,7 +168,9 @@ export const Schein: Component<{
 const Scheine: Component<{motor: ScheineMotor}> = props => {
   const m = props.motor
   const [blatt, setBlatt] = createSignal<string | null>(null)
-  const [eingabe, setEingabe] = createSignal<'teilen' | 'etikett' | null>(null)
+  const [eingabe, setEingabe] = createSignal<
+    'teilen' | 'etikett' | 'weitergeben' | null
+  >(null)
   const [text, setText] = createSignal('')
   const [mal, setMal] = createSignal('1')
   const [ausBlatt, setAusBlatt] = createSignal<string | null>(null)
@@ -194,6 +228,16 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const teilMal = () => Math.max(1, Math.trunc(Number(mal()) || 1))
   const teilGeht = (s: Bearer) =>
     teilBetrag() >= 1 && teilBetrag() * teilMal() < sats(s)
+  const linkSchicken = async (b: Bearer) => {
+    const e = await schickeLink(b)
+    if (e === 'abgebrochen') return
+    notify(
+      e === 'geteilt'
+        ? 'Link geschickt — der Schein steht unter „Unterwegs“.'
+        : 'Link kopiert — füg ihn in deine Nachricht ein. Der Schein steht unter „Unterwegs“.'
+    )
+    schliessen()
+  }
   const ausOffen = () => m.ausgegebene().find(b => b.id === ausBlatt()) ?? null
 
   // Blatt eines gezeigten Scheins: derselbe QR noch einmal, sonst nur Zurückholen
@@ -556,7 +600,14 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               >
                 {holt()
                   ? 'Einen Moment …'
-                  : 'Zurückholen — der QR wird wertlos'}
+                  : 'Zurückholen — QR und Link werden wertlos'}
+              </button>
+              <button
+                type="button"
+                class="rz-leise rz-block rz-mitte"
+                onClick={() => void schickeLink(s())}
+              >
+                Als Link schicken
               </button>
             </div>
           </Dialog>
@@ -627,6 +678,12 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
             <div class="rz-blatt rz-schein-blatt">
               <Schein schein={s()} />
               <Show when={eingabe() === null}>
+                <Werkzeug
+                  pfad={PFADE.weiter}
+                  titel="Weitergeben"
+                  unter="Zeigen oder als Link schicken"
+                  onClick={() => setEingabe('weitergeben')}
+                />
                 <button
                   type="button"
                   class="rz-option"
@@ -704,107 +761,60 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   <summary>
                     Weitere Werkzeuge <Symbol d={PFADE.chev} />
                   </summary>
-                  <button
-                    type="button"
-                    class="rz-setting"
-                    onClick={() => m.qrBild(s())}
-                  >
-                    <span>
-                      <span class="sl">Als QR-Bild sichern</span>
-                      <span class="s">
-                        Zum Ausdrucken oder Weitergeben — wer es hat, kann
-                        einlösen
-                      </span>
-                    </span>
-                    <span class="val">
-                      <Symbol d={PFADE.chev} />
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    class="rz-setting"
-                    onClick={() => m.alsText(s())}
-                  >
-                    <span>
-                      <span class="sl">Als Text sichern</span>
-                      <span class="s">
-                        Eine Datei mit dem Schein (LNURL) — wie bares Geld
-                        behandeln
-                      </span>
-                    </span>
-                    <span class="val">
-                      <Symbol d={PFADE.chev} />
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    class="rz-setting"
+                  <Werkzeug
+                    pfad={PFADE.umziehen}
+                    titel="Zu anderer Ausgabestelle umziehen"
+                    unter="Kostet eine kleine Gebühr"
                     onClick={() => {
                       m.umziehen(s())
                       schliessen()
                     }}
-                  >
-                    <span>
-                      <span class="sl">Zu anderer Ausgabestelle umziehen</span>
-                      <span class="s">Kostet eine kleine Gebühr</span>
-                    </span>
-                    <span class="val">
-                      <Symbol d={PFADE.chev} />
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    class="rz-setting"
+                  />
+                  <Werkzeug
+                    pfad={PFADE.schluessel}
+                    titel="An einen Schlüssel übertragen"
+                    unter="Nur der Inhaber dieses Schlüssels kann einlösen"
                     onClick={() => {
                       m.anSchluessel(s())
                       schliessen()
                     }}
-                  >
-                    <span>
-                      <span class="sl">An einen Schlüssel übertragen</span>
-                      <span class="s">
-                        Nur der Inhaber dieses Schlüssels kann einlösen
-                      </span>
-                    </span>
-                    <span class="val">
-                      <Symbol d={PFADE.chev} />
-                    </span>
-                  </button>
+                  />
                   <Show when={m.absicherbar(s())}>
-                    <button
-                      type="button"
-                      class="rz-setting"
+                    <Werkzeug
+                      pfad={PFADE.erneuern}
+                      titel="Wiederherstellbar machen"
+                      unter="Älterer Schein — danach auch über die zwölf Wörter wiederzufinden"
                       onClick={() => void ausfuehren(() => m.absichern(s()))}
-                    >
-                      <span>
-                        <span class="sl">Wiederherstellbar machen</span>
-                        <span class="s">
-                          Älterer Schein — danach auch über die zwölf Wörter
-                          wiederzufinden
-                        </span>
-                      </span>
-                      <span class="val">
-                        <Symbol d={PFADE.chev} />
-                      </span>
-                    </button>
+                    />
                   </Show>
-                  <button
-                    type="button"
-                    class="rz-setting"
+                  <Werkzeug
+                    pfad={PFADE.markiert}
+                    titel="Als ausgegeben markieren"
+                    unter="Wenn er woanders schon eingelöst wurde — lässt sich wieder aufheben"
                     onClick={() => void ausfuehren(() => m.markieren(s()))}
-                  >
-                    <span>
-                      <span class="sl">Als ausgegeben markieren</span>
-                      <span class="s">
-                        Wenn er woanders schon eingelöst wurde — lässt sich
-                        wieder aufheben
-                      </span>
-                    </span>
-                    <span class="val">
-                      <Symbol d={PFADE.chev} />
-                    </span>
-                  </button>
+                  />
                 </details>
+              </Show>
+
+              <Show when={eingabe() === 'weitergeben'}>
+                <Werkzeug
+                  pfad={PFADE.zeigen}
+                  titel="Zeigen"
+                  unter="Die Person steht neben dir und scannt"
+                  onClick={() => {
+                    merkeUnterwegs(s().id)
+                    const id = s().id
+                    schliessen()
+                    setGezeigt(id)
+                  }}
+                />
+                <Werkzeug
+                  pfad={PFADE.link}
+                  titel="Als Link schicken"
+                  unter="Per Signal, Telegram oder E-Mail"
+                  onClick={() => void linkSchicken(s())}
+                />
+                <p class="rz-hinweis">{WARNUNG}</p>
               </Show>
 
               <Show when={eingabe() === 'teilen'}>

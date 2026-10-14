@@ -1478,16 +1478,6 @@ const Wallet: Component<{
       await refreshOneBearer(schein)
     },
     // was früher nur die Werkstatt des Originals konnte (Gerhard: keine Design-Rücksprünge)
-    qrBild: schein => {
-      nurDieser(schein.id)
-      downloadQrSelected()
-      setSelected(new Set<string>())
-    },
-    alsText: schein => {
-      nurDieser(schein.id)
-      exportSelected()
-      setSelected(new Set<string>())
-    },
     umziehen: schein => setTransferSource(schein),
     anSchluessel: schein => setSendToPubkeySource([schein]),
     absicherbar: schein => {
