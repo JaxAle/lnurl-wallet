@@ -1762,3 +1762,79 @@ nav[hidden] {
 .rz-fuss a {
   color: rgba(238, 152, 90, 0.85);
 }
+
+/* Einrichtung (Prototyp onb-words/onb-check, .words/.quiz/.steps) */
+.rz-schritte {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 14px;
+}
+.rz-schritte i {
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  background: #2f2218;
+}
+.rz-schritte i.an {
+  background: rgba(240, 131, 42, 0.8);
+}
+.rz-text {
+  margin: 0 0 14px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #f4ebdf;
+}
+.rz-text b {
+  font-weight: 500;
+}
+.rz-woerter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.rz-wort {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 9px 8px;
+  border: 1px solid #2f2218;
+  border-radius: 12px;
+  background: #17110c;
+  font-size: 15px;
+  color: #f4ebdf;
+}
+.rz-wort b {
+  min-width: 15px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #a3907c;
+}
+.rz-wort span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rz-quiz {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rz-quiz button {
+  min-height: 48px;
+  border: 1px solid #2f2218;
+  border-radius: 14px;
+  background: #17110c;
+  color: #f4ebdf;
+  font-size: 17px;
+  cursor: pointer;
+}
+.rz-quiz button.richtig {
+  border-color: rgba(255, 239, 196, 0.6);
+  color: #ffefc4;
+  box-shadow: 0 0 8px rgba(255, 154, 34, 0.4);
+}
+.rz-quiz button.falsch {
+  border-color: rgba(255, 98, 50, 0.6);
+  color: #ff8a5c;
+}

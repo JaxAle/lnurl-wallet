@@ -22,7 +22,6 @@ import Wallet from './pages/Wallet'
 import Reiter from './roehren/Reiter'
 import Senden from './roehren/Senden'
 import Empfangen from './roehren/Empfangen'
-import Setup from './pages/Setup'
 import Mint from './pages/Mint'
 import Activity from './pages/Activity'
 import Docs from './pages/Docs'
@@ -33,6 +32,7 @@ import Einstellungen from './roehren/Einstellungen'
 import PasswortSeite from './roehren/PasswortSeite'
 import PasswortVergessen from './roehren/PasswortVergessen'
 import Willkommen from './roehren/Willkommen'
+import Einrichtung from './roehren/Einrichtung'
 import SoFunktioniert from './roehren/SoFunktioniert'
 import SicherungEinspielen from './roehren/SicherungEinspielen'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
@@ -114,7 +114,7 @@ const cleanup = render(
         path="/empfangen/einfuegen"
         component={() => <Empfangen weg="einfuegen" />}
       />
-      <Route path="/setup" component={Setup} />
+      <Route path="/setup" component={Einrichtung} />
       <Route path="/mint" component={() => <Mint ansicht="liste" />} />
       <Route
         path="/mint/hinzufuegen"
