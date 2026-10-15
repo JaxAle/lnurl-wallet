@@ -1743,7 +1743,10 @@ nav[hidden] {
 /* So funktioniert die Wallet — Begleitheft */
 .rz-heft h3 {
   margin: 0 0 6px;
-  font: 400 19px/1.3 'Jost', system-ui, sans-serif;
+  font:
+    400 19px/1.3 'Jost',
+    system-ui,
+    sans-serif;
   color: #ead8bf;
 }
 .rz-heft p {
