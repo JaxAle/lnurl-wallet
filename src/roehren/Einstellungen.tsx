@@ -212,7 +212,7 @@ const Einstellungen: Component = () => {
           <Zeile
             label="Verschlüsselung erneuern"
             unter="Einmal nötig — mit deinen zwölf Wörtern"
-            href="/settings/erweitert?teil=verschluesselung"
+            href="/settings/verschluesselung"
           />
         </Show>
       </Gruppe>
@@ -231,7 +231,7 @@ const Einstellungen: Component = () => {
         </Show>
         <Zeile
           label="Sicherung einspielen"
-          href="/settings/erweitert?teil=einspielen"
+          href="/settings/sicherung-einspielen"
         />
       </Gruppe>
 
@@ -301,10 +301,6 @@ const Einstellungen: Component = () => {
             unter="LNURLvault über USB oder Bluetooth"
             an={vaultEnabled()}
             onClick={() => setVaultEnabled(!vaultEnabled())}
-          />
-          <Zeile
-            label="Alle Einstellungen des Originals"
-            href="/settings/erweitert"
           />
           <Zeile label="Wie die Wallet funktioniert" href="/ueber" />
           <Zeile label="Anleitung" wert="englisch" href="/docs" />

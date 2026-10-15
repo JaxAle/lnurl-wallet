@@ -216,8 +216,8 @@ const Setup: Component = () => {
           </Show>
           <p>
             Wiederherstellen aus einer Sicherungsdatei – ohne die zwölf Wörter,
-            solange du ihr Passwort kennst – geht in den{' '}
-            <A href="/settings/erweitert?teil=einspielen">Einstellungen</A>.
+            solange du ihr Passwort kennst – geht unter{' '}
+            <A href="/settings/sicherung-einspielen">Sicherung einspielen</A>.
           </p>
         </div>
       </div>
