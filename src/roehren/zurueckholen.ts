@@ -26,6 +26,15 @@ type Kontext = Pick<
 
 export type Ergebnis = 'zurueck' | 'schon-eingeloest'
 
+// die Stelle meldet den Schein als gültig, lässt ihn aber nicht erneuern — er bleibt, nichts wird gelöscht
+export class ErneuernAbgelehnt extends Error {
+  constructor(host: string) {
+    super(
+      `${host} lässt diesen Schein gerade nicht erneuern — er bleibt bei dir und ist laut Stelle gültig.`
+    )
+  }
+}
+
 export const holeZurueck = async (
   schein: Bearer,
   ctx: Kontext
@@ -65,9 +74,23 @@ export const holeZurueck = async (
     )
   } catch (err) {
     if (err instanceof NoteSpentError) {
-      // zwischen Nachfrage und Erneuern eingelöst
-      eingeloest()
-      return 'schon-eingeloest'
+      // Erst noch einmal nachfragen: war er wirklich eben eingelöst, oder lehnt die Stelle nur das
+      // Erneuern ab? lnurl.21mint.me meldete einen gültigen Schein bei der Nachfrage, verweigerte
+      // aber das Erneuern mit „Invalid or already spent k1“ — und der Schein wurde hier gelöscht,
+      // obwohl er noch galt (Gerhard, Pixel/iPad, 2026-10-15). Gelöscht wird nur auf Nachfrage-Beleg.
+      try {
+        await fetchNoteInfo(schein.url)
+      } catch (nochmal) {
+        if (
+          nochmal instanceof NoteSpentError ||
+          nochmal instanceof NoteUnknownError
+        ) {
+          eingeloest()
+          return 'schon-eingeloest'
+        }
+        throw nochmal
+      }
+      throw new ErneuernAbgelehnt(serverOf(schein.url))
     }
     if (!(err instanceof AmbiguousMutationError)) throw err
     // wie im Original: Ist das Erneuern vielleicht doch angekommen, ist das frische Geheimnis
