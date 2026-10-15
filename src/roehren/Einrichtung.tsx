@@ -35,13 +35,16 @@ const Einrichtung: Component = () => {
   const {setup, state} = useWallet()
   const navigate = useNavigate()
   const [suche] = useSearchParams()
-  const wiederherstellen = suche.tab === 'restore'
+  // Modus als Signal: „Du hast schon zwölf Wörter? Wiederherstellen“ wechselt ohne Umweg
+  const [wiederherstellen, setWiederherstellen] = createSignal(
+    suche.tab === 'restore'
+  )
   const vorhanden = state() !== 'none'
 
   const [schritt, setSchritt] = createSignal<Schritt>(
-    wiederherstellen ? 'eingabe' : 'woerter'
+    wiederherstellen() ? 'eingabe' : 'woerter'
   )
-  const [seed] = createSignal(wiederherstellen ? '' : generateSeedPhrase())
+  const [seed] = createSignal(wiederherstellen() ? '' : generateSeedPhrase())
   const woerterNeu = () => seed().split(' ')
   const [eingabe, setEingabe] = createSignal('')
   const [pw, setPw] = createSignal('')
@@ -52,7 +55,7 @@ const Einrichtung: Component = () => {
 
   // Prüfung: zwei Wörter, je vier Möglichkeiten (Prototyp: Nummer 4 und 10, hier zufällig)
   const quiz = (() => {
-    if (wiederherstellen) return []
+    if (wiederherstellen()) return []
     const a = zufall(6)
     const b = 6 + zufall(6)
     return [a, b].map(i => ({
@@ -81,13 +84,13 @@ const Einrichtung: Component = () => {
     setArbeitet(true)
     setFehler(null)
     try {
-      const s = wiederherstellen
+      const s = wiederherstellen()
         ? eingabe().trim().toLowerCase().split(/\s+/).join(' ')
         : seed()
-      await setup(s, ohne() ? undefined : pw(), !wiederherstellen)
+      await setup(s, ohne() ? undefined : pw(), !wiederherstellen())
       setPw('')
       setPw2('')
-      if (wiederherstellen) setSchritt('suchen')
+      if (wiederherstellen()) setSchritt('suchen')
       else navigate('/wallet')
     } catch (err) {
       setFehler((err as Error).message)
@@ -109,7 +112,7 @@ const Einrichtung: Component = () => {
     const s = schritt()
     if (s === 'pruefung') setSchritt('woerter')
     else if (s === 'passwort')
-      setSchritt(wiederherstellen ? 'eingabe' : 'pruefung')
+      setSchritt(wiederherstellen() ? 'eingabe' : 'pruefung')
     else navigate('/')
   }
 
@@ -135,11 +138,11 @@ const Einrichtung: Component = () => {
           <div class="rz-frage">
             <h3>Auf diesem Gerät gibt es schon eine Wallet.</h3>
             <p>
-              {wiederherstellen
+              {wiederherstellen()
                 ? 'Hast du nur das Passwort vergessen? Dann setz mit deinen zwölf Wörtern ein neues — es bleibt dieselbe Wallet mit allen Scheinen.'
                 : 'Eine zweite Wallet auf demselben Gerät geht nicht.'}
             </p>
-            <Show when={wiederherstellen}>
+            <Show when={wiederherstellen()}>
               <A
                 href="/passwort-vergessen"
                 class="rz-knopf an rz-weiter rz-link-knopf"
@@ -179,6 +182,16 @@ const Einrichtung: Component = () => {
             <p class="rz-hinweis">
               Niemand wird dich je nach diesen Wörtern fragen. Auch wir nicht.
             </p>
+            <button
+              type="button"
+              class="rz-aendern rz-block"
+              onClick={() => {
+                setWiederherstellen(true)
+                setSchritt('eingabe')
+              }}
+            >
+              Du hast schon zwölf Wörter? Wiederherstellen ›
+            </button>
             <button
               type="button"
               class="rz-knopf an rz-weiter"
@@ -279,7 +292,7 @@ const Einrichtung: Component = () => {
           </Match>
 
           <Match when={schritt() === 'passwort'}>
-            <Show when={!wiederherstellen}>
+            <Show when={!wiederherstellen()}>
               <Schritte n={3} />
             </Show>
             <p class="rz-text">
@@ -331,7 +344,7 @@ const Einrichtung: Component = () => {
               <span class="lbl">
                 {arbeitet()
                   ? 'Einen Moment …'
-                  : wiederherstellen
+                  : wiederherstellen()
                     ? 'Wiederherstellen'
                     : 'Wallet anlegen'}
               </span>

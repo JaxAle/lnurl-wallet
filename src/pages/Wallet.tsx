@@ -10,7 +10,7 @@ import {
   onCleanup
 } from 'solid-js'
 import {render} from 'solid-js/web'
-import {A, useNavigate, useSearchParams} from '@solidjs/router'
+import {A, Navigate, useNavigate, useSearchParams} from '@solidjs/router'
 import {QRCodeSVG, ErrorCorrectionLevel} from 'solid-qr-code'
 import {
   IoAddCircleSharp,
@@ -1516,19 +1516,9 @@ const Wallet: Component<{
     <Show
       when={state() !== 'none'}
       fallback={
-        <div id="wallet" class="page">
-          <div class="setup-card">
-            <h2>Auf diesem Gerät gibt es noch keine Wallet</h2>
-            <p>
-              Leg eine an oder stell sie mit deinen zwölf Wörtern wieder her.
-            </p>
-            <div class="btns">
-              <A href="/setup" class="hero-btn hero-btn-primary">
-                Wallet anlegen
-              </A>
-            </div>
-          </div>
-        </div>
+        // Fork: ohne Wallet eine einzige Tür — die Begrüßung mit „neu / habe schon eine“ (Steve,
+        // 2026-10-15); die Karte „Wallet anlegen“ führte direkt zu neuen Wörtern
+        <Navigate href="/" />
       }
     >
       <Show
