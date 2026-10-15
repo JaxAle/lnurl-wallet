@@ -1557,7 +1557,7 @@ const Wallet: Component<{
                 </div>
               </form>
               <p>
-                <A href="/setup?tab=restore">Passwort vergessen?</A>
+                <A href="/passwort-vergessen">Passwort vergessen?</A>
               </p>
             </div>
           </div>

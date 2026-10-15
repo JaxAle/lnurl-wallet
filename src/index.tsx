@@ -31,6 +31,7 @@ import Claim from './pages/Claim'
 import Settings from './pages/Settings'
 import Einstellungen from './roehren/Einstellungen'
 import PasswortSeite from './roehren/PasswortSeite'
+import PasswortVergessen from './roehren/PasswortVergessen'
 import Willkommen from './roehren/Willkommen'
 import SoFunktioniert from './roehren/SoFunktioniert'
 import SicherungEinspielen from './roehren/SicherungEinspielen'
@@ -143,6 +144,7 @@ const cleanup = render(
       <Route path="/settings" component={Einstellungen} />
       <Route path="/settings/erweitert" component={Settings} />
       <Route path="/settings/passwort" component={PasswortSeite} />
+      <Route path="/passwort-vergessen" component={PasswortVergessen} />
       <Route
         path="/settings/sicherung-einspielen"
         component={SicherungEinspielen}

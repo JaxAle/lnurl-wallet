@@ -156,6 +156,10 @@ const PasswortSeite: Component = () => {
                 <Show when={fehler()}>
                   <p class="rz-erkannt fremd">{fehler()}</p>
                 </Show>
+                <A href="/passwort-vergessen" class="rz-aendern rz-block">
+                  Bisheriges Passwort vergessen? Mit den zwölf Wörtern neu
+                  setzen
+                </A>
                 <button
                   type="button"
                   class="rz-knopf an rz-weiter"
