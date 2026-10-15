@@ -88,9 +88,9 @@ const SoFunktioniert: Component = () => (
 
     <Abschnitt titel="Wenn eine Antwort ausbleibt">
       <p>
-        Bricht das Netz mitten im Teilen oder Zusammenlegen ab, weiß die Wallet
-        kurz nicht, was gilt. Sie hält den Vorgang dann fest, sperrt die
-        beteiligten Scheine und klärt ihn selbst, sobald die Ausgabestelle
+        Bricht das Netz mitten im Teilen, Zusammenlegen oder Empfangen ab, weiß
+        die Wallet kurz nicht, was gilt. Sie hält den Vorgang dann fest, sperrt
+        die beteiligten Scheine und klärt ihn selbst, sobald die Ausgabestelle
         wieder antwortet. Geld geht dabei nicht verloren.
       </p>
     </Abschnitt>

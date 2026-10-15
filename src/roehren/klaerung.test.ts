@@ -80,3 +80,27 @@ describe('Vorgänge in Klärung', () => {
     })
   })
 })
+
+describe('Empfangen absichern', () => {
+  it('hält unklares Erneuern beim Empfang als Vorgang fest, und merkt sich Abzusicherndes', async () => {
+    const {registriere, merkeAbzusichern, vergissAbzusichern, abzusichern} =
+      await import('./klaerung')
+    for (const v of vorgaenge()) aendere(v.id, () => null)
+    registriere(
+      'empfangen',
+      [schein('alt', 100)],
+      [schein('kopie', 100, false)]
+    )
+    expect(vorgaenge()[0]).toMatchObject({
+      art: 'empfangen',
+      eingangSats: [100],
+      ergebnisSats: [100]
+    })
+    expect([...gebunden()].sort()).toEqual(['alt', 'kopie'])
+    merkeAbzusichern('x')
+    merkeAbzusichern('x')
+    expect(abzusichern()).toEqual(['x'])
+    vergissAbzusichern('x')
+    expect(abzusichern()).toEqual([])
+  })
+})

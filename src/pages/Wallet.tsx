@@ -49,7 +49,8 @@ import {
   toBech32Lnurl,
   isBolt11Invoice,
   isLightningAddress,
-  isValidNoteInput
+  isValidNoteInput,
+  resolveNoteInput
 } from '../lnurlcash'
 import {
   noteK1,
@@ -110,7 +111,9 @@ import {
   beobachte,
   erreichbar,
   gebunden,
+  merkeAbzusichern,
   nichtErreichbar,
+  registriere,
   vorgaenge
 } from '../roehren/klaerung'
 import {merkeTeilGebuehr} from '../roehren/gebuehren'
@@ -340,6 +343,7 @@ const Wallet: Component<{
     // Fork: eine Stelle, von der man einen Schein hält, trägt das Original still ein — hier wird es
     // gesagt (Gerhard, 2026-10-13: Schein von dnis Wallet ging ohne eingetragene Ausgabestelle)
     const vorher = new Set(trustedMints().map(m => m.server))
+    const vorherIds = new Set(bearers().map(b => b.id))
     try {
       await receiveIntoWallet(noteValue, {
         bearers: bearers(),
@@ -348,6 +352,15 @@ const Wallet: Component<{
         logActivity,
         deviceClient: deviceClient()
       })
+      // Fork: Empfang absichern (Steve, 2026-10-15). War das Erneuern unklar, liegen der empfangene
+      // Schein und eine mögliche neue Kopie da → als Vorgang klären; ging das Erneuern gar nicht, hat
+      // der Absender noch eine gültige Kopie → die Prüfwache erneuert, sobald die Stelle es zulässt
+      const k1Ein = noteK1(resolveNoteInput(noteValue.trim()) ?? '')
+      const neu = bearers().filter(b => !vorherIds.has(b.id))
+      const alt = neu.find(b => k1Ein && noteK1(b.url) === k1Ein)
+      const kopie = neu.find(b => b !== alt && !b.verified)
+      if (alt && kopie) registriere('empfangen', [alt], [kopie])
+      else if (alt) merkeAbzusichern(alt.id)
       for (const m of trustedMints().filter(t => !vorher.has(t.server))) {
         const host = serverOf(m.server)
         const text = `${host} ist eine neue Ausgabestelle und steht jetzt in deiner Liste — sie verwahrt die Sats hinter diesem Schein.`

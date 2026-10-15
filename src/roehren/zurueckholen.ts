@@ -35,9 +35,12 @@ export class ErneuernAbgelehnt extends Error {
   }
 }
 
+// zweck 'absichern': ein empfangener Schein, den das Einlösen nicht erneuern konnte — der Absender hat
+// dann noch eine gültige Kopie; erst das Erneuern macht ihn zu unserem (Steve, 2026-10-15)
 export const holeZurueck = async (
   schein: Bearer,
-  ctx: Kontext
+  ctx: Kontext,
+  zweck: 'zurueckholen' | 'absichern' = 'zurueckholen'
 ): Promise<Ergebnis> => {
   const {addBearer, updateBearer, removeBearer, logActivity} = ctx
   const sats = Math.floor(schein.amount / 1000)
@@ -45,7 +48,9 @@ export const holeZurueck = async (
   const eingeloest = () => {
     logActivity(
       'spent',
-      `${sats.toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst (${serverOf(schein.url)}).`,
+      zweck === 'absichern'
+        ? `Empfangener Schein über ${sats.toLocaleString('de-DE')} Sats war schon eingelöst — der Absender hat ihn wohl zurückgeholt (${serverOf(schein.url)}).`
+        : `${sats.toLocaleString('de-DE')} Sats gesendet — vom Empfänger eingelöst (${serverOf(schein.url)}).`,
       schein.label
     )
     removeBearer(schein.id)
@@ -121,8 +126,10 @@ export const holeZurueck = async (
   })
   vergiss(schein.id)
   logActivity(
-    'refresh',
-    `Schein über ${sats} Sats zurückgeholt (${serverOf(url)}) — der gezeigte QR ist wertlos.`,
+    zweck === 'absichern' ? 'receive' : 'refresh',
+    zweck === 'absichern'
+      ? `Empfang von ${sats} Sats abgesichert (${serverOf(url)}) — der Absender hat keine gültige Kopie mehr.`
+      : `Schein über ${sats} Sats zurückgeholt (${serverOf(url)}) — der gezeigte QR ist wertlos.`,
     schein.label
   )
   return 'zurueck'

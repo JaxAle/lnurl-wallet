@@ -20,7 +20,16 @@ import {
 } from '../lnurlcash'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
-import {aendere, gebunden, vorgaenge} from './klaerung'
+import {
+  abzusichern,
+  aendere,
+  beobachte,
+  gebunden,
+  merkeAbzusichern,
+  vergissAbzusichern,
+  vorgaenge
+} from './klaerung'
+import {holeZurueck} from './zurueckholen'
 import type {Vorgang} from './klaerung'
 
 const ABSTAND_MS = 15_000
@@ -51,14 +60,24 @@ export const pruefeEinen = async (
   }
 }
 
-export const offenZurPruefung = (b: {
+const ungeprueft = (b: {
   verified: boolean
   spent?: boolean
   deviceId?: string
 }) => !b.verified && !b.spent && !b.deviceId
 
+// „wird geprüft“: ungeprüft, oder empfangen und noch nicht abgesichert (der Absender hat dann noch
+// eine gültige Kopie) — keine Werkzeuge, nicht in der großen Zahl
+export const offenZurPruefung = (b: {
+  id?: string
+  verified: boolean
+  spent?: boolean
+  deviceId?: string
+}) => ungeprueft(b) || (!!b.id && !b.spent && abzusichern().includes(b.id))
+
 const Pruefwache: Component = () => {
-  const {state, bearers, updateBearer, removeBearer, logActivity} = useWallet()
+  const {state, bearers, addBearer, updateBearer, removeBearer, logActivity} =
+    useWallet()
 
   type Antwort = {
     b: Bearer
@@ -89,11 +108,22 @@ const Pruefwache: Component = () => {
       return
     }
     const echt = antworten.filter(a => a.info)
-    const name = v.art === 'teilen' ? 'Teilen' : 'Zusammenlegen'
+    const name =
+      v.art === 'teilen'
+        ? 'Teilen'
+        : v.art === 'empfangen'
+          ? 'Erneuern beim Empfang'
+          : 'Zusammenlegen'
     if (echt.length === 0) {
       // nie stattgefunden: die möglichen Ergebnisse sind nichts wert, die Eingänge wieder frei
       for (const a of antworten) removeBearer(a.b.id)
-      const text = `${name} hat nicht stattgefunden — deine Scheine (${summe(v.eingangSats)} Sats) sind wieder frei.`
+      // Empfang: der empfangene Schein ist dann noch nicht abgesichert — gleich noch einmal
+      if (v.art === 'empfangen')
+        for (const id of v.eingang) merkeAbzusichern(id)
+      const text =
+        v.art === 'empfangen'
+          ? `Erneuern beim Empfang hat nicht stattgefunden — die Wallet versucht es gleich noch einmal.`
+          : `${name} hat nicht stattgefunden — deine Scheine (${summe(v.eingangSats)} Sats) sind wieder frei.`
       logActivity('refresh', `${text} (${v.host})`)
       notify(text)
     } else {
@@ -112,7 +142,9 @@ const Pruefwache: Component = () => {
       const text =
         v.art === 'teilen'
           ? `Geteilt: ${summe(neu)} Sats.`
-          : `Zusammengelegt: ${summe(neu)} Sats.`
+          : v.art === 'empfangen'
+            ? `Empfang von ${summe(neu)} Sats abgesichert.`
+            : `Zusammengelegt: ${summe(neu)} Sats.`
       logActivity(
         'refresh',
         `${text} Nach unklarer Antwort bestätigt (${v.host}).`
@@ -123,6 +155,8 @@ const Pruefwache: Component = () => {
   }
   let laeuft = false
   let uhr: ReturnType<typeof setInterval> | undefined
+  // Absichern höchstens alle zwei Minuten je Schein — eine Stelle, die ablehnt, nicht im Takt bedrängen
+  const letzterVersuch = new Map<string, number>()
 
   const runde = async () => {
     if (laeuft || document.hidden || state() !== 'unlocked') return
@@ -131,16 +165,46 @@ const Pruefwache: Component = () => {
     const bindung = gebunden()
     const offen = bearers().filter(
       b =>
-        offenZurPruefung(b) &&
-        !bindung.has(b.id) &&
-        jetzt - b.updatedAt > RUHEZEIT_MS
+        ungeprueft(b) && !bindung.has(b.id) && jetzt - b.updatedAt > RUHEZEIT_MS
     )
-    if (offen.length === 0 && faellig.length === 0) return
+    // empfangene, noch nicht erneuerte Scheine: geprüft und nicht gebunden → jetzt absichern
+    const sichern = abzusichern()
+      .map(id => bearers().find(b => b.id === id))
+      .filter(
+        (b): b is Bearer =>
+          !!b &&
+          !b.spent &&
+          b.verified &&
+          !bindung.has(b.id) &&
+          jetzt - (letzterVersuch.get(b.id) ?? 0) > 120_000
+      )
+    for (const id of abzusichern()) {
+      const b = bearers().find(x => x.id === id)
+      if (!b || b.spent) vergissAbzusichern(id)
+    }
+    if (offen.length === 0 && faellig.length === 0 && sichern.length === 0)
+      return
     laeuft = true
     try {
       for (const v of faellig) await klaere(v)
     } catch {
       // nächste Runde
+    }
+    for (const b of sichern) {
+      letzterVersuch.set(b.id, Date.now())
+      try {
+        await beobachte('empfangen', [b], bearers, () =>
+          holeZurueck(
+            b,
+            {addBearer, updateBearer, removeBearer, logActivity},
+            'absichern'
+          )
+        )
+        vergissAbzusichern(b.id)
+      } catch {
+        // keine Antwort, abgelehnt oder unklar (dann als Vorgang festgehalten) — nächste Runde
+        if (gebunden().has(b.id)) vergissAbzusichern(b.id)
+      }
     }
     let bestaetigt = 0
     let bestaetigtSats = 0

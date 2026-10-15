@@ -17,7 +17,7 @@ import {getTrustedMintAddress, trustedMints} from '../trustedMints'
 
 export type Vorgang = {
   id: string
-  art: 'teilen' | 'zusammenlegen'
+  art: 'teilen' | 'zusammenlegen' | 'empfangen'
   host: string
   eingang: string[]
   eingangSats: number[]
@@ -58,11 +58,58 @@ export const aendere = (id: string, f: (v: Vorgang) => Vorgang | null) =>
     })
   )
 
+// einen Vorgang direkt festhalten (Empfangen: Eingang und mögliche Kopie entstehen beide erst dabei)
+const sats = (b: Bearer) => Math.floor(b.amount / 1000)
+
+export const registriere = (
+  art: Vorgang['art'],
+  eingang: Bearer[],
+  ergebnis: Bearer[]
+) =>
+  schreibe([
+    ...vorgaenge(),
+    {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      art,
+      host: serverOf(eingang[0].url),
+      eingang: eingang.map(b => b.id),
+      eingangSats: eingang.map(sats),
+      ergebnis: ergebnis.map(b => b.id),
+      ergebnisSats: ergebnis.map(sats),
+      seit: Date.now(),
+      ohneAntwort: 0
+    }
+  ])
+
+// empfangene Scheine, die noch nicht erneuert sind — der Absender hat dann noch eine gültige Kopie.
+// Die Prüfwache erneuert sie, sobald die Stelle es zulässt.
+const ABZUSICHERN = 'fork_abzusichern'
+const liesListe = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(ABZUSICHERN) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+const [abzusichern, setAbzusichernSignal] = createSignal<string[]>(liesListe())
+export {abzusichern}
+const schreibeListe = (l: string[]) => {
+  setAbzusichernSignal(l)
+  try {
+    localStorage.setItem(ABZUSICHERN, JSON.stringify(l))
+  } catch {
+    // ohne Speicher bis zum Neuladen
+  }
+}
+export const merkeAbzusichern = (id: string) => {
+  if (!abzusichern().includes(id)) schreibeListe([...abzusichern(), id])
+}
+export const vergissAbzusichern = (id: string) =>
+  schreibeListe(abzusichern().filter(x => x !== id))
+
 // alle Scheine, die an einem offenen Vorgang hängen
 export const gebunden = (): Set<string> =>
   new Set(vorgaenge().flatMap(v => [...v.eingang, ...v.ergebnis]))
-
-const sats = (b: Bearer) => Math.floor(b.amount / 1000)
 
 // Vorgang ausführen und — falls er unklar endet — festhalten. `alle` liefert den aktuellen Stand
 // der Wallet; neu entstandene ungeprüfte Scheine sind die möglichen Ergebnisse.
