@@ -302,8 +302,7 @@ const Einstellungen: Component = () => {
             an={vaultEnabled()}
             onClick={() => setVaultEnabled(!vaultEnabled())}
           />
-          <Zeile label="Wie die Wallet funktioniert" href="/ueber" />
-          <Zeile label="Anleitung" wert="englisch" href="/docs" />
+          <Zeile label="So funktioniert die Wallet" href="/ueber" />
           <Show when={offen() && activity().length > 0}>
             <Zeile
               label="Verlauf löschen"

@@ -18,7 +18,6 @@ import './styles/background.scss'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
 import AddressAutoScanner from './components/AddressAutoScanner'
-import Hero from './pages/Hero'
 import Wallet from './pages/Wallet'
 import Reiter from './roehren/Reiter'
 import Senden from './roehren/Senden'
@@ -33,6 +32,7 @@ import Settings from './pages/Settings'
 import Einstellungen from './roehren/Einstellungen'
 import PasswortSeite from './roehren/PasswortSeite'
 import Willkommen from './roehren/Willkommen'
+import SoFunktioniert from './roehren/SoFunktioniert'
 import SicherungEinspielen from './roehren/SicherungEinspielen'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
 import AddonRun from './pages/AddonRun'
@@ -95,7 +95,7 @@ const cleanup = render(
   () => (
     <HashRouter root={App}>
       <Route path="/" component={Willkommen} />
-      <Route path="/ueber" component={Hero} />
+      <Route path="/ueber" component={SoFunktioniert} />
       <Route path="/wallet" component={Wallet} />
       {/* Fork: Reiter „Scheine“ (Profi-Modus) — dieselbe Seite, nur die Liste */}
       <Route path="/scheine" component={() => <Wallet ansicht="scheine" />} />

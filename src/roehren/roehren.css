@@ -1739,3 +1739,23 @@ select {
 nav[hidden] {
   display: none !important;
 }
+
+/* So funktioniert die Wallet — Begleitheft */
+.rz-heft h3 {
+  margin: 0 0 6px;
+  font: 400 19px/1.3 'Jost', system-ui, sans-serif;
+  color: #ead8bf;
+}
+.rz-heft p {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #cbb9a4;
+}
+.rz-heft b {
+  font-weight: 500;
+  color: #f4ebdf;
+}
+.rz-fuss a {
+  color: rgba(238, 152, 90, 0.85);
+}
