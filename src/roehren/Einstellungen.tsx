@@ -31,6 +31,7 @@ import {downloadBackupFile} from '../storage'
 import {trustedMints} from '../trustedMints'
 import {setVaultEnabled, vaultEnabled} from '../vaultFeature'
 import {useWallet} from '../WalletContext'
+import {isCk1, noteK1} from '../lnurlcash'
 import Rueckfrage from './Rueckfrage'
 import './roehren.css'
 
@@ -163,8 +164,16 @@ const Einstellungen: Component = () => {
     encryptionUpgraded,
     forgetWallet,
     activity,
-    clearActivity
+    clearActivity,
+    bearers
   } = useWallet()
+  // Scheine, die sich mit den zwölf Wörtern nicht wiederfinden lassen: alles ohne seed-abgeleitetes
+  // Geheimnis (ck1) und alles Ungeprüfte — beim Entfernen ausdrücklich nennen (am iPad gingen so
+  // 100 Sats verloren, 2026-10-15)
+  const nurMitSicherung = () =>
+    bearers().filter(
+      b => !b.spent && (!b.verified || !isCk1(noteK1(b.url) ?? ''))
+    )
   const navigate = useNavigate()
   const [fragt, setFragt] = createSignal(false)
   const [verlaufFrage, setVerlaufFrage] = createSignal(false)
@@ -347,11 +356,30 @@ const Einstellungen: Component = () => {
                 setFragt(false)
               }}
             >
-              <p>
-                Hast du eine Sicherung? Ohne sie sind die Scheine auf diesem
-                Gerät verloren — die zwölf Wörter allein bringen sie nicht
-                zurück.
-              </p>
+              <Show
+                when={offen() && nurMitSicherung().length > 0}
+                fallback={
+                  <p>
+                    Hast du eine Sicherung? Die zwölf Wörter finden nur Scheine
+                    wieder, die diese Wallet selbst erzeugt hat — alles andere
+                    bringt nur eine Sicherung zurück.
+                  </p>
+                }
+              >
+                <p>
+                  <b>
+                    {nurMitSicherung().length}{' '}
+                    {nurMitSicherung().length === 1 ? 'Schein' : 'Scheine'} (
+                    {nurMitSicherung()
+                      .reduce((a, b) => a + Math.floor(b.amount / 1000), 0)
+                      .toLocaleString('de-DE')}{' '}
+                    Sats)
+                  </b>{' '}
+                  {nurMitSicherung().length === 1 ? 'lässt' : 'lassen'} sich mit
+                  den zwölf Wörtern nicht wiederfinden — nur mit einer
+                  Sicherung. Lade sie zuerst herunter.
+                </p>
+              </Show>
             </Rueckfrage>
           </Show>
         </Gruppe>

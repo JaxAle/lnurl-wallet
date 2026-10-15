@@ -1508,7 +1508,20 @@ const Wallet: Component<{
       )
     },
     ausgegebeneEntfernen: clearAllSpent,
-    alleErneuern: refreshAllNotes,
+    // nur Geprüftes und nicht Gebundenes — was die Wallet gerade klärt, fasst niemand an (Steve)
+    alleErneuern: async () => {
+      const g = gebunden()
+      const picked = bearers().filter(
+        b => !b.spent && b.verified && !g.has(b.id)
+      )
+      if (picked.length === 0) return
+      setRefreshingAll(true)
+      try {
+        for (const b of picked) await refreshOneBearer(b)
+      } finally {
+        setRefreshingAll(false)
+      }
+    },
     erneuertAlle: refreshingAll
   }
 

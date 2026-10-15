@@ -26,6 +26,31 @@ import type {Vorgang} from './klaerung'
 const ABSTAND_MS = 15_000
 const RUHEZEIT_MS = 60_000
 
+// einen ungeprüften Schein jetzt nachsehen (Taste im Blatt) — nur lesend, wie die Runde der Wache
+export const pruefeEinen = async (
+  b: Bearer,
+  ctx: {
+    updateBearer: (id: string, c: Partial<Omit<Bearer, 'id'>>) => Promise<void>
+  }
+): Promise<'bestaetigt' | 'unbekannt' | 'keine-antwort'> => {
+  try {
+    const info = await fetchNoteInfo(b.url)
+    await ctx.updateBearer(b.id, {
+      verified: true,
+      amount: info.maxWithdrawable,
+      callback: info.callback,
+      mintPubkey: info.mintPubkey ?? b.mintPubkey
+    })
+    return 'bestaetigt'
+  } catch (err) {
+    if (err instanceof NoteSpentError || err instanceof NoteUnknownError) {
+      await ctx.updateBearer(b.id, {spent: true, spentGrund: 'unbekannt'})
+      return 'unbekannt'
+    }
+    return 'keine-antwort'
+  }
+}
+
 export const offenZurPruefung = (b: {
   verified: boolean
   spent?: boolean

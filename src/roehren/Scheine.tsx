@@ -21,7 +21,7 @@ import {useWallet} from '../WalletContext'
 import {teilGebuehr} from './gebuehren'
 import {unterwegs} from './einloesen'
 import Rueckfrage from './Rueckfrage'
-import {offenZurPruefung} from './Pruefwache'
+import {offenZurPruefung, pruefeEinen} from './Pruefwache'
 import {gebunden} from './klaerung'
 import type {Vorgang} from './klaerung'
 import {holeZurueck} from './zurueckholen'
@@ -276,8 +276,13 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   let uhr: ReturnType<typeof setTimeout> | undefined
   let lang = false
   let start: {x: number; y: number} | null = null
+  const ungeprueft = (id: string) => {
+    const b = m.scheine().find(x => x.id === id)
+    return !!b && offenZurPruefung(b)
+  }
   const druck = (id: string, e: PointerEvent) => {
     lang = false
+    if (ungeprueft(id)) return // in Klärung: nicht auswählbar
     start = {x: e.clientX, y: e.clientY}
     uhr = setTimeout(() => {
       lang = true
@@ -293,8 +298,26 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   }
   const tipp = (id: string) => {
     if (lang) return
+    if (ungeprueft(id)) return setPruefBlatt(id)
     if (wahl() > 0) m.waehle(id, !m.ausgewaehlt().has(id))
     else setBlatt(id)
+  }
+  // ein Schein auf „wird geprüft“ hat keine Werkzeuge — die Wallet klärt ihn; nur nachsehen
+  // (Steve, 2026-10-15: am iPad wurde ein ungeprüfter Schein von Hand erneuert, danach war die Spur weg)
+  const [pruefBlatt, setPruefBlatt] = createSignal<string | null>(null)
+  const [sieht, setSieht] = createSignal(false)
+  const [pruefAntwort, setPruefAntwort] = createSignal<string | null>(null)
+  const geprueft = () => m.scheine().find(b => b.id === pruefBlatt()) ?? null
+  const jetztNachsehen = async (b: Bearer) => {
+    setSieht(true)
+    setPruefAntwort(null)
+    const e = await pruefeEinen(b, {updateBearer})
+    setSieht(false)
+    if (e === 'keine-antwort')
+      setPruefAntwort(
+        `${serverOf(b.url)} antwortet gerade nicht — die Wallet versucht es weiter.`
+      )
+    else setPruefBlatt(null)
   }
 
   const ausfuehren = async (f: () => Promise<void> | void) => {
@@ -666,6 +689,38 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                 }}
               >
                 Aus der Wallet entfernen
+              </button>
+            </div>
+          </Dialog>
+        )}
+      </Show>
+
+      <Show when={geprueft()}>
+        {s => (
+          <Dialog onClose={() => setPruefBlatt(null)}>
+            <div class="rz-blatt rz-schein-blatt">
+              <Schein schein={s()} />
+              <p class="rz-status">
+                <span class="rz-lampe-klein" /> Wird geprüft
+              </p>
+              <p class="rz-hinweis">
+                Die Wallet klärt diesen Schein gerade mit {serverOf(s().url)}.
+                Teilen, Weitergeben und Erneuern gibt es, sobald er geprüft ist
+                — vorher könnte ein Eingriff das einzige gültige Geheimnis
+                verbrauchen.
+              </p>
+              <Show when={pruefAntwort()}>
+                <p class="rz-hinweis">{pruefAntwort()}</p>
+              </Show>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                disabled={sieht()}
+                onClick={() => void jetztNachsehen(s())}
+              >
+                <span class="lbl">
+                  {sieht() ? 'Fragt nach …' : 'Jetzt nachsehen'}
+                </span>
               </button>
             </div>
           </Dialog>
