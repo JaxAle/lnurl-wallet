@@ -63,20 +63,24 @@ const UnterwegsListe: Component = () => {
                 {Math.floor(bearer.amount / 1000).toLocaleString('de-DE')} Sats
               </span>
               <span class="rz-matt">{host(bearer.url)}</span>
-              <button
-                type="button"
-                class="rz-leise rz-zeilenknopf"
-                disabled={
-                  holt() === bearer.id || zurueckzuholen().includes(bearer.id)
+              {/* Auftrag liegt: leuchtend wie unter Scheine, keine blasse Taste (Gerhard, 2026-10-16) */}
+              <Show
+                when={!zurueckzuholen().includes(bearer.id)}
+                fallback={
+                  <span class="rz-unterwegs-zeile rz-zeilenknopf">
+                    wird zurückgeholt …
+                  </span>
                 }
-                onClick={() => void zurueckholen(bearer.id)}
               >
-                {holt() === bearer.id
-                  ? '…'
-                  : zurueckzuholen().includes(bearer.id)
-                    ? 'wird zurückgeholt …'
-                    : 'zurückholen'}
-              </button>
+                <button
+                  type="button"
+                  class="rz-leise rz-zeilenknopf"
+                  disabled={holt() === bearer.id}
+                  onClick={() => void zurueckholen(bearer.id)}
+                >
+                  {holt() === bearer.id ? '…' : 'zurückholen'}
+                </button>
+              </Show>
             </div>
           )}
         </For>

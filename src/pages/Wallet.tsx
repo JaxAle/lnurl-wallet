@@ -102,6 +102,7 @@ import FiatValue from '../components/FiatValue'
 import Zaehlwerk from '../roehren/Zaehlwerk'
 import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
+import {zurueckzuholen} from '../roehren/zurueckholen'
 import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
@@ -1642,23 +1643,40 @@ const Wallet: Component<{
                       Sats werden geprüft
                     </p>
                   </Show>
-                  <Show when={unterwegsScheine().length > 0}>
-                    <button
-                      type="button"
-                      class="rz-hinweiszeile"
-                      onClick={() => navigate('/activity')}
-                    >
-                      {unterwegsScheine().length === 1
-                        ? '1 Schein unterwegs'
-                        : `${unterwegsScheine().length} Scheine unterwegs`}
-                      {' · '}
-                      {Math.floor(
-                        unterwegsScheine().reduce((a, b) => a + b.amount, 0) /
-                          1000
-                      ).toLocaleString('de-DE')}{' '}
-                      Sats ›
-                    </button>
-                  </Show>
+                  {/* liegt ein Zurückholen-Auftrag, heißt es auch hier so — nicht „unterwegs“ (Gerhard, 2026-10-16) */}
+                  <For
+                    each={[
+                      {
+                        liste: unterwegsScheine().filter(
+                          b => !zurueckzuholen().includes(b.id)
+                        ),
+                        eins: '1 Schein unterwegs',
+                        mehr: (n: number) => `${n} Scheine unterwegs`
+                      },
+                      {
+                        liste: unterwegsScheine().filter(b =>
+                          zurueckzuholen().includes(b.id)
+                        ),
+                        eins: '1 Schein wird zurückgeholt',
+                        mehr: (n: number) => `${n} Scheine werden zurückgeholt`
+                      }
+                    ].filter(z => z.liste.length > 0)}
+                  >
+                    {z => (
+                      <button
+                        type="button"
+                        class="rz-hinweiszeile"
+                        onClick={() => navigate('/activity')}
+                      >
+                        {z.liste.length === 1 ? z.eins : z.mehr(z.liste.length)}
+                        {' · '}
+                        {Math.floor(
+                          z.liste.reduce((a, b) => a + b.amount, 0) / 1000
+                        ).toLocaleString('de-DE')}{' '}
+                        Sats ›
+                      </button>
+                    )}
+                  </For>
                 </Zaehlwerk>
                 {/* Fork: statt Zählerzeile und fünf Knöpfen nur Senden/Empfangen (Steve, 2026-10-11) */}
                 <Knoepfe
