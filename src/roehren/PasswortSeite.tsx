@@ -5,10 +5,10 @@ import {createSignal, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
-import {MIN_PASSWORD_LENGTH} from '../pages/Setup'
 import {downloadBackupFile} from '../storage'
 import {useWallet} from '../WalletContext'
 import {pruefePasswort, setzePasswort} from './passwort'
+import {codeFehler, kandidaten, normalisiere} from './roehrencode'
 import './roehren.css'
 
 const PasswortSeite: Component = () => {
@@ -30,7 +30,15 @@ const PasswortSeite: Component = () => {
     if (!alt()) return
     setArbeitet(true)
     setFehler(null)
-    const ok = await pruefePasswort(alt())
+    // wie auf dem Röhrenfeld: wie getippt, sonst klein (ältere Passwörter)
+    let ok = false
+    for (const k of kandidaten(alt())) {
+      if (await pruefePasswort(k)) {
+        setAlt(k)
+        ok = true
+        break
+      }
+    }
     setArbeitet(false)
     if (ok) setGeprueft(true)
     else setFehler('Das bisherige Passwort stimmt nicht.')
@@ -38,11 +46,11 @@ const PasswortSeite: Component = () => {
 
   const problem = () => {
     if (hatte && !alt()) return 'Bitte das bisherige Passwort eingeben.'
-    if (neu().length < MIN_PASSWORD_LENGTH)
-      return `Das neue Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`
-    if (neu() !== nochmal())
+    const f = codeFehler(neu())
+    if (f) return f
+    if (normalisiere(neu()) !== normalisiere(nochmal()))
       return 'Die beiden neuen Passwörter stimmen nicht überein.'
-    if (hatte && neu() === alt())
+    if (hatte && normalisiere(neu()) === alt())
       return 'Das neue Passwort ist dasselbe wie das bisherige.'
     return null
   }
@@ -52,7 +60,7 @@ const PasswortSeite: Component = () => {
     setArbeitet(true)
     setFehler(null)
     try {
-      await setzePasswort(hatte ? alt() : undefined, neu())
+      await setzePasswort(hatte ? alt() : undefined, normalisiere(neu()))
       setAlt('')
       setNeu('')
       setNochmal('')

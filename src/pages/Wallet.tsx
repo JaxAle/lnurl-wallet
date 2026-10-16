@@ -44,6 +44,7 @@ import {useWallet, groupByServer} from '../WalletContext'
 import {storeableMeltAddresses} from '../storeableLinks'
 import type {Bearer} from '../storage'
 import {downloadBackupFile} from '../storage'
+import Roehrenschloss from '../roehren/Roehrenschloss'
 import {splitBearerIntoAmounts, type SplitTarget} from '../noteSplitting'
 import {
   serverOf,
@@ -1558,33 +1559,8 @@ const Wallet: Component<{
       <Show
         when={state() === 'unlocked'}
         fallback={
-          <div id="unlock" class="page">
-            <div class="setup-card">
-              <h2>Wallet entsperren</h2>
-              <form onSubmit={unlockWallet}>
-                <input
-                  type="password"
-                  placeholder="Passwort"
-                  autocomplete="current-password"
-                  autocapitalize="off"
-                  spellcheck={false}
-                  value={password()}
-                  onInput={e => setPassword(e.currentTarget.value)}
-                />
-                <div class="btns">
-                  <button type="submit" disabled={unlocking() || !password()}>
-                    <Show when={unlocking()} fallback={<IoLockOpenSharp />}>
-                      <IoRefreshSharp class="spin" />
-                    </Show>
-                    &nbsp;Entsperren
-                  </button>
-                </div>
-              </form>
-              <p>
-                <A href="/passwort-vergessen">Passwort vergessen?</A>
-              </p>
-            </div>
-          </div>
+          // Fork: Entsperren auf dem Röhrenfeld wie im Prototyp (Gerhard, 2026-10-16)
+          <Roehrenschloss />
         }
       >
         {/* Fork: auch die leere Wallet ist die Startseite — Zählwerk mit kalter Null, dieselben

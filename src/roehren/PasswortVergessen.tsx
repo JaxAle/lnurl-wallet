@@ -6,9 +6,9 @@ import {createSignal, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import {notify} from '../helpers'
-import {MIN_PASSWORD_LENGTH} from '../pages/Setup'
 import {useWallet} from '../WalletContext'
 import {passwortVergessen} from './passwort'
+import {codeFehler, normalisiere} from './roehrencode'
 import './roehren.css'
 
 const PasswortVergessen: Component = () => {
@@ -23,9 +23,10 @@ const PasswortVergessen: Component = () => {
   const problem = () => {
     if (woerter().trim().split(/\s+/).length < 12)
       return 'Bitte alle zwölf Wörter eingeben.'
-    if (pw().length < MIN_PASSWORD_LENGTH)
-      return `Das neue Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`
-    if (pw() !== pw2()) return 'Die beiden Passwörter stimmen nicht überein.'
+    const f = codeFehler(pw())
+    if (f) return f
+    if (normalisiere(pw()) !== normalisiere(pw2()))
+      return 'Die beiden Passwörter stimmen nicht überein.'
     return null
   }
 
@@ -34,10 +35,10 @@ const PasswortVergessen: Component = () => {
     setArbeitet(true)
     setFehler(null)
     try {
-      const r = await passwortVergessen(woerter(), pw())
+      const r = await passwortVergessen(woerter(), normalisiere(pw()))
       // mit dem neuen Passwort öffnen — so lädt die Wallet alles unter dem einen Schlüssel neu
       if (state() === 'unlocked') lock()
-      await unlock(pw())
+      await unlock(normalisiere(pw()))
       setWoerter('')
       setPw('')
       setPw2('')

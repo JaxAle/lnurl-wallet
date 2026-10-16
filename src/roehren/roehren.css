@@ -1861,3 +1861,303 @@ nav[hidden] {
   border-color: rgba(255, 98, 50, 0.6);
   color: #ff8a5c;
 }
+
+/* ---------- Röhrenschloss (Prototyp screens.lock, Gerhard 2026-10-16) ---------- */
+body.rz-gesperrt {
+  overflow: hidden;
+}
+.rz-schloss {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  background: #050403;
+  transition: opacity 0.6s ease;
+}
+.rz-schloss.weg {
+  animation: rz-schloss-weg 0.6s ease 1.8s both;
+}
+@keyframes rz-schloss-weg {
+  to {
+    opacity: 0;
+  }
+}
+.rz-schloss-feld {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: 2px;
+  padding: 4px;
+}
+.rz-schloss .tube {
+  position: relative;
+  container-type: size;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 12%;
+  display: grid;
+  place-items: center;
+  background: #050403 url('./roehre.webp') center / 100% 100% no-repeat;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease-out,
+    filter 0.12s ease-out;
+}
+.rz-schloss .tube .glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(
+      44% 36% at 50% 56%,
+      rgba(255, 118, 22, 0.8),
+      rgba(255, 72, 0, 0.38) 60%,
+      transparent 84%
+    ),
+    radial-gradient(34% 9% at 50% 92%, rgba(255, 130, 40, 0.6), transparent 80%);
+}
+.rz-schloss .tube .treffer {
+  display: contents;
+}
+.rz-schloss .tube .ch {
+  position: relative;
+  font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif;
+  font-weight: 300;
+  font-size: 26px;
+  font-size: min(58cqh, 92cqw);
+  line-height: 1;
+  transform: translateY(7%) scaleX(0.8);
+  color: #f28a34;
+  text-shadow:
+    0 0 1px #ffb46a,
+    0 0 3px rgba(255, 110, 16, 0.9),
+    0 0 8px rgba(255, 80, 0, 0.55),
+    0 0 14px rgba(255, 60, 0, 0.25);
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
+  mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 5px,
+    rgba(0, 0, 0, 0.5) 5px 6.2px
+  );
+  transition:
+    color 0.5s,
+    text-shadow 0.5s;
+}
+.rz-schloss .tube .ch-J svg {
+  display: block;
+  height: 1.19em;
+  width: auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4.2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 0.02em currentColor)
+    drop-shadow(0 0 0.08em rgba(255, 110, 16, 0.45));
+}
+.rz-schloss .tube .ch-0::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.11em;
+  height: 0.11em;
+  margin: -0.02em 0 0 -0.055em;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0.06em currentColor;
+}
+/* Zünden, dann aus — die Zeichen bleiben matt lesbar */
+.rz-schloss-feld.zuendet .ch {
+  animation: rz-zuenden 1s steps(1, end) var(--d, 0s) both;
+}
+@keyframes rz-zuenden {
+  0% {
+    opacity: 0.05;
+  }
+  22% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.2;
+  }
+  44% {
+    opacity: 1;
+  }
+  58% {
+    opacity: 0.5;
+  }
+  72%,
+  100% {
+    opacity: 1;
+  }
+}
+.rz-schloss-feld.dunkel .tube .ch {
+  color: rgba(238, 152, 90, 0.48);
+  text-shadow:
+    0 0 2px rgba(255, 112, 30, 0.22),
+    0 0 6px rgba(255, 80, 0, 0.08);
+  transition:
+    color 0.45s var(--od, 0s),
+    text-shadow 0.45s var(--od, 0s);
+}
+/* Finger auf der Röhre: hell; nach dem Tippen anderthalb Sekunden Nachglimmen */
+.rz-schloss .tube.druck {
+  transform: scale(0.965);
+  filter: brightness(1.25) saturate(1.1);
+}
+.rz-schloss .tube.druck .glow {
+  opacity: 1;
+  transition: none;
+}
+.rz-schloss-feld .tube.druck .ch,
+.rz-schloss-feld .tube .treffer .ch {
+  color: #fff3d6;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 6px #ffc070,
+    0 0 13px #ff7a00,
+    0 0 24px #ff5000,
+    0 0 44px rgba(255, 60, 0, 0.9);
+}
+.rz-schloss-feld.dunkel .tube .treffer .ch {
+  animation: rz-nachglimmen 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes rz-nachglimmen {
+  0% {
+    color: #fff3d6;
+  }
+  30% {
+    color: #ffcf7a;
+    text-shadow:
+      0 0 1px #ffe9c0,
+      0 0 4px #ffa22e,
+      0 0 10px #ff6a00,
+      0 0 20px rgba(255, 74, 0, 0.8);
+  }
+  100% {
+    color: rgba(238, 152, 90, 0.48);
+    text-shadow:
+      0 0 2px rgba(255, 112, 30, 0.22),
+      0 0 6px rgba(255, 80, 0, 0.08);
+  }
+}
+/* falsch: kurz rot flackern */
+.rz-schloss-feld.falsch .tube .ch {
+  animation: rz-falsch 0.55s steps(2, end);
+  color: #ff6232;
+  text-shadow:
+    0 0 2px #ff9a6a,
+    0 0 8px rgba(255, 60, 20, 0.8),
+    0 0 16px rgba(255, 40, 0, 0.5);
+}
+@keyframes rz-falsch {
+  0%,
+  50% {
+    opacity: 0.1;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+}
+/* richtig: LN · URL · CASH und „by DNI“ glühen auf */
+.rz-schloss-feld.offen .tube.marke .glow {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+.rz-schloss-feld.offen .tube.marke .ch {
+  color: #ffefc4;
+  text-shadow:
+    0 0 1px #fff,
+    0 0 3px #ffd27a,
+    0 0 7px #ff9a22,
+    0 0 13px #ff5a00,
+    0 0 24px #ff3c00,
+    0 0 40px rgba(255, 50, 0, 0.75);
+  animation: rz-zuenden 0.9s steps(1, end) var(--d, 0s) both;
+}
+.rz-schloss-fuss {
+  flex: none;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 8px 14px 4px;
+  min-height: 56px;
+}
+.rz-schloss-taste {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  color: rgba(238, 152, 90, 0.75);
+  font:
+    300 20px/1 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.rz-schloss-taste.an {
+  color: #ffb35c;
+  text-shadow: 0 0 8px rgba(255, 120, 20, 0.45);
+}
+.rz-schloss-taste:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.rz-schloss-punkte {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+.rz-schloss-punkte .punkt {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffb35c;
+  box-shadow:
+    0 0 4px #ff9a2a,
+    0 0 9px rgba(255, 90, 0, 0.5);
+}
+.rz-schloss-punkte .leer {
+  color: rgba(238, 152, 90, 0.55);
+  font-size: 15px;
+}
+.rz-schloss-warte {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  color: #ff8a5c;
+  font-size: 15px;
+}
+.rz-schloss-vergessen {
+  flex: none;
+  align-self: center;
+  padding: 6px 12px 12px;
+  color: rgba(238, 152, 90, 0.55);
+  font-size: 14px;
+  text-decoration: none;
+}

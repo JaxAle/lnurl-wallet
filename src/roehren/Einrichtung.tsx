@@ -11,9 +11,9 @@ import {A, useNavigate, useSearchParams} from '@solidjs/router'
 import {wordlist} from '@scure/bip39/wordlists/english.js'
 
 import {generateSeedPhrase, isValidSeedPhrase} from '../keys'
-import {MIN_PASSWORD_LENGTH} from '../pages/Setup'
 import {useWallet} from '../WalletContext'
 import Wiederfinden from './Wiederfinden'
+import {codeFehler, normalisiere} from './roehrencode'
 import './roehren.css'
 
 type Schritt = 'woerter' | 'pruefung' | 'eingabe' | 'passwort' | 'suchen'
@@ -73,9 +73,11 @@ const Einrichtung: Component = () => {
 
   const pwProblem = () => {
     if (ohne()) return null
-    if (pw().length < MIN_PASSWORD_LENGTH)
-      return `Mindestens ${MIN_PASSWORD_LENGTH} Zeichen — mit ihm öffnest du die Wallet.`
-    if (pw() !== pw2()) return 'Die beiden Passwörter stimmen nicht überein.'
+    // Röhren-Code: getippt wird später auf dem Röhrenfeld (roehrencode.ts)
+    const f = codeFehler(pw())
+    if (f) return f
+    if (normalisiere(pw()) !== normalisiere(pw2()))
+      return 'Die beiden Passwörter stimmen nicht überein.'
     return null
   }
 
@@ -87,7 +89,11 @@ const Einrichtung: Component = () => {
       const s = wiederherstellen()
         ? eingabe().trim().toLowerCase().split(/\s+/).join(' ')
         : seed()
-      await setup(s, ohne() ? undefined : pw(), !wiederherstellen())
+      await setup(
+        s,
+        ohne() ? undefined : normalisiere(pw()),
+        !wiederherstellen()
+      )
       setPw('')
       setPw2('')
       if (wiederherstellen()) setSchritt('suchen')
@@ -296,7 +302,8 @@ const Einrichtung: Component = () => {
               <Schritte n={3} />
             </Show>
             <p class="rz-text">
-              Mit diesem Passwort öffnest du die Wallet auf diesem Gerät.
+              Mit diesem Code öffnest du die Wallet auf diesem Gerät — getippt
+              auf den Röhren: A–Z, 0–9 und . # &amp; -, mindestens 8 Zeichen.
             </p>
             <Show when={!ohne()}>
               <label class="rz-feldname" for="ei-pw">
