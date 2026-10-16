@@ -44,7 +44,6 @@ import {useWallet, groupByServer} from '../WalletContext'
 import {storeableMeltAddresses} from '../storeableLinks'
 import type {Bearer} from '../storage'
 import {downloadBackupFile} from '../storage'
-import Roehrenschloss from '../roehren/Roehrenschloss'
 import {splitBearerIntoAmounts, type SplitTarget} from '../noteSplitting'
 import {
   serverOf,
@@ -1559,8 +1558,8 @@ const Wallet: Component<{
       <Show
         when={state() === 'unlocked'}
         fallback={
-          // Fork: Entsperren auf dem Röhrenfeld wie im Prototyp (Gerhard, 2026-10-16)
-          <Roehrenschloss />
+          // Fork: gesperrt deckt das Röhrenschloss jede Seite (components/Nav.tsx)
+          <div id="unlock" class="page" />
         }
       >
         {/* Fork: auch die leere Wallet ist die Startseite — Zählwerk mit kalter Null, dieselben

@@ -19,6 +19,7 @@ import {enabledAddonIds} from '../addons/enabled'
 import {ADDON_ICONS} from '../addons/icons'
 import {effectiveNavPosition} from '../addons/navPosition'
 import {vaultEnabled} from '../vaultFeature'
+import Roehrenschloss from '../roehren/Roehrenschloss'
 
 // enabled addons (bundled or custom) that asked for a nav entry (see
 // addons/types.ts's AddonNavEntry) - 'left' joins Wallet/Mint/Vault
@@ -54,181 +55,197 @@ const Nav = () => {
     navigate('/wallet')
   }
 
+  // Fork: gesperrt gilt das Röhrenschloss auf jeder Seite — sonst führte die Zurück-Geste in
+  // halb gesperrte Seiten mit dem alten Menü (Gerhard am Pixel, 2026-10-16). Nur „Code vergessen?“
+  // muss gesperrt erreichbar bleiben.
+  const schloss = () =>
+    state() === 'locked' && ort.pathname !== '/passwort-vergessen'
+
   return (
-    <nav classList={{'rz-kopf': leiste()}} hidden={begruessung()}>
-      {/* Fork: kein Menü, solange die Reiterleiste steht — wie im Prototyp nur Titel und
+    <>
+      <Show when={schloss()}>
+        <Roehrenschloss />
+      </Show>
+      {/* Fork: die Kopfzeile nur entsperrt; das Menü des Originals (Wallet/Mint/Vault …) kommt nicht
+    mehr — gesperrt deckt das Schloss alles, ohne Wallet steht die Begrüßung bzw. die Einrichtung */}
+      <nav
+        classList={{'rz-kopf': leiste()}}
+        hidden={!leiste() || begruessung()}
+      >
+        {/* Fork: kein Menü, solange die Reiterleiste steht — wie im Prototyp nur Titel und
       Netzschalter (Steve, 2026-10-11). Gesperrt/ohne Wallet bleibt es: dort liegt der Weg zu
       „Sicherung einspielen“ in den Einstellungen. */}
-      <Show when={!leiste()}>
-        <button
-          class="nav-toggle"
-          title={menuOpen() ? 'Close menu' : 'Open menu'}
-          onClick={() => setMenuOpen(v => !v)}
-        >
-          {menuOpen() ? <IoCloseSharp /> : <IoMenuSharp />}
-        </button>
-      </Show>
-      {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift — nur ohne Reiterleiste
-      (gesperrt, Einrichtung); mit Leiste sagt der helle Reiter, wo man ist (Steve, 2026-10-11) */}
-      <Show when={!leiste()}>
-        <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
-          Wallet
-        </A>
-      </Show>
-      {/* Fork: Netzschalter — Ausschalten ist überall eine Berührung (Prototyp). Nur mit
-      Passwort: ohne entsperrt die Wallet von selbst, ein Schalter wäre eine leere Geste */}
-      <Show when={state() === 'unlocked' && encrypted()}>
-        <button
-          type="button"
-          class="rz-netzschalter"
-          title="Ausschalten – Wallet sperren"
-          aria-label="Ausschalten – Wallet sperren"
-          onClick={lock_action}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            aria-hidden="true"
+        <Show when={!leiste()}>
+          <button
+            class="nav-toggle"
+            title={menuOpen() ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen(v => !v)}
           >
-            <path d="M12 3.5v8" />
-            <path d="M6.6 7a7.5 7.5 0 1 0 10.8 0" />
-          </svg>
-        </button>
-      </Show>
-      {/* wraps both groups so they collapse into one dropdown on mobile -
+            {menuOpen() ? <IoCloseSharp /> : <IoMenuSharp />}
+          </button>
+        </Show>
+        {/* Fork: Name "Wallet" (entschieden 2026-10-09), matt in Drahtschrift — nur ohne Reiterleiste
+      (gesperrt, Einrichtung); mit Leiste sagt der helle Reiter, wo man ist (Steve, 2026-10-11) */}
+        <Show when={!leiste()}>
+          <A href="/" class="nav-brand rz-titel" onClick={closeMenu}>
+            Wallet
+          </A>
+        </Show>
+        {/* Fork: Netzschalter — Ausschalten ist überall eine Berührung (Prototyp). Nur mit
+      Passwort: ohne entsperrt die Wallet von selbst, ein Schalter wäre eine leere Geste */}
+        <Show when={state() === 'unlocked' && encrypted()}>
+          <button
+            type="button"
+            class="rz-netzschalter"
+            title="Ausschalten – Wallet sperren"
+            aria-label="Ausschalten – Wallet sperren"
+            onClick={lock_action}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3.5v8" />
+              <path d="M6.6 7a7.5 7.5 0 1 0 10.8 0" />
+            </svg>
+          </button>
+        </Show>
+        {/* wraps both groups so they collapse into one dropdown on mobile -
       Docs always renders regardless of wallet state, so this is never
       empty when opened (see .nav-menu in style.scss) */}
-      <Show when={!leiste()}>
-        <div
-          class="nav-menu"
-          classList={{open: menuOpen()}}
-          onClick={closeMenu}
-        >
-          <div class="nav-links">
-            {/* shown whenever there's a wallet on this device, even locked -
+        <Show when={!leiste()}>
+          <div
+            class="nav-menu"
+            classList={{open: menuOpen()}}
+            onClick={closeMenu}
+          >
+            <div class="nav-links">
+              {/* shown whenever there's a wallet on this device, even locked -
           that's where the unlock form lives now that "/" is the landing
           page (see pages/Hero.tsx and pages/Wallet.tsx) */}
-            <Show when={state() !== 'none' && !leiste()}>
-              <A href="/wallet" class="nav-link">
-                <IoWalletSharp />
-                &nbsp;Wallet
-              </A>
-            </Show>
-            {/* not gated on state()/offlineMode() - trusted-mint management
+              <Show when={state() !== 'none' && !leiste()}>
+                <A href="/wallet" class="nav-link">
+                  <IoWalletSharp />
+                  &nbsp;Wallet
+                </A>
+              </Show>
+              {/* not gated on state()/offlineMode() - trusted-mint management
           lives at the bottom of this page too now (see pages/Mint.tsx) and
           stays usable without an unlocked wallet or a network connection,
           same as /backup below. Melt has no nav link of its own anymore -
           it's a dialog on the Wallet page now (see its own "Melt" button),
           same as Send/Receive */}
-            <A
-              href="/mint"
-              class="nav-link"
-              title="Mint a note, or manage trusted mints"
-            >
-              <IoLibrarySharp />
-              &nbsp;Mint
-            </A>
-            {/* still alpha (TODO.md) - off by default, a holder opts in via
-          Settings instead of this permanently occupying a nav slot */}
-            <Show when={vaultEnabled()}>
               <A
-                href="/vault"
+                href="/mint"
                 class="nav-link"
-                title={
-                  connectionState() === 'connected'
-                    ? 'LNURLvault - connected'
-                    : 'LNURLvault - pair a hardware device'
-                }
+                title="Mint a note, or manage trusted mints"
               >
-                <IoHardwareChipSharp />
-                &nbsp;Vault
+                <IoLibrarySharp />
+                &nbsp;Mint
               </A>
-            </Show>
-            <Show when={state() !== 'none'}>
-              <For each={addonsWithNav('left')}>
-                {addon => {
-                  const Icon = ADDON_ICONS[addon.manifest.nav!.icon]
-                  return (
-                    <A
-                      href={
-                        addon.manifest.nav!.route ??
-                        `/addons/${addon.manifest.id}`
-                      }
-                      class="nav-link"
-                    >
-                      {Icon && <Icon />}
-                      &nbsp;{addon.manifest.nav!.label}
-                    </A>
-                  )
-                }}
-              </For>
-            </Show>
-          </div>
-          <div class="nav-persistent">
-            {/* not gated on state() === 'unlocked' - restoring a backup (now
+              {/* still alpha (TODO.md) - off by default, a holder opts in via
+          Settings instead of this permanently occupying a nav slot */}
+              <Show when={vaultEnabled()}>
+                <A
+                  href="/vault"
+                  class="nav-link"
+                  title={
+                    connectionState() === 'connected'
+                      ? 'LNURLvault - connected'
+                      : 'LNURLvault - pair a hardware device'
+                  }
+                >
+                  <IoHardwareChipSharp />
+                  &nbsp;Vault
+                </A>
+              </Show>
+              <Show when={state() !== 'none'}>
+                <For each={addonsWithNav('left')}>
+                  {addon => {
+                    const Icon = ADDON_ICONS[addon.manifest.nav!.icon]
+                    return (
+                      <A
+                        href={
+                          addon.manifest.nav!.route ??
+                          `/addons/${addon.manifest.id}`
+                        }
+                        class="nav-link"
+                      >
+                        {Icon && <Icon />}
+                        &nbsp;{addon.manifest.nav!.label}
+                      </A>
+                    )
+                  }}
+                </For>
+              </Show>
+            </div>
+            <div class="nav-persistent">
+              {/* not gated on state() === 'unlocked' - restoring a backup (now
           one of the cards on this page) is exactly what a device with no
           wallet yet (state() === 'none') needs this link for, and hiding it
           there was the whole bug this comment used to guard against on the
           old standalone /backup link: after "Forget this wallet" there was
           no way back to it at all */}
-            <A href="/docs" title="Documentation">
-              <IoBookSharp />
-              <span class="nav-label">&nbsp;Docs</span>
-            </A>
-            <Show when={state() !== 'none' && !leiste()}>
-              <A
-                href="/activity"
-                title="Activity log - a history of every mint, split, combine, melt and transfer"
-              >
-                <IoReceiptSharp />
-                <span class="nav-label">&nbsp;Activity</span>
+              <A href="/docs" title="Documentation">
+                <IoBookSharp />
+                <span class="nav-label">&nbsp;Docs</span>
               </A>
-            </Show>
-            {/* addons sit left of Settings - Settings stays the outermost
+              <Show when={state() !== 'none' && !leiste()}>
+                <A
+                  href="/activity"
+                  title="Activity log - a history of every mint, split, combine, melt and transfer"
+                >
+                  <IoReceiptSharp />
+                  <span class="nav-label">&nbsp;Activity</span>
+                </A>
+              </Show>
+              {/* addons sit left of Settings - Settings stays the outermost
           (rightmost) page link, a fixed landmark regardless of how many
           right-side addons are enabled */}
-            <Show when={state() !== 'none'}>
-              <For each={addonsWithNav('right')}>
-                {addon => {
-                  const Icon = ADDON_ICONS[addon.manifest.nav!.icon]
-                  return (
-                    <A
-                      href={
-                        addon.manifest.nav!.route ??
-                        `/addons/${addon.manifest.id}`
-                      }
-                    >
-                      {Icon && <Icon />}
-                      <span class="nav-label">
-                        &nbsp;{addon.manifest.nav!.label}
-                      </span>
-                    </A>
-                  )
-                }}
-              </For>
-            </Show>
-            <Show when={!leiste()}>
-              <A
-                href="/settings"
-                title="Settings - auto-lock, currency, offline mode, backup, restore &amp; addons"
-              >
-                <IoCogSharp />
-                <span class="nav-label">&nbsp;Settings</span>
-              </A>
-            </Show>
-            <Show when={state() === 'unlocked' && encrypted() && !leiste()}>
-              <a href="#lock" title="Lock wallet" onClick={lock_action}>
-                <IoLockClosedSharp />
-                <span class="nav-label">&nbsp;Lock</span>
-              </a>
-            </Show>
+              <Show when={state() !== 'none'}>
+                <For each={addonsWithNav('right')}>
+                  {addon => {
+                    const Icon = ADDON_ICONS[addon.manifest.nav!.icon]
+                    return (
+                      <A
+                        href={
+                          addon.manifest.nav!.route ??
+                          `/addons/${addon.manifest.id}`
+                        }
+                      >
+                        {Icon && <Icon />}
+                        <span class="nav-label">
+                          &nbsp;{addon.manifest.nav!.label}
+                        </span>
+                      </A>
+                    )
+                  }}
+                </For>
+              </Show>
+              <Show when={!leiste()}>
+                <A
+                  href="/settings"
+                  title="Settings - auto-lock, currency, offline mode, backup, restore &amp; addons"
+                >
+                  <IoCogSharp />
+                  <span class="nav-label">&nbsp;Settings</span>
+                </A>
+              </Show>
+              <Show when={state() === 'unlocked' && encrypted() && !leiste()}>
+                <a href="#lock" title="Lock wallet" onClick={lock_action}>
+                  <IoLockClosedSharp />
+                  <span class="nav-label">&nbsp;Lock</span>
+                </a>
+              </Show>
+            </div>
           </div>
-        </div>
-      </Show>
-    </nav>
+        </Show>
+      </nav>
+    </>
   )
 }
 export default Nav
