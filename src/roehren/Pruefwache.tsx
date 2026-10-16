@@ -11,7 +11,7 @@
 import type {Component} from 'solid-js'
 import {onCleanup, onMount} from 'solid-js'
 
-import {notify} from '../helpers'
+import {notify, NotifyKind} from '../helpers'
 import {
   fetchNoteInfo,
   NoteSpentError,
@@ -29,7 +29,13 @@ import {
   vergissAbzusichern,
   vorgaenge
 } from './klaerung'
-import {holeZurueck} from './zurueckholen'
+import {
+  holeZurueck,
+  vergissZurueckholen,
+  zurueckholenAuftrag,
+  zurueckholenLaeuft,
+  zurueckzuholen
+} from './zurueckholen'
 import type {Vorgang} from './klaerung'
 
 const ABSTAND_MS = 15_000
@@ -182,7 +188,25 @@ const Pruefwache: Component = () => {
       const b = bearers().find(x => x.id === id)
       if (!b || b.spent) vergissAbzusichern(id)
     }
-    if (offen.length === 0 && faellig.length === 0 && sichern.length === 0)
+    // liegengebliebene Zurückholen-Aufträge (offline getippt): sobald die Stelle antwortet
+    for (const id of zurueckzuholen()) {
+      const b = bearers().find(x => x.id === id)
+      if (!b || b.spent) vergissZurueckholen(id)
+    }
+    const holen = zurueckzuholen()
+      .map(id => bearers().find(b => b.id === id))
+      .filter(
+        (b): b is Bearer =>
+          !!b &&
+          !zurueckholenLaeuft(b.id) &&
+          jetzt - (letzterVersuch.get(`z:${b.id}`) ?? 0) > 30_000
+      )
+    if (
+      offen.length === 0 &&
+      faellig.length === 0 &&
+      sichern.length === 0 &&
+      holen.length === 0
+    )
       return
     laeuft = true
     try {
@@ -204,6 +228,24 @@ const Pruefwache: Component = () => {
       } catch {
         // keine Antwort, abgelehnt oder unklar (dann als Vorgang festgehalten) — nächste Runde
         if (gebunden().has(b.id)) vergissAbzusichern(b.id)
+      }
+    }
+    for (const b of holen) {
+      letzterVersuch.set(`z:${b.id}`, Date.now())
+      try {
+        const e = await zurueckholenAuftrag(b, {
+          addBearer,
+          updateBearer,
+          removeBearer,
+          logActivity
+        })
+        // zurückgeholt: das Zählwerk zählt hinauf, kein Satz dazu (Steve)
+        if (e === 'schon-eingeloest')
+          notify(
+            `Der Schein über ${Math.floor(b.amount / 1000).toLocaleString('de-DE')} Sats war schon eingelöst — der Empfänger war schneller.`
+          )
+      } catch (err) {
+        notify((err as Error).message, NotifyKind.ERROR)
       }
     }
     let bestaetigt = 0
@@ -259,10 +301,13 @@ const Pruefwache: Component = () => {
     void runde()
     uhr = setInterval(() => void runde(), ABSTAND_MS)
     document.addEventListener('visibilitychange', runde)
+    // Netz wieder da: gleich eine Runde, nicht erst in 15 s
+    window.addEventListener('online', runde)
   })
   onCleanup(() => {
     if (uhr) clearInterval(uhr)
     document.removeEventListener('visibilitychange', runde)
+    window.removeEventListener('online', runde)
   })
   return null
 }

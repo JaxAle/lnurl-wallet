@@ -18,11 +18,11 @@ import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import {splitBearerIntoAmounts} from '../noteSplitting'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
-import {merkeUnterwegs} from './einloesen'
+import {merkeUnterwegs, unterwegs} from './einloesen'
 import {merkeTeilGebuehr} from './gebuehren'
 import {schickeLink, WARNUNG} from './weitergabe'
 import {beobachte, erreichbar, gebunden, nichtErreichbar} from './klaerung'
-import {holeZurueck} from './zurueckholen'
+import {zurueckholenAuftrag, zurueckzuholen} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
@@ -136,19 +136,22 @@ const Senden: Component = () => {
   // „Doch nicht senden“: Schein erneuern, der gezeigte QR wird wertlos (Gerhard am Pixel, 2026-10-11)
   const [holt, setHolt] = createSignal(false)
   const [zurueck, setZurueck] = createSignal(false)
+  const [warAuftrag, setWarAuftrag] = createSignal(false)
   const zurueckholen = async () => {
     const s = aktuell()
     if (!s) return
     setHolt(true)
     try {
-      const ergebnis = await holeZurueck(s, {
+      const ergebnis = await zurueckholenAuftrag(s, {
         addBearer,
         updateBearer,
         removeBearer,
         logActivity
       })
       if (ergebnis === 'zurueck') setZurueck(true)
+      if (ergebnis === 'gemerkt' || ergebnis === 'laeuft') setWarAuftrag(true)
       // 'schon-eingeloest': der Schein ist nun weg, die Seite zeigt „eingelöst“
+      // 'gemerkt': ohne Netz liegt der Auftrag, die Seite zeigt „wird zurückgeholt“
     } catch (err) {
       notify(
         `Zurückholen geht gerade nicht: ${(err as Error).message}`,
@@ -157,6 +160,23 @@ const Senden: Component = () => {
     } finally {
       setHolt(false)
     }
+  }
+  // Auftrag liegt (offline getippt): kein QR mehr (Steve, 2026-10-16)
+  const wirdGeholt = () => {
+    const s = schein()
+    return !!s && zurueckzuholen().includes(s.id)
+  }
+  // Hat die Prüfwache den Auftrag später ausgeführt, trägt der Schein ein neues Geheimnis — sein QR
+  // darf hier nie erscheinen. Zurück heißt: nicht mehr unterwegs, aber noch in der Wallet.
+  const spaeterZurueck = () => {
+    const s = schein()
+    return (
+      !!s &&
+      warAuftrag() &&
+      !wirdGeholt() &&
+      !unterwegs().includes(s.id) &&
+      bearers().some(b => b.id === s.id && !b.spent)
+    )
   }
 
   return (
@@ -243,14 +263,20 @@ const Senden: Component = () => {
         >
           {s => (
             <Show
-              when={!zurueck()}
+              when={!zurueck() && !spaeterZurueck() && !wirdGeholt()}
               fallback={
                 <div class="rz-fertig">
                   {/* nichts ist weggegangen, also glüht nichts und es gibt kein Vorzeichen (Steve) */}
                   <Zaehlwerk sats={Math.floor(s().amount / 1000)} sofort kalt>
-                    <p class="rz-zeile-matt">Sats zurückgeholt</p>
+                    <p class="rz-zeile-matt">
+                      {wirdGeholt() ? 'Wird zurückgeholt' : 'Sats zurückgeholt'}
+                    </p>
                     <p class="rz-klein">
-                      Der gezeigte QR ist wertlos, der Betrag bleibt bei dir.
+                      {holt()
+                        ? 'Einen Moment …'
+                        : !wirdGeholt()
+                          ? 'Der gezeigte QR ist wertlos, der Betrag bleibt bei dir.'
+                          : 'Die Ausgabestelle antwortet gerade nicht. Sobald sie erreichbar ist, holt die Wallet den Schein zurück — zeig den QR nicht mehr.'}
                     </p>
                   </Zaehlwerk>
                   <button

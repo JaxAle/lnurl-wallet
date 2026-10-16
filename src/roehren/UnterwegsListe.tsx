@@ -6,7 +6,7 @@ import {createMemo, createSignal, For, Show} from 'solid-js'
 
 import {notify, NotifyKind} from '../helpers'
 import {useWallet} from '../WalletContext'
-import {holeZurueck} from './zurueckholen'
+import {zurueckholenAuftrag, zurueckzuholen} from './zurueckholen'
 import {unterwegs} from './einloesen'
 
 const host = (url: string): string => {
@@ -26,17 +26,14 @@ const UnterwegsListe: Component = () => {
     if (!b) return
     setHolt(id)
     try {
-      const e = await holeZurueck(b, {
+      const e = await zurueckholenAuftrag(b, {
         addBearer,
         updateBearer,
         removeBearer,
         logActivity
       })
-      notify(
-        e === 'zurueck'
-          ? 'Zurückgeholt — der gezeigte QR ist wertlos.'
-          : 'Schon eingelöst.'
-      )
+      // zurückgeholt: das Zählwerk zählt hinauf; ohne Netz zeigt die Zeile den Auftrag (Steve)
+      if (e === 'schon-eingeloest') notify('Schon eingelöst.')
     } catch (err) {
       notify(
         `Zurückholen geht gerade nicht: ${(err as Error).message}`,
@@ -69,10 +66,16 @@ const UnterwegsListe: Component = () => {
               <button
                 type="button"
                 class="rz-leise rz-zeilenknopf"
-                disabled={holt() === bearer.id}
+                disabled={
+                  holt() === bearer.id || zurueckzuholen().includes(bearer.id)
+                }
                 onClick={() => void zurueckholen(bearer.id)}
               >
-                {holt() === bearer.id ? '…' : 'zurückholen'}
+                {holt() === bearer.id
+                  ? '…'
+                  : zurueckzuholen().includes(bearer.id)
+                    ? 'wird zurückgeholt …'
+                    : 'zurückholen'}
               </button>
             </div>
           )}

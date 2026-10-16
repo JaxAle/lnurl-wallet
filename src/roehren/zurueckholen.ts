@@ -15,6 +15,8 @@ import {
   serverOf,
   withNewK1
 } from '../lnurlcash'
+import {createSignal} from 'solid-js'
+
 import type {Bearer} from '../storage'
 import type {WalletContextType} from '../WalletContext'
 import {vergiss} from './einloesen'
@@ -134,3 +136,67 @@ export const holeZurueck = async (
   )
   return 'zurueck'
 }
+
+// Zurückholen als Auftrag (Steve, 2026-10-16, Muster Postausgang): Wer offline „Zurückholen“ tippt,
+// bekommt keinen Fehler — der Auftrag bleibt liegen (übersteht Sperren und Neustart) und die
+// Prüfwache führt ihn aus, sobald die Stelle antwortet. Der QR wird sofort nicht mehr gezeigt.
+// Ein Auftrag endet nur mit Beleg: zurückgeholt, schon eingelöst, oder die Stelle lehnt ab.
+const AUFTRAEGE = 'fork_zurueckholen'
+const liesAuftraege = (): string[] => {
+  try {
+    const l = JSON.parse(localStorage.getItem(AUFTRAEGE) ?? '[]')
+    return Array.isArray(l) ? (l as string[]) : []
+  } catch {
+    return []
+  }
+}
+const [zurueckzuholen, setzeAuftraege] = createSignal<string[]>(liesAuftraege())
+export {zurueckzuholen}
+const schreibeAuftraege = (l: string[]) => {
+  setzeAuftraege(l)
+  try {
+    localStorage.setItem(AUFTRAEGE, JSON.stringify(l))
+  } catch {
+    // ohne Speicher bis zum Neuladen
+  }
+}
+export const merkeZurueckholen = (id: string) => {
+  if (!zurueckzuholen().includes(id))
+    schreibeAuftraege([...zurueckzuholen(), id])
+}
+export const vergissZurueckholen = (id: string) =>
+  schreibeAuftraege(zurueckzuholen().filter(x => x !== id))
+
+// je Schein höchstens ein Versuch zugleich — Taste und Prüfwache dürfen sich nicht überholen
+const laeuft = new Set<string>()
+
+export type Auftrag = Ergebnis | 'gemerkt' | 'laeuft'
+
+// Taste „Zurückholen“: Auftrag sofort merken (die Oberfläche zeigt ihn gleich), dann versuchen.
+// Kommt keine Antwort, bleibt er liegen; lehnt die Stelle ab oder ist es unklar, endet er mit Fehler.
+export const zurueckholenAuftrag = async (
+  schein: Bearer,
+  ctx: Kontext
+): Promise<Auftrag> => {
+  merkeZurueckholen(schein.id)
+  if (laeuft.has(schein.id)) return 'laeuft'
+  laeuft.add(schein.id)
+  try {
+    const e = await holeZurueck(schein, ctx)
+    vergissZurueckholen(schein.id)
+    return e
+  } catch (err) {
+    if (
+      err instanceof ErneuernAbgelehnt ||
+      err instanceof AmbiguousMutationError
+    ) {
+      vergissZurueckholen(schein.id)
+      throw err
+    }
+    return 'gemerkt' // keine Antwort — die Prüfwache holt nach
+  } finally {
+    laeuft.delete(schein.id)
+  }
+}
+
+export const zurueckholenLaeuft = (id: string) => laeuft.has(id)

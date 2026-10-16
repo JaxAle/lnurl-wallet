@@ -24,7 +24,11 @@ import Rueckfrage from './Rueckfrage'
 import {offenZurPruefung, pruefeEinen} from './Pruefwache'
 import {gebunden} from './klaerung'
 import type {Vorgang} from './klaerung'
-import {holeZurueck} from './zurueckholen'
+import {
+  vergissZurueckholen,
+  zurueckholenAuftrag,
+  zurueckzuholen
+} from './zurueckholen'
 import {merkeUnterwegs} from './einloesen'
 import {schickeLink, WARNUNG} from './weitergabe'
 import Zaehlwerk from './Zaehlwerk'
@@ -248,18 +252,15 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const zurueckholen = async (b: Bearer) => {
     setHolt(true)
     try {
-      const e = await holeZurueck(b, {
+      const e = await zurueckholenAuftrag(b, {
         addBearer,
         updateBearer,
         removeBearer,
         logActivity
       })
-      notify(
-        e === 'zurueck'
-          ? 'Zurückgeholt — der gezeigte QR ist wertlos.'
-          : 'Schon eingelöst.'
-      )
-      setGezeigt(null)
+      // zurückgeholt: das Zählwerk zählt hinauf; ohne Netz bleibt das Blatt offen und sagt es (Steve)
+      if (e === 'schon-eingeloest') notify('Schon eingelöst.')
+      if (e === 'zurueck' || e === 'schon-eingeloest') setGezeigt(null)
     } catch (err) {
       notify(
         `Zurückholen geht gerade nicht: ${(err as Error).message}`,
@@ -269,6 +270,7 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
       setHolt(false)
     }
   }
+  const wirdGeholt = (id: string) => zurueckzuholen().includes(id)
 
   // lange antippen = auswählen (Prototyp); kurz = Werkzeuge, oder bei laufender Auswahl umschalten
   // Wischen ist kein langes Antippen: am iPad wählte Scrollen über einer Kachel sie aus, weil der
@@ -411,12 +413,14 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                       type="button"
                       class="rz-note-knopf"
                       aria-label={`Gezeigter Schein über ${zahl(sats(b))} Sats`}
+                      classList={{gedaempft: wirdGeholt(b.id)}}
                       onClick={() => setGezeigt(b.id)}
                     >
                       <Schein schein={b} klein />
                     </button>
                     <div class="rz-etikett rz-unterwegs-zeile">
-                      <span class="rz-lampe-klein" /> unterwegs
+                      <span class="rz-lampe-klein" />{' '}
+                      {wirdGeholt(b.id) ? 'wird zurückgeholt …' : 'unterwegs'}
                     </div>
                   </div>
                 )}
@@ -608,30 +612,57 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
         {s => (
           <Dialog onClose={() => setGezeigt(null)}>
             <div class="rz-blatt rz-schein-blatt">
-              <div class="rz-qr">
-                <Qr value={toBech32Lnurl(s().url)} />
-              </div>
-              <p class="rz-status">
-                <span class="rz-lampe-klein" /> Gezeigt, noch nicht eingelöst ·{' '}
-                {zahl(sats(s()))} Sats
-              </p>
-              <button
-                type="button"
-                class="rz-leise rz-block rz-mitte"
-                disabled={holt()}
-                onClick={() => void zurueckholen(s())}
+              {/* Auftrag liegt: kein QR mehr — ein Code, der gleich wertlos wird, wird nicht gezeigt (Steve) */}
+              <Show
+                when={!wirdGeholt(s().id)}
+                fallback={
+                  <>
+                    <p class="rz-status">
+                      <span class="rz-lampe-klein" /> Wird zurückgeholt ·{' '}
+                      {zahl(sats(s()))} Sats
+                    </p>
+                    <Show when={!holt()}>
+                      <p class="rz-hinweis">
+                        Die Ausgabestelle antwortet gerade nicht. Sobald sie
+                        erreichbar ist, holt die Wallet den Schein zurück. Löst
+                        der Empfänger vorher ein, ist er gesendet.
+                      </p>
+                      <button
+                        type="button"
+                        class="rz-leise rz-block rz-mitte"
+                        onClick={() => vergissZurueckholen(s().id)}
+                      >
+                        Nicht mehr zurückholen
+                      </button>
+                    </Show>
+                  </>
+                }
               >
-                {holt()
-                  ? 'Einen Moment …'
-                  : 'Zurückholen — QR und Link werden wertlos'}
-              </button>
-              <button
-                type="button"
-                class="rz-leise rz-block rz-mitte"
-                onClick={() => void schickeLink(s())}
-              >
-                Als Link schicken
-              </button>
+                <div class="rz-qr">
+                  <Qr value={toBech32Lnurl(s().url)} />
+                </div>
+                <p class="rz-status">
+                  <span class="rz-lampe-klein" /> Gezeigt, noch nicht eingelöst
+                  · {zahl(sats(s()))} Sats
+                </p>
+                <button
+                  type="button"
+                  class="rz-leise rz-block rz-mitte"
+                  disabled={holt()}
+                  onClick={() => void zurueckholen(s())}
+                >
+                  {holt()
+                    ? 'Einen Moment …'
+                    : 'Zurückholen — QR und Link werden wertlos'}
+                </button>
+                <button
+                  type="button"
+                  class="rz-leise rz-block rz-mitte"
+                  onClick={() => void schickeLink(s())}
+                >
+                  Als Link schicken
+                </button>
+              </Show>
             </div>
           </Dialog>
         )}

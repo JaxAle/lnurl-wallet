@@ -1246,6 +1246,10 @@ select {
   -webkit-touch-callout: none;
   user-select: none;
 }
+/* Zurückholen liegt als Auftrag: wie ein Brief im Ausgang (Steve) */
+.rz-note-knopf.gedaempft {
+  opacity: 0.45;
+}
 .rz-note {
   position: relative;
   display: grid;
