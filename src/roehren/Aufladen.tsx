@@ -227,9 +227,9 @@ const Aufladen: Component<{motor: AufladeMotor}> = props => {
                 </div>
                 <Show when={m.pruefbar()}>
                   <p class="rz-hinweis">
-                    Die Wallet sieht von selbst nach, solange diese Seite offen
-                    ist. Bitte nicht schließen, bis der Betrag in der Wallet
-                    steht.
+                    Die Wallet sieht von selbst nach. Du kannst die Seite auch
+                    schließen — der Schein kommt, sobald bezahlt ist und die
+                    Wallet offen ist.
                   </p>
                 </Show>
               </>

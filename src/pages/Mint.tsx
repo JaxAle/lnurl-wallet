@@ -101,7 +101,16 @@ import {
   savePendingDeviceMint,
   type PendingDeviceMint
 } from '../pendingDeviceMint'
-import {clearPendingMintSecret} from '../cashSecrets'
+import {
+  clearPendingMintSecret,
+  nextCashAddressSecretIndex
+} from '../cashSecrets'
+import {
+  merkeRechnung,
+  scheinDerRechnung,
+  setzeAufDemSchirm,
+  vergissRechnung
+} from '../roehren/rechnungen'
 import {registeredAddresses} from '../addressRegistry'
 import {
   storeableMints,
@@ -332,6 +341,10 @@ const Mint: Component<{
   }
 
   onCleanup(stopPolling)
+
+  // Fork: die Rechnung auf diesem Bildschirm holt der Bildschirm selbst ab, nicht die Prüfwache
+  createEffect(() => setzeAufDemSchirm(invoice()))
+  onCleanup(() => setzeAufDemSchirm(null))
 
   // Fork: zurück aus der Bezahl-App (Zeus, Phoenix …) sofort nachfragen, statt auf den
   // nächsten 5-s-Takt zu warten — im Hintergrund hält der Browser den Takt an, und am Pixel
@@ -691,6 +704,20 @@ const Mint: Component<{
         setMintSecret(minted.secret)
         setDeviceMintAttempt(null)
         setInvoicedMsat(amount.netMsat)
+        // Fork: offene Rechnung merken (ohne Geheimnis), damit die Prüfwache den Schein auch abholt,
+        // wenn dieser Bildschirm vorher zugeht (roehren/rechnungen.ts). Nur wenn die Ableitung aus den
+        // Wörtern genau das Geheimnis dieser Rechnung ergibt — sonst bleibt es beim Wiederfinden.
+        if (isCk1(minted.secret) && info.withdrawLink) {
+          const r = {
+            pr: result.pr,
+            host: mintServer,
+            index: nextCashAddressSecretIndex(mintServer) - 1,
+            withdrawLink: info.withdrawLink,
+            netMsat: amount.netMsat,
+            seit: Date.now()
+          }
+          if (scheinDerRechnung(r)?.ck1 === minted.secret) merkeRechnung(r)
+        }
       }
 
       setInvoice(result.pr)
@@ -862,6 +889,8 @@ const Mint: Component<{
         )
         // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf; nur die Gebühr steht darunter
         zeigeGebuehr(Math.floor(feePaidMsat / 1000))
+        const pr = invoice()
+        if (pr) vergissRechnung(pr)
         navigate('/wallet')
         return true
       }

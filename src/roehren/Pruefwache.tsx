@@ -30,6 +30,7 @@ import {
   vorgaenge
 } from './klaerung'
 import {merkeSicherung} from './sicherung'
+import {aufDemSchirm, holeRechnungAb, offeneRechnungen} from './rechnungen'
 import {
   holeZurueck,
   vergissZurueckholen,
@@ -202,11 +203,18 @@ const Pruefwache: Component = () => {
           !zurueckholenLaeuft(b.id) &&
           jetzt - (letzterVersuch.get(`z:${b.id}`) ?? 0) > 30_000
       )
+    // offene Rechnungen, deren Bildschirm zu ist: höchstens alle 20 s je Rechnung nachfragen
+    const rechnungen = offeneRechnungen().filter(
+      r =>
+        r.pr !== aufDemSchirm() &&
+        jetzt - (letzterVersuch.get(`r:${r.pr}`) ?? 0) > 20_000
+    )
     if (
       offen.length === 0 &&
       faellig.length === 0 &&
       sichern.length === 0 &&
-      holen.length === 0
+      holen.length === 0 &&
+      rechnungen.length === 0
     )
       return
     laeuft = true
@@ -247,6 +255,18 @@ const Pruefwache: Component = () => {
           )
       } catch (err) {
         notify((err as Error).message, NotifyKind.ERROR)
+      }
+    }
+    for (const r of rechnungen) {
+      letzterVersuch.set(`r:${r.pr}`, Date.now())
+      try {
+        const e = await holeRechnungAb(r, bearers, {addBearer, logActivity})
+        if (e === 'abgeholt')
+          notify(
+            `Aufladen bei ${r.host} ist angekommen — der Schein ist in der Wallet.`
+          )
+      } catch {
+        // nächste Runde
       }
     }
     let bestaetigt = 0
