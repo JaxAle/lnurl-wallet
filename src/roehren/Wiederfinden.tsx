@@ -158,9 +158,10 @@ const Wiederfinden: Component<{
           </h3>
           <Show when={anzahl() === 0}>
             <p class="rz-hinweis">
-              Gefunden werden Scheine, die diese Wallet selbst erzeugt, geteilt
-              oder zusammengelegt hat. Empfangene und sehr alte Scheine stecken
-              nur in einer Sicherungsdatei.
+              Gefunden werden Scheine, die diese Wallet erzeugt, geteilt,
+              zusammengelegt oder beim Empfang abgesichert hat. Was dann noch
+              fehlt, steckt vielleicht nur in einer Sicherungsdatei —
+              Einstellungen › Sicherung einspielen.
             </p>
           </Show>
           <Show when={zeilen().some(z => z.stand === 'fehler')}>

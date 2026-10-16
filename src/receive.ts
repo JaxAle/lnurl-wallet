@@ -4,7 +4,6 @@ import {
   noteDeclaredAmount,
   serverOf,
   fetchNoteInfo,
-  rotateNote,
   withNewK1,
   requireNoteK1,
   noteEndpointOf,
@@ -15,6 +14,7 @@ import {
   AmbiguousMutationError
 } from './lnurlcash'
 import {deviceReceive} from './deviceOrchestration'
+import {erneuereEmpfangen} from './roehren/umwandeln'
 import type {DeviceClient} from './device'
 import {notify, NotifyKind, msatToSats} from './helpers'
 import type {Bearer, ActivityKind} from './storage'
@@ -84,7 +84,8 @@ export const secureReceivedNote = async (note: {
   if (!k1 || !note.callback) {
     throw new Error('Der Schein hat noch keine Adresse zum Erneuern.')
   }
-  const result = await rotateNote(note.callback, k1)
+  // Fork: alte Hash-Scheine dabei in eigene, aus den Wörtern wiederfindbare umwandeln (roehren/umwandeln.ts)
+  const result = await erneuereEmpfangen(note.callback, k1)
   return withNewK1(note.url, result.k1, note.amount, result.signature)
 }
 

@@ -20,6 +20,7 @@ import {createSignal} from 'solid-js'
 import type {Bearer} from '../storage'
 import type {WalletContextType} from '../WalletContext'
 import {vergiss} from './einloesen'
+import {erneuereEmpfangen} from './umwandeln'
 
 type Kontext = Pick<
   WalletContextType,
@@ -72,7 +73,11 @@ export const holeZurueck = async (
 
   let url: string
   try {
-    const rotiert = await rotateNote(info.callback, requireNoteK1(schein.url))
+    // absichern (Empfang): alte Hash-Scheine dabei umwandeln — wie beim Empfang selbst (umwandeln.ts)
+    const rotiert =
+      zweck === 'absichern'
+        ? await erneuereEmpfangen(info.callback, requireNoteK1(schein.url))
+        : await rotateNote(info.callback, requireNoteK1(schein.url))
     url = withNewK1(
       schein.url,
       rotiert.k1,

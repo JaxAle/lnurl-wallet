@@ -35,6 +35,7 @@ import Willkommen from './roehren/Willkommen'
 import Einrichtung from './roehren/Einrichtung'
 import SoFunktioniert from './roehren/SoFunktioniert'
 import SicherungEinspielen from './roehren/SicherungEinspielen'
+import ScheineWiederfinden from './roehren/ScheineWiederfinden'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
 import AddonRun from './pages/AddonRun'
 
@@ -145,6 +146,7 @@ const cleanup = render(
       <Route path="/settings/erweitert" component={Settings} />
       <Route path="/settings/passwort" component={PasswortSeite} />
       <Route path="/passwort-vergessen" component={PasswortVergessen} />
+      <Route path="/settings/wiederfinden" component={ScheineWiederfinden} />
       <Route
         path="/settings/sicherung-einspielen"
         component={SicherungEinspielen}

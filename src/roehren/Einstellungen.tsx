@@ -242,6 +242,13 @@ const Einstellungen: Component = () => {
           label="Sicherung einspielen"
           href="/settings/sicherung-einspielen"
         />
+        <Show when={offen()}>
+          <Zeile
+            label="Scheine wiederfinden"
+            unter="Mit deinen zwölf Wörtern, bei allen Ausgabestellen"
+            href="/settings/wiederfinden"
+          />
+        </Show>
       </Gruppe>
 
       <Gruppe titel="Extras">
