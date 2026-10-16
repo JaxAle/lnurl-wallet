@@ -1601,6 +1601,25 @@ select {
 .rz-setting.rz-still .val {
   color: #a3907c;
 }
+/* Wiederfinden (Steve, 2026-10-16): wo gesucht wird, leuchtet es; Funde hell; „nichts“ ruhig, aber
+   lesbar; „nicht erreichbar“ heißt „weiß ich nicht“ und sieht anders aus als „leer“ */
+.rz-setting.rz-still .val.rz-sucht {
+  gap: 8px;
+  color: #ffb35c;
+}
+.rz-setting.rz-still .val.rz-sucht .rz-lampe-klein {
+  animation: rz-puls 1.6s ease-in-out infinite;
+}
+.rz-setting.rz-still .val.rz-fund {
+  color: #ead8bf;
+  font-weight: 400;
+}
+.rz-setting.rz-still .val.rz-nichts {
+  color: #bfae98;
+}
+.rz-setting.rz-still .val.rz-fehler {
+  color: #ff8a5c;
+}
 .rz-eintrag-kopf .s.warn {
   color: #ff8a5c;
 }

@@ -115,17 +115,34 @@ const Wiederfinden: Component<{
     if (props.automatisch !== false) void suche(zeilen())
   })
 
+  // die wievielte Stelle gerade gefragt wird
+  const position = () =>
+    Math.max(1, zeilen().findIndex(z => z.stand === 'sucht') + 1)
+
   const gefunden = () => zeilen().filter(z => z.scheine > 0)
   const summe = () => gefunden().reduce((a, z) => a + z.sats, 0)
   const anzahl = () => gefunden().reduce((a, z) => a + z.scheine, 0)
 
   return (
     <div class="rz-wiederfinden">
-      <p class="rz-hinweis">
-        {props.nur
-          ? 'Die Wallet fragt bei dieser Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'
-          : 'Die Wallet fragt bei jeder bekannten Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'}
-      </p>
+      {/* läuft: oben der Fortschritt mit Lämpchen, statt des Erklärsatzes (Steve, 2026-10-16) */}
+      <Show
+        when={laeuft()}
+        fallback={
+          <Show when={!fertig()}>
+            <p class="rz-hinweis">
+              {props.nur
+                ? 'Die Wallet fragt bei dieser Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'
+                : 'Die Wallet fragt bei jeder bekannten Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'}
+            </p>
+          </Show>
+        }
+      >
+        <p class="rz-status">
+          <span class="rz-lampe-klein" /> Sucht bei {position()} von{' '}
+          {zeilen().length} {zeilen().length === 1 ? 'Stelle' : 'Stellen'} …
+        </p>
+      </Show>
       <div class="rz-liste">
         <For each={zeilen()}>
           {z => (
@@ -133,7 +150,18 @@ const Wiederfinden: Component<{
               <span>
                 <span class="sl">{z.host}</span>
               </span>
-              <span class="val">
+              <span
+                class="val"
+                classList={{
+                  'rz-sucht': z.stand === 'sucht',
+                  'rz-fund': z.stand === 'fertig' && z.scheine > 0,
+                  'rz-nichts': z.stand === 'fertig' && z.scheine === 0,
+                  'rz-fehler': z.stand === 'fehler'
+                }}
+              >
+                <Show when={z.stand === 'sucht'}>
+                  <span class="rz-lampe-klein" />
+                </Show>
                 {z.stand === 'wartet'
                   ? '…'
                   : z.stand === 'sucht'
@@ -197,16 +225,16 @@ const Wiederfinden: Component<{
         </details>
       </Show>
 
-      <button
-        type="button"
-        class="rz-knopf an rz-weiter"
-        disabled={laeuft()}
-        onClick={() => props.onFertig()}
-      >
-        <span class="lbl">
-          {laeuft() ? 'Sucht …' : (props.fertigText ?? 'Zur Wallet')}
-        </span>
-      </button>
+      {/* kein toter Knopf, solange gesucht wird (Steve) */}
+      <Show when={!laeuft()}>
+        <button
+          type="button"
+          class="rz-knopf an rz-weiter"
+          onClick={() => props.onFertig()}
+        >
+          <span class="lbl">{props.fertigText ?? 'Zur Wallet'}</span>
+        </button>
+      </Show>
     </div>
   )
 }
