@@ -24,7 +24,9 @@ import {
 import type {TrustedMint} from '../trustedMints'
 import {useWallet} from '../WalletContext'
 import {aufladeGebuehr, frageAufladeGebuehr, teilGebuehr} from './gebuehren'
+import Dialog from '../components/Dialog'
 import Rueckfrage from './Rueckfrage'
+import Wiederfinden from './Wiederfinden'
 import {setStandard, standardStelle} from './standard'
 import './roehren.css'
 
@@ -548,6 +550,8 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
   const navigate = useNavigate()
   const {state, bearers} = useWallet()
   const [fragt, setFragt] = createSignal(false)
+  // Wiederfinden im neuen Bild, nur bei dieser Stelle — statt RescanDialog des Originals (Gerhard, 2026-10-16)
+  const [sucht, setSucht] = createSignal(false)
 
   const stelle = () =>
     trustedMints().find(t => serverOf(t.server) === params.host)
@@ -699,9 +703,21 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                 <Zeile
                   label="Fehlende Scheine suchen"
                   unter="Nach dem Wiederherstellen aus den zwölf Wörtern"
-                  onClick={() => m.suchen(s().server)}
+                  onClick={() => setSucht(true)}
                 />
               </div>
+              <Show when={sucht()}>
+                <Dialog onClose={() => setSucht(false)}>
+                  <div class="rz-blatt">
+                    <h3>Scheine wiederfinden</h3>
+                    <Wiederfinden
+                      nur={params.host}
+                      fertigText="Fertig"
+                      onFertig={() => setSucht(false)}
+                    />
+                  </div>
+                </Dialog>
+              </Show>
             </Show>
 
             <div class="rz-gruppe">

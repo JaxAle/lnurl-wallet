@@ -51,6 +51,7 @@ const Wiederfinden: Component<{
   onFertig: () => void
   automatisch?: boolean
   nur?: string
+  fertigText?: string
 }> = props => {
   const {bearers, addBearer, logActivity} = useWallet()
   const start = props.nur
@@ -121,8 +122,9 @@ const Wiederfinden: Component<{
   return (
     <div class="rz-wiederfinden">
       <p class="rz-hinweis">
-        Die Wallet fragt bei jeder bekannten Ausgabestelle nach Scheinen, die zu
-        deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.
+        {props.nur
+          ? 'Die Wallet fragt bei dieser Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'
+          : 'Die Wallet fragt bei jeder bekannten Ausgabestelle nach Scheinen, die zu deinen zwölf Wörtern gehören. Das dauert etwas — bitte offen lassen.'}
       </p>
       <div class="rz-liste">
         <For each={zeilen()}>
@@ -170,27 +172,29 @@ const Wiederfinden: Component<{
         </div>
       </Show>
 
-      <details class="rz-erweitert">
-        <summary>Bei einer anderen Stelle suchen</summary>
-        <input
-          class="rz-feld"
-          type="text"
-          autocapitalize="off"
-          spellcheck={false}
-          placeholder="z. B. mint@stelle.beispiel.at"
-          value={eigene()}
-          onInput={e => setEigene(e.currentTarget.value)}
-          onKeyDown={e => e.key === 'Enter' && eigeneDazu()}
-        />
-        <button
-          type="button"
-          class="rz-leise rz-block"
-          disabled={laeuft() || !resolveMintInput(eigene().trim())}
-          onClick={eigeneDazu}
-        >
-          Dort suchen ›
-        </button>
-      </details>
+      <Show when={!props.nur}>
+        <details class="rz-erweitert">
+          <summary>Bei einer anderen Stelle suchen</summary>
+          <input
+            class="rz-feld"
+            type="text"
+            autocapitalize="off"
+            spellcheck={false}
+            placeholder="z. B. mint@stelle.beispiel.at"
+            value={eigene()}
+            onInput={e => setEigene(e.currentTarget.value)}
+            onKeyDown={e => e.key === 'Enter' && eigeneDazu()}
+          />
+          <button
+            type="button"
+            class="rz-leise rz-block"
+            disabled={laeuft() || !resolveMintInput(eigene().trim())}
+            onClick={eigeneDazu}
+          >
+            Dort suchen ›
+          </button>
+        </details>
+      </Show>
 
       <button
         type="button"
@@ -198,7 +202,9 @@ const Wiederfinden: Component<{
         disabled={laeuft()}
         onClick={() => props.onFertig()}
       >
-        <span class="lbl">{laeuft() ? 'Sucht …' : 'Zur Wallet'}</span>
+        <span class="lbl">
+          {laeuft() ? 'Sucht …' : (props.fertigText ?? 'Zur Wallet')}
+        </span>
       </button>
     </div>
   )

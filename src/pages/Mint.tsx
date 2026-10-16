@@ -225,7 +225,14 @@ const Mint: Component<{
     if (!url || verifying()) return
     setVerifying(true)
     try {
-      const result = await fetchInvoiceVerification(url)
+      // Fork: höchstens 10 s — eine Nachfrage, die beim Umschalten des Flugmodus hängen bleibt, sperrte
+      // sonst alle weiteren (verifying() bleibt an), die Zahlung „hing“ (Gerhard am Pixel, 2026-10-16)
+      const result = await Promise.race([
+        fetchInvoiceVerification(url),
+        new Promise<never>((_, nein) =>
+          setTimeout(() => nein(new Error('Zeit')), 10_000)
+        )
+      ])
       // a settled report only means this wallet's invoice was paid if it's
       // for the invoice this wallet actually requested
       const requested = invoice()
@@ -252,7 +259,14 @@ const Mint: Component<{
         // settlement preimage the service discloses here.
         const secret = mintSecret()
         if (secret) {
-          await claim(secret, invoicedMsat(), invoicedGrossMsat())
+          // Fork: scheitert das Abholen (Netz wackelt noch), weiter nachfragen statt stehen bleiben —
+          // die Stelle meldet wieder „bezahlt“, und das Abholen desselben Scheins wird wiederholt
+          const abgeholt = await claim(
+            secret,
+            invoicedMsat(),
+            invoicedGrossMsat()
+          )
+          if (abgeholt === false) startPolling(url)
         } else {
           notify(
             'Bezahlt, aber das Geheimnis für den Schein fehlt. Diese Rechnung nicht noch einmal bezahlen.',
@@ -326,9 +340,12 @@ const Mint: Component<{
     if (!document.hidden && pollTimer) void checkVerify()
   }
   document.addEventListener('visibilitychange', beiRueckkehr)
-  onCleanup(() =>
+  // Fork: Netz wieder da (Flugmodus aus) — gleich nachfragen
+  window.addEventListener('online', beiRueckkehr)
+  onCleanup(() => {
     document.removeEventListener('visibilitychange', beiRueckkehr)
-  )
+    window.removeEventListener('online', beiRueckkehr)
+  })
 
   const proceedWithPayRequest = (info: PayRequestInfo) => {
     setPayRequest(info)
@@ -846,7 +863,7 @@ const Mint: Component<{
         // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf; nur die Gebühr steht darunter
         zeigeGebuehr(Math.floor(feePaidMsat / 1000))
         navigate('/wallet')
-        return
+        return true
       }
 
       // if a vault is connected, this note's secret is generated and held
@@ -999,8 +1016,10 @@ const Mint: Component<{
         zeigeGebuehr(Math.floor(feePaidMsat / 1000))
       }
       navigate('/wallet')
+      return true
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
+      return false
     } finally {
       setBusy(false)
     }
