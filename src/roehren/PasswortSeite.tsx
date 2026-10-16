@@ -8,7 +8,7 @@ import RequireWallet from '../components/RequireWallet'
 import {downloadBackupFile} from '../storage'
 import {useWallet} from '../WalletContext'
 import {pruefePasswort, setzePasswort} from './passwort'
-import {codeFehler, kandidaten, normalisiere} from './roehrencode'
+import {codeFehler, kandidaten, merkeLaenge, normalisiere} from './roehrencode'
 import './roehren.css'
 
 const PasswortSeite: Component = () => {
@@ -61,6 +61,7 @@ const PasswortSeite: Component = () => {
     setFehler(null)
     try {
       await setzePasswort(hatte ? alt() : undefined, normalisiere(neu()))
+      merkeLaenge(neu().length)
       setAlt('')
       setNeu('')
       setNochmal('')

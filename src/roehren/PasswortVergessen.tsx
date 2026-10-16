@@ -8,7 +8,7 @@ import {A, useNavigate} from '@solidjs/router'
 import {notify} from '../helpers'
 import {useWallet} from '../WalletContext'
 import {passwortVergessen} from './passwort'
-import {codeFehler, normalisiere} from './roehrencode'
+import {codeFehler, merkeLaenge, normalisiere} from './roehrencode'
 import './roehren.css'
 
 const PasswortVergessen: Component = () => {
@@ -36,6 +36,7 @@ const PasswortVergessen: Component = () => {
     setFehler(null)
     try {
       const r = await passwortVergessen(woerter(), normalisiere(pw()))
+      merkeLaenge(pw().length)
       // mit dem neuen Passwort öffnen — so lädt die Wallet alles unter dem einen Schlüssel neu
       if (state() === 'unlocked') lock()
       await unlock(normalisiere(pw()))

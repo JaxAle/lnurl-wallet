@@ -10,9 +10,12 @@ import {A} from '@solidjs/router'
 import {useWallet} from '../WalletContext'
 import {pruefePasswort} from './passwort'
 import {
+  codeLaenge,
   fehlversuch,
   geschafft,
   kandidaten,
+  merkeLaenge,
+  vergissLaenge,
   wartenBis,
   ZEICHEN
 } from './roehrencode'
@@ -59,10 +62,13 @@ const Roehrenschloss: Component = () => {
   const spaeter = (f: () => void, ms: number) => uhren.push(setTimeout(f, ms))
 
   const sperre = () => Math.max(0, wartenBis() - jetzt())
+  // bekannte Länge: nach dem letzten Zeichen öffnet das Schloss von selbst (Steve)
+  const [laenge, setLaenge] = createSignal(codeLaenge())
+  let autoFehl = 0
 
   onMount(() => {
     document.body.classList.add('rz-gesperrt')
-    spaeter(() => setPhase('bereit'), 1900)
+    spaeter(() => phase() === 'zuendet' && setPhase('bereit'), 1900)
     const takt = setInterval(() => setJetzt(Date.now()), 1000)
     onCleanup(() => clearInterval(takt))
   })
@@ -71,9 +77,12 @@ const Roehrenschloss: Component = () => {
     document.body.classList.remove('rz-gesperrt')
   })
 
+  // Tippen zählt vom ersten Moment an, auch während die Röhren noch zünden (Steve)
+  const nimmtAn = () => phase() === 'bereit' || phase() === 'zuendet'
   const tippe = (i: number) => {
-    if (phase() !== 'bereit' || sperre() > 0) return
+    if (!nimmtAn() || sperre() > 0) return
     setCode(c => (c.length < 64 ? c + ZEICHEN[i] : c))
+    if (laenge() !== null && code().length === laenge()) void oeffne()
     setTreffer(t => ({...t, [i]: (t[i] ?? 0) + 1}))
     try {
       navigator.vibrate?.(8)
@@ -81,10 +90,10 @@ const Roehrenschloss: Component = () => {
       // kein Vibrieren
     }
   }
-  const loesche = () => phase() === 'bereit' && setCode(c => c.slice(0, -1))
+  const loesche = () => nimmtAn() && setCode(c => c.slice(0, -1))
 
   const oeffne = async () => {
-    if (phase() !== 'bereit' || !code() || sperre() > 0) return
+    if (!nimmtAn() || !code() || sperre() > 0) return
     setPhase('prueft')
     let richtig: string | null = null
     for (const k of kandidaten(code())) {
@@ -95,6 +104,12 @@ const Roehrenschloss: Component = () => {
     }
     if (!richtig) {
       fehlversuch()
+      // zweimal hintereinander falsch bei gemerkter Länge: vielleicht stimmt die Länge nicht mehr
+      // (Sicherung eingespielt, anderswo geändert) — dann wieder mit Knopf, ohne Länge
+      if (laenge() !== null && ++autoFehl >= 2) {
+        vergissLaenge()
+        setLaenge(null)
+      }
       setJetzt(Date.now())
       setPhase('falsch')
       spaeter(() => {
@@ -105,6 +120,7 @@ const Roehrenschloss: Component = () => {
       return
     }
     geschafft()
+    merkeLaenge(code().length)
     setTreffer({})
     setCode('')
     setBild(true)
@@ -205,27 +221,46 @@ const Roehrenschloss: Component = () => {
             type="button"
             class="rz-schloss-taste"
             aria-label="Letztes Zeichen löschen"
-            disabled={!code() || phase() !== 'bereit'}
+            disabled={!code() || !nimmtAn()}
             onClick={loesche}
           >
             ⌫
           </button>
           <span class="rz-schloss-punkte" aria-live="polite">
             <Show
-              when={code().length > 0}
+              when={code().length > 0 || laenge() !== null}
               fallback={<span class="leer">Code antippen</span>}
             >
-              <For each={code().split('')}>{() => <span class="punkt" />}</For>
+              {/* bekannte Länge: leere Punkte füllen sich — man sieht, wie viele noch fehlen */}
+              <For
+                each={Array.from(
+                  {length: Math.max(laenge() ?? 0, code().length)},
+                  (_, k) => k
+                )}
+              >
+                {k => (
+                  <span class="punkt" classList={{hohl: k >= code().length}} />
+                )}
+              </For>
             </Show>
           </span>
-          <button
-            type="button"
-            class="rz-schloss-taste an"
-            disabled={!code() || phase() !== 'bereit'}
-            onClick={() => void oeffne()}
+          <Show
+            when={laenge() === null}
+            fallback={
+              <span class="rz-schloss-taste an" aria-hidden="true">
+                {phase() === 'prueft' ? '…' : ''}
+              </span>
+            }
           >
-            {phase() === 'prueft' ? '…' : 'Öffnen'}
-          </button>
+            <button
+              type="button"
+              class="rz-schloss-taste an"
+              disabled={!code() || !nimmtAn()}
+              onClick={() => void oeffne()}
+            >
+              {phase() === 'prueft' ? '…' : 'Öffnen'}
+            </button>
+          </Show>
         </Show>
       </div>
       <A href="/passwort-vergessen" class="rz-schloss-vergessen">

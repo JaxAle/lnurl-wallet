@@ -13,7 +13,7 @@ import {wordlist} from '@scure/bip39/wordlists/english.js'
 import {generateSeedPhrase, isValidSeedPhrase} from '../keys'
 import {useWallet} from '../WalletContext'
 import Wiederfinden from './Wiederfinden'
-import {codeFehler, normalisiere} from './roehrencode'
+import {codeFehler, merkeLaenge, normalisiere} from './roehrencode'
 import './roehren.css'
 
 type Schritt = 'woerter' | 'pruefung' | 'eingabe' | 'passwort' | 'suchen'
@@ -94,6 +94,7 @@ const Einrichtung: Component = () => {
         ohne() ? undefined : normalisiere(pw()),
         !wiederherstellen()
       )
+      if (!ohne()) merkeLaenge(pw().length)
       setPw('')
       setPw2('')
       if (wiederherstellen()) setSchritt('suchen')

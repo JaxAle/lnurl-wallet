@@ -52,3 +52,30 @@ export const fehlversuch = (jetzt = Date.now()): number => {
   return bis
 }
 export const geschafft = () => schreibe({fehl: 0, bis: 0})
+
+// Länge des Codes (Steve, 2026-10-16): damit das Schloss nach dem letzten Zeichen von selbst öffnet, wie
+// im Prototyp. Gemerkt wird nur die Länge, nie der Code — sie verrät einem Angreifer wenig (weniger als
+// Faktor 2 beim Durchprobieren). Unbekannt (erstes Mal, nach Einspielen einer Sicherung): Knopf „Öffnen“.
+const LAENGE = 'fork_code_laenge'
+export const codeLaenge = (): number | null => {
+  try {
+    const n = Number(localStorage.getItem(LAENGE))
+    return Number.isInteger(n) && n > 0 ? n : null
+  } catch {
+    return null
+  }
+}
+export const merkeLaenge = (n: number) => {
+  try {
+    localStorage.setItem(LAENGE, String(n))
+  } catch {
+    // dann eben mit Knopf
+  }
+}
+export const vergissLaenge = () => {
+  try {
+    localStorage.removeItem(LAENGE)
+  } catch {
+    // nichts
+  }
+}

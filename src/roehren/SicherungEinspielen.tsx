@@ -8,6 +8,7 @@ import {A, useNavigate} from '@solidjs/router'
 import {applyBackup, MAX_BACKUP_FILE_BYTES} from '../storage'
 import type {BackupFile, RestoreResult} from '../storage'
 import {useWallet} from '../WalletContext'
+import {vergissLaenge} from './roehrencode'
 import './roehren.css'
 
 type Inhalt = {
@@ -78,6 +79,8 @@ const SicherungEinspielen: Component = () => {
     setFehler(null)
     try {
       const r = applyBackup(i.daten)
+      // ein eingespielter Schlüssel kann einen anderen Code haben — Länge nicht mehr annehmen
+      if (r.linkingKeyRestored) vergissLaenge()
       if (state() === 'unlocked') await reloadBearers()
       if (r.linkingKeyRestored) refreshState()
       setErgebnis(r)
