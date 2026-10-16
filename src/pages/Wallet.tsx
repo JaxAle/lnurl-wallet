@@ -43,6 +43,7 @@ import {MdSharpKeyboard} from 'solid-icons/md'
 import {useWallet, groupByServer} from '../WalletContext'
 import {storeableMeltAddresses} from '../storeableLinks'
 import type {Bearer} from '../storage'
+import {downloadBackupFile} from '../storage'
 import {splitBearerIntoAmounts, type SplitTarget} from '../noteSplitting'
 import {
   serverOf,
@@ -103,6 +104,12 @@ import Zaehlwerk from '../roehren/Zaehlwerk'
 import Knoepfe from '../roehren/Knoepfe'
 import {unterwegs} from '../roehren/einloesen'
 import {zurueckzuholen} from '../roehren/zurueckholen'
+import {
+  alterText,
+  erinnern,
+  letzteSicherung,
+  ungesichert
+} from '../roehren/sicherung'
 import {eingang, setEingang} from '../roehren/uebergabe'
 import {aufDeutsch} from '../roehren/fehler'
 import Scheine from '../roehren/Scheine'
@@ -1642,6 +1649,30 @@ const Wallet: Component<{
                       )}{' '}
                       Sats werden geprüft
                     </p>
+                  </Show>
+                  {/* Erinnerung an die Sicherung (Steve): nur Geld, das die zwölf Wörter nicht wiederfinden */}
+                  <Show
+                    when={
+                      ungesichert(bearers()).length > 0 &&
+                      erinnern(ungesichert(bearers()))
+                    }
+                  >
+                    <button
+                      type="button"
+                      class="rz-hinweiszeile"
+                      onClick={() => downloadBackupFile()}
+                    >
+                      {alterText(letzteSicherung())}
+                      {' · '}
+                      {(() => {
+                        const n = ungesichert(bearers()).length
+                        const scheine = n === 1 ? '1 Schein' : `${n} Scheine`
+                        return letzteSicherung() === null
+                          ? `${scheine} nur auf diesem Gerät`
+                          : `${scheine} ${n === 1 ? 'fehlt' : 'fehlen'} darin`
+                      })()}{' '}
+                      › sichern
+                    </button>
                   </Show>
                   {/* liegt ein Zurückholen-Auftrag, heißt es auch hier so — nicht „unterwegs“ (Gerhard, 2026-10-16) */}
                   <For

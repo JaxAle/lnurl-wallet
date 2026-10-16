@@ -29,6 +29,7 @@ import {
   vergissAbzusichern,
   vorgaenge
 } from './klaerung'
+import {merkeSicherung} from './sicherung'
 import {
   holeZurueck,
   vergissZurueckholen,
@@ -297,17 +298,22 @@ const Pruefwache: Component = () => {
     if (teile.length) notify(`Geprüft: ${teile.join(', ')}.`)
   }
 
+  // eben wurde eine Sicherung heruntergeladen: das ist jetzt der gesicherte Stand
+  const gesichert = () => merkeSicherung(bearers())
+
   onMount(() => {
     void runde()
     uhr = setInterval(() => void runde(), ABSTAND_MS)
     document.addEventListener('visibilitychange', runde)
     // Netz wieder da: gleich eine Runde, nicht erst in 15 s
     window.addEventListener('online', runde)
+    window.addEventListener('fork:sicherung', gesichert)
   })
   onCleanup(() => {
     if (uhr) clearInterval(uhr)
     document.removeEventListener('visibilitychange', runde)
     window.removeEventListener('online', runde)
+    window.removeEventListener('fork:sicherung', gesichert)
   })
   return null
 }

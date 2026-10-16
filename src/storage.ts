@@ -358,6 +358,8 @@ export const downloadBackupFile = (): void => {
   a.download = `lnurlwallet-backup-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
+  // Fork: die Erinnerung an die Sicherung merkt sich, was jetzt gesichert ist (roehren/sicherung.ts)
+  window.dispatchEvent(new Event('fork:sicherung'))
 }
 
 export type RestoreResult = {
