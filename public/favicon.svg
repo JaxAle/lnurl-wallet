@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#0a0c10"/>
-  <path d="M18 4 8 18h6l-2 10 10-14h-6z" fill="#ff9d3f"/>
+  <defs>
+    <filter id="g" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#050403"/>
+  <rect x="8" y="3" width="16" height="26" rx="5" fill="none" stroke="#3a2a1c" stroke-width="1.2"/>
+  <path d="M16 6.5v19M11 11h10M11 16h10M11 21h10" fill="none" stroke="#ffb35c" stroke-width="1.8" stroke-linecap="round" filter="url(#g)"/>
 </svg>

@@ -75,8 +75,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'LNURLwallet',
-        short_name: 'LNURLwallet',
+        // Fork: Name unter dem Icon (Gerhard, 2026-10-16)
+        name: 'LNURLcash',
+        short_name: 'LNURLcash',
         description: pkg.description,
         // relative to the manifest's own URL, so this resolves correctly
         // whether served from a domain root or a GitHub Pages subpath
