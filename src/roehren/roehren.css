@@ -2210,3 +2210,25 @@ body.rz-gesperrt {
 .rz-verborgen input {
   font-size: 16px; /* iOS zoomt sonst beim Fokus */
 }
+
+/* Startseite: das Zählwerk genau so breit wie Empfangen/Senden darunter (Gerhard am Pixel, 2026-10-17).
+   Die Röhren wachsen mit der Breite: 7 Röhren + 2 Punkte (je 8 px) + Sats-Zeichen (16/35 der Röhre,
+   4 px Abstand) + 9 Lücken à 3 px = 100 % → Röhre = (100cqw − 47px) / 7,457. Seitenverhältnis 35:56. */
+.wallet-hero .roehren-zaehlwerk .rz-inrow {
+  padding-left: 0;
+  padding-right: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+  container-type: inline-size;
+}
+.wallet-hero .roehren-zaehlwerk .bal-tubes {
+  --rz-t: min(64px, calc((100cqw - 47px) / 7.457));
+}
+.wallet-hero .roehren-zaehlwerk .bal-tubes .tube {
+  width: var(--rz-t);
+  height: calc(var(--rz-t) * 1.6);
+}
+.wallet-hero .roehren-zaehlwerk .satsym svg {
+  width: calc(var(--rz-t) * 0.457);
+  height: calc(var(--rz-t) * 0.914);
+}
