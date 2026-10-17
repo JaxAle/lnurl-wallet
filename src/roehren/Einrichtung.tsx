@@ -13,7 +13,8 @@ import {wordlist} from '@scure/bip39/wordlists/english.js'
 import {generateSeedPhrase, isValidSeedPhrase} from '../keys'
 import {useWallet} from '../WalletContext'
 import Wiederfinden from './Wiederfinden'
-import {codeFehler, merkeLaenge, normalisiere} from './roehrencode'
+import CodeFestlegen from './CodeFestlegen'
+import {merkeLaenge, vergissLaenge} from './roehrencode'
 import './roehren.css'
 
 type Schritt = 'woerter' | 'pruefung' | 'eingabe' | 'passwort' | 'suchen'
@@ -47,8 +48,6 @@ const Einrichtung: Component = () => {
   const [seed] = createSignal(wiederherstellen() ? '' : generateSeedPhrase())
   const woerterNeu = () => seed().split(' ')
   const [eingabe, setEingabe] = createSignal('')
-  const [pw, setPw] = createSignal('')
-  const [pw2, setPw2] = createSignal('')
   const [ohne, setOhne] = createSignal(false)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [fehler, setFehler] = createSignal<string | null>(null)
@@ -71,32 +70,17 @@ const Einrichtung: Component = () => {
     quiz.map(() => null)
   )
 
-  const pwProblem = () => {
-    if (ohne()) return null
-    // Röhren-Code: getippt wird später auf dem Röhrenfeld (roehrencode.ts)
-    const f = codeFehler(pw())
-    if (f) return f
-    if (normalisiere(pw()) !== normalisiere(pw2()))
-      return 'Die beiden Passwörter stimmen nicht überein.'
-    return null
-  }
-
-  const fertig = async () => {
-    if (pwProblem()) return
+  // code: auf den Röhren festgelegt (oder aus dem Passwortmanager); undefined = ohne Code
+  const fertig = async (code?: string, ausManager = false) => {
     setArbeitet(true)
     setFehler(null)
     try {
       const s = wiederherstellen()
         ? eingabe().trim().toLowerCase().split(/\s+/).join(' ')
         : seed()
-      await setup(
-        s,
-        ohne() ? undefined : normalisiere(pw()),
-        !wiederherstellen()
-      )
-      if (!ohne()) merkeLaenge(pw().length)
-      setPw('')
-      setPw2('')
+      await setup(s, code, !wiederherstellen())
+      if (code && !ausManager) merkeLaenge(code.length)
+      else vergissLaenge()
       if (wiederherstellen()) setSchritt('suchen')
       else navigate('/wallet')
     } catch (err) {
@@ -299,71 +283,67 @@ const Einrichtung: Component = () => {
           </Match>
 
           <Match when={schritt() === 'passwort'}>
-            <Show when={!wiederherstellen()}>
-              <Schritte n={3} />
-            </Show>
-            <p class="rz-text">
-              Mit diesem Code öffnest du die Wallet auf diesem Gerät — getippt
-              auf den Röhren: A–Z, 0–9 und . # &amp; -, mindestens 8 Zeichen.
-            </p>
-            <Show when={!ohne()}>
-              <label class="rz-feldname" for="ei-pw">
-                Passwort
-              </label>
-              <input
-                id="ei-pw"
-                class="rz-feld"
-                type="password"
-                autocomplete="new-password"
-                value={pw()}
-                onInput={e => setPw(e.currentTarget.value)}
-              />
-              <label class="rz-feldname" for="ei-pw2">
-                Passwort wiederholen
-              </label>
-              <input
-                id="ei-pw2"
-                class="rz-feld"
-                type="password"
-                autocomplete="new-password"
-                value={pw2()}
-                onInput={e => setPw2(e.currentTarget.value)}
-              />
-              <Show when={pw() && pwProblem()}>
-                <p class="rz-hinweis">{pwProblem()}</p>
+            {/* Code festlegen auf den Röhren, mit Schlüssel für den Passwortmanager (Steve, 2026-10-17) —
+            ein iPhone-Tester nahm hier den Vorschlag des Schlüsselbunds an und kam danach nicht weiter */}
+            <Show
+              when={ohne()}
+              fallback={
+                <CodeFestlegen
+                  titel={
+                    wiederherstellen() ? 'Code für dieses Gerät' : 'Dein Code'
+                  }
+                  zurueck={() =>
+                    setSchritt(wiederherstellen() ? 'eingabe' : 'pruefung')
+                  }
+                  onCode={async (code, ausManager) => {
+                    await fertig(code, ausManager)
+                    return fehler()
+                  }}
+                  unten={
+                    <button
+                      type="button"
+                      class="rz-schloss-vergessen rz-leise"
+                      onClick={() => setOhne(true)}
+                    >
+                      Ohne Code weiter
+                    </button>
+                  }
+                />
+              }
+            >
+              <Show when={!wiederherstellen()}>
+                <Schritte n={3} />
               </Show>
-            </Show>
-            <Show when={ohne()}>
               <p class="rz-erkannt fremd">
-                Ohne Passwort liegt der Schlüssel offen im Browser — wer dieses
-                Gerät benutzt, kann deine Scheine ausgeben. Ein Passwort lässt
-                sich später unter Einstellungen setzen.
+                Ohne Code liegt der Schlüssel offen im Browser — wer dieses
+                Gerät benutzt, kann deine Scheine ausgeben. Ein Code lässt sich
+                später unter Einstellungen setzen.
               </p>
+              <Show when={fehler()}>
+                <p class="rz-erkannt fremd">{fehler()}</p>
+              </Show>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                disabled={arbeitet()}
+                onClick={() => void fertig()}
+              >
+                <span class="lbl">
+                  {arbeitet()
+                    ? 'Einen Moment …'
+                    : wiederherstellen()
+                      ? 'Wiederherstellen'
+                      : 'Wallet anlegen'}
+                </span>
+              </button>
+              <button
+                type="button"
+                class="rz-aendern rz-block rz-mitte"
+                onClick={() => setOhne(false)}
+              >
+                Doch mit Code
+              </button>
             </Show>
-            <Show when={fehler()}>
-              <p class="rz-erkannt fremd">{fehler()}</p>
-            </Show>
-            <button
-              type="button"
-              class="rz-knopf an rz-weiter"
-              disabled={!!pwProblem() || arbeitet()}
-              onClick={() => void fertig()}
-            >
-              <span class="lbl">
-                {arbeitet()
-                  ? 'Einen Moment …'
-                  : wiederherstellen()
-                    ? 'Wiederherstellen'
-                    : 'Wallet anlegen'}
-              </span>
-            </button>
-            <button
-              type="button"
-              class="rz-aendern rz-block rz-mitte"
-              onClick={() => setOhne(v => !v)}
-            >
-              {ohne() ? 'Doch mit Passwort' : 'Ohne Passwort weiter'}
-            </button>
           </Match>
 
           <Match when={schritt() === 'suchen'}>

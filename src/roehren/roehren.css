@@ -2165,3 +2165,48 @@ body.rz-gesperrt {
   font-size: 14px;
   text-decoration: none;
 }
+
+/* Röhrenfeld: Kopfzeile beim Festlegen, Schlüssel, verborgenes Feld für den Passwortmanager */
+.rz-schloss-kopf {
+  flex: none;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 10px 14px 4px;
+  color: #ead8bf;
+  font:
+    300 17px/1.35 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+}
+.rz-schloss-kopf .rz-seitenkopf {
+  margin: 0 0 4px;
+}
+.rz-schloss-kopf p {
+  margin: 2px 0 0;
+  color: rgba(238, 152, 90, 0.75);
+  font-size: 15px;
+}
+.rz-schloss-schluessel svg {
+  width: 26px;
+  height: 26px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 4px rgba(255, 120, 20, 0.45));
+}
+.rz-schloss-zeile {
+  flex: none;
+  padding: 6px 14px 0;
+}
+.rz-verborgen {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.rz-verborgen input {
+  font-size: 16px; /* iOS zoomt sonst beim Fokus */
+}

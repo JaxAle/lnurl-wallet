@@ -1,5 +1,7 @@
-// Einstellungen › Passwort ändern / setzen (Gerhard, 2026-10-13). Ein eigener Bildschirm wie im Bedienfeld;
-// die Arbeit tut passwort.ts. Nach dem Ändern ein Satz und der ehrliche Hinweis auf alte Sicherungen.
+// Einstellungen › Code ändern / setzen (Gerhard, 2026-10-13; auf den Röhren seit 2026-10-17, Steve): erst
+// der bisherige Code auf dem Röhrenfeld (oder mit dem Schlüssel aus dem Passwortmanager), dann der neue —
+// dort, wo man ihn später tippt. Die Arbeit tut passwort.ts. Danach ein Satz und der Hinweis auf alte
+// Sicherungen.
 import type {Component} from 'solid-js'
 import {createSignal, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
@@ -7,95 +9,42 @@ import {A, useNavigate} from '@solidjs/router'
 import RequireWallet from '../components/RequireWallet'
 import {downloadBackupFile} from '../storage'
 import {useWallet} from '../WalletContext'
+import CodeFestlegen from './CodeFestlegen'
 import {pruefePasswort, setzePasswort} from './passwort'
-import {codeFehler, kandidaten, merkeLaenge, normalisiere} from './roehrencode'
+import Roehrenfeld from './Roehrenfeld'
+import {codeLaenge, kandidaten, merkeLaenge, vergissLaenge} from './roehrencode'
 import './roehren.css'
 
 const PasswortSeite: Component = () => {
   const {encrypted} = useWallet()
   const navigate = useNavigate()
-  // einmal beim Öffnen: hat die Wallet schon eines? (encrypted() liest den Speicher, ist nicht reaktiv)
+  // einmal beim Öffnen: hat die Wallet schon einen? (encrypted() liest den Speicher, ist nicht reaktiv)
   const hatte = encrypted()
-  const [alt, setAlt] = createSignal('')
-  const [neu, setNeu] = createSignal('')
-  const [nochmal, setNochmal] = createSignal('')
-  const [arbeitet, setArbeitet] = createSignal(false)
-  const [fehler, setFehler] = createSignal<string | null>(null)
+  const [alt, setAlt] = createSignal<string | null>(hatte ? null : '')
   const [fertig, setFertig] = createSignal(false)
-  // zwei Schritte: erst das bisherige allein, dann die neuen — Bitwarden füllte sonst alle drei Felder
-  // mit dem bisherigen (Gerhard am Pixel, 2026-10-13)
-  const [geprueft, setGeprueft] = createSignal(!hatte)
+  const zurueck = () => navigate('/settings')
 
-  const weiter = async () => {
-    if (!alt()) return
-    setArbeitet(true)
-    setFehler(null)
-    // wie auf dem Röhrenfeld: wie getippt, sonst klein (ältere Passwörter)
-    let ok = false
-    for (const k of kandidaten(alt())) {
+  const pruefeAlt = async (code: string) => {
+    for (const k of kandidaten(code)) {
       if (await pruefePasswort(k)) {
         setAlt(k)
-        ok = true
-        break
+        return 'weiter' as const
       }
     }
-    setArbeitet(false)
-    if (ok) setGeprueft(true)
-    else setFehler('Das bisherige Passwort stimmt nicht.')
+    return 'falsch' as const
   }
 
-  const problem = () => {
-    if (hatte && !alt()) return 'Bitte das bisherige Passwort eingeben.'
-    const f = codeFehler(neu())
-    if (f) return f
-    if (normalisiere(neu()) !== normalisiere(nochmal()))
-      return 'Die beiden neuen Passwörter stimmen nicht überein.'
-    if (hatte && normalisiere(neu()) === alt())
-      return 'Das neue Passwort ist dasselbe wie das bisherige.'
-    return null
-  }
-
-  const los = async () => {
-    if (problem()) return
-    setArbeitet(true)
-    setFehler(null)
+  const setze = async (code: string, ausManager: boolean) => {
     try {
-      await setzePasswort(hatte ? alt() : undefined, normalisiere(neu()))
-      merkeLaenge(neu().length)
-      setAlt('')
-      setNeu('')
-      setNochmal('')
+      await setzePasswort(hatte ? alt()! : undefined, code)
+      if (ausManager) vergissLaenge()
+      else merkeLaenge(code.length)
       setFertig(true)
+      return null
     } catch (err) {
-      setFehler((err as Error).message)
-    } finally {
-      setArbeitet(false)
+      return (err as Error).message
     }
   }
-
-  const feld = (props: {
-    id: string
-    label: string
-    wert: () => string
-    setze: (v: string) => void
-    neu?: boolean
-  }) => (
-    <>
-      <label class="rz-feldname" for={props.id}>
-        {props.label}
-      </label>
-      <input
-        id={props.id}
-        class="rz-feld"
-        type="password"
-        autocomplete={props.neu ? 'new-password' : 'current-password'}
-        autocapitalize="off"
-        spellcheck={false}
-        value={props.wert()}
-        onInput={e => props.setze(e.currentTarget.value)}
-      />
-    </>
-  )
 
   return (
     <RequireWallet>
@@ -108,25 +57,25 @@ const PasswortSeite: Component = () => {
           >
             ‹
           </A>
-          <h2>{hatte ? 'Passwort ändern' : 'Passwort setzen'}</h2>
+          <h2>{hatte ? 'Code ändern' : 'Code setzen'}</h2>
         </div>
 
         <Show
           when={!fertig()}
           fallback={
             <div class="rz-frage">
-              <h3>{hatte ? 'Passwort geändert.' : 'Passwort gesetzt.'}</h3>
+              <h3>{hatte ? 'Code geändert.' : 'Code gesetzt.'}</h3>
               <p>
                 Ab jetzt öffnet sich die Wallet auf diesem Gerät nur mit dem
-                neuen Passwort.
+                neuen Code.
               </p>
               <p class="rz-hinweis">
-                Hast du es in einem Passwortmanager (z. B. Bitwarden)
-                gespeichert, trag dort jetzt das neue ein.
+                Hast du den alten in einem Passwortmanager (z. B. Bitwarden)
+                gespeichert, trag dort jetzt den neuen ein.
               </p>
               <p class="rz-hinweis">
-                Sicherungsdateien von früher öffnen sich weiter mit dem
-                Passwort, das beim Herunterladen galt
+                Sicherungsdateien von früher öffnen sich weiter mit dem Code,
+                der beim Herunterladen galt
                 {hatte ? '' : ' — oder ohne'}. Lade jetzt eine neue Sicherung
                 herunter.
               </p>
@@ -147,75 +96,43 @@ const PasswortSeite: Component = () => {
             </div>
           }
         >
-          <p class="rz-hinweis">
-            {hatte
-              ? 'Das Passwort schützt die Wallet auf diesem Gerät. Deine Scheine und deine zwölf Wörter bleiben dieselben.'
-              : 'Ohne Passwort öffnet sich die Wallet von selbst. Mit Passwort braucht es zum Öffnen dieses Passwort — und das automatische Sperren wirkt.'}
-          </p>
           <Show
-            when={geprueft()}
+            when={alt() !== null}
             fallback={
-              <>
-                {feld({
-                  id: 'pw-alt',
-                  label: 'Bisheriges Passwort',
-                  wert: alt,
-                  setze: setAlt
-                })}
-                <Show when={fehler()}>
-                  <p class="rz-erkannt fremd">{fehler()}</p>
-                </Show>
-                <A href="/passwort-vergessen" class="rz-aendern rz-block">
-                  Bisheriges Passwort vergessen? Mit den zwölf Wörtern neu
-                  setzen
-                </A>
-                <button
-                  type="button"
-                  class="rz-knopf an rz-weiter"
-                  disabled={!alt() || arbeitet()}
-                  onClick={() => void weiter()}
-                >
-                  <span class="lbl">
-                    {arbeitet() ? 'Einen Moment …' : 'Weiter'}
-                  </span>
-                </button>
-              </>
+              <Roehrenfeld
+                onCode={pruefeAlt}
+                aktion="Weiter"
+                autocomplete="current-password"
+                laenge={codeLaenge()}
+                kopf={
+                  <>
+                    <div class="rz-seitenkopf">
+                      <button
+                        type="button"
+                        class="rz-zurueck"
+                        aria-label="Zurück"
+                        onClick={zurueck}
+                      >
+                        ‹
+                      </button>
+                      <h2>Bisheriger Code</h2>
+                    </div>
+                    <p>Erst der Code, mit dem du die Wallet heute öffnest.</p>
+                  </>
+                }
+                unten={
+                  <A href="/passwort-vergessen" class="rz-schloss-vergessen">
+                    Code vergessen?
+                  </A>
+                }
+              />
             }
           >
-            {feld({
-              id: 'pw-neu',
-              label: 'Neues Passwort',
-              wert: neu,
-              setze: setNeu,
-              neu: true
-            })}
-            {feld({
-              id: 'pw-nochmal',
-              label: 'Neues Passwort wiederholen',
-              wert: nochmal,
-              setze: setNochmal,
-              neu: true
-            })}
-            <Show when={(neu() || nochmal()) && problem()}>
-              <p class="rz-hinweis">{problem()}</p>
-            </Show>
-            <Show when={fehler()}>
-              <p class="rz-erkannt fremd">{fehler()}</p>
-            </Show>
-            <button
-              type="button"
-              class="rz-knopf an rz-weiter"
-              disabled={!!problem() || arbeitet()}
-              onClick={() => void los()}
-            >
-              <span class="lbl">
-                {arbeitet()
-                  ? 'Einen Moment …'
-                  : hatte
-                    ? 'Passwort ändern'
-                    : 'Passwort setzen'}
-              </span>
-            </button>
+            <CodeFestlegen
+              titel={hatte ? 'Neuer Code' : 'Code setzen'}
+              zurueck={zurueck}
+              onCode={setze}
+            />
           </Show>
         </Show>
       </div>

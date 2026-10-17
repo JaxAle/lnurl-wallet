@@ -8,50 +8,43 @@ import {A, useNavigate} from '@solidjs/router'
 import {notify} from '../helpers'
 import {useWallet} from '../WalletContext'
 import {passwortVergessen} from './passwort'
-import {codeFehler, merkeLaenge, normalisiere} from './roehrencode'
+import CodeFestlegen from './CodeFestlegen'
+import {merkeLaenge, vergissLaenge} from './roehrencode'
 import './roehren.css'
 
 const PasswortVergessen: Component = () => {
   const {state, unlock, lock} = useWallet()
   const navigate = useNavigate()
   const [woerter, setWoerter] = createSignal('')
-  const [pw, setPw] = createSignal('')
-  const [pw2, setPw2] = createSignal('')
-  const [arbeitet, setArbeitet] = createSignal(false)
+  // erst die Wörter, dann der neue Code auf den Röhren (Steve, 2026-10-17)
+  const [codeSchritt, setCodeSchritt] = createSignal(false)
   const [fehler, setFehler] = createSignal<string | null>(null)
 
-  const problem = () => {
-    if (woerter().trim().split(/\s+/).length < 12)
-      return 'Bitte alle zwölf Wörter eingeben.'
-    const f = codeFehler(pw())
-    if (f) return f
-    if (normalisiere(pw()) !== normalisiere(pw2()))
-      return 'Die beiden Passwörter stimmen nicht überein.'
-    return null
-  }
+  const problem = () =>
+    woerter().trim().split(/\s+/).length < 12
+      ? 'Bitte alle zwölf Wörter eingeben.'
+      : null
 
-  const los = async () => {
-    if (problem()) return
-    setArbeitet(true)
-    setFehler(null)
+  const setze = async (code: string, ausManager: boolean) => {
     try {
-      const r = await passwortVergessen(woerter(), normalisiere(pw()))
-      merkeLaenge(pw().length)
-      // mit dem neuen Passwort öffnen — so lädt die Wallet alles unter dem einen Schlüssel neu
+      const r = await passwortVergessen(woerter(), code)
+      if (ausManager) vergissLaenge()
+      else merkeLaenge(code.length)
+      // mit dem neuen Code öffnen — so lädt die Wallet alles unter dem einen Schlüssel neu
       if (state() === 'unlocked') lock()
-      await unlock(normalisiere(pw()))
+      await unlock(code)
       setWoerter('')
-      setPw('')
-      setPw2('')
       notify(
-        `Neues Passwort gesetzt. ${r.scheine} ${r.scheine === 1 ? 'Schein ist' : 'Scheine sind'} da` +
+        `Neuer Code gesetzt. ${r.scheine} ${r.scheine === 1 ? 'Schein ist' : 'Scheine sind'} da` +
           (r.doppelt > 0 ? `, ${r.doppelt} doppelte zusammengelegt.` : '.')
       )
       navigate('/wallet')
+      return null
     } catch (err) {
+      // meist die Wörter: zurück zu ihnen, mit dem Grund
       setFehler((err as Error).message)
-    } finally {
-      setArbeitet(false)
+      setCodeSchritt(false)
+      return (err as Error).message
     }
   }
 
@@ -61,7 +54,7 @@ const PasswortVergessen: Component = () => {
         <A href="/wallet" class="rz-zurueck" aria-label="Zurück">
           ‹
         </A>
-        <h2>Passwort vergessen</h2>
+        <h2>Code vergessen</h2>
       </div>
       <Show
         when={state() !== 'none'}
@@ -75,9 +68,9 @@ const PasswortVergessen: Component = () => {
         }
       >
         <p class="rz-hinweis">
-          Mit deinen zwölf Wörtern setzt du ein neues Passwort. Es bleibt
-          dieselbe Wallet mit allen Scheinen — die Wallet prüft vorher, dass die
-          Wörter zu ihr gehören.
+          Mit deinen zwölf Wörtern setzt du einen neuen Code. Es bleibt dieselbe
+          Wallet mit allen Scheinen — die Wallet prüft vorher, dass die Wörter
+          zu ihr gehören.
         </p>
         <label class="rz-feldname" for="pv-woerter">
           Deine zwölf Wörter
@@ -95,29 +88,7 @@ const PasswortVergessen: Component = () => {
           value={woerter()}
           onInput={e => setWoerter(e.currentTarget.value)}
         />
-        <label class="rz-feldname" for="pv-pw">
-          Neues Passwort
-        </label>
-        <input
-          id="pv-pw"
-          class="rz-feld"
-          type="password"
-          autocomplete="new-password"
-          value={pw()}
-          onInput={e => setPw(e.currentTarget.value)}
-        />
-        <label class="rz-feldname" for="pv-pw2">
-          Neues Passwort wiederholen
-        </label>
-        <input
-          id="pv-pw2"
-          class="rz-feld"
-          type="password"
-          autocomplete="new-password"
-          value={pw2()}
-          onInput={e => setPw2(e.currentTarget.value)}
-        />
-        <Show when={(woerter() || pw()) && problem()}>
+        <Show when={woerter() && problem()}>
           <p class="rz-hinweis">{problem()}</p>
         </Show>
         <Show when={fehler()}>
@@ -126,13 +97,21 @@ const PasswortVergessen: Component = () => {
         <button
           type="button"
           class="rz-knopf an rz-weiter"
-          disabled={!!problem() || arbeitet()}
-          onClick={() => void los()}
+          disabled={!!problem()}
+          onClick={() => {
+            setFehler(null)
+            setCodeSchritt(true)
+          }}
         >
-          <span class="lbl">
-            {arbeitet() ? 'Einen Moment …' : 'Neues Passwort setzen'}
-          </span>
+          <span class="lbl">Weiter zum neuen Code</span>
         </button>
+        <Show when={codeSchritt()}>
+          <CodeFestlegen
+            titel="Neuer Code"
+            zurueck={() => setCodeSchritt(false)}
+            onCode={setze}
+          />
+        </Show>
       </Show>
     </div>
   )

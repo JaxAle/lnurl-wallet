@@ -6,7 +6,7 @@ const speicher = new Map<string, string>()
   setItem: (k: string, v: string) => void speicher.set(k, v),
   removeItem: (k: string) => void speicher.delete(k)
 }
-const {codeFehler, kandidaten, fehlversuch, geschafft, wartenBis} =
+const {codeFehler, kandidaten, fehlversuch, geschafft, wartenBis, tippbar} =
   await import('./roehrencode')
 
 describe('Röhren-Code', () => {
@@ -17,6 +17,9 @@ describe('Röhren-Code', () => {
     expect(codeFehler('Linz 2026')).toMatch(/Nur Zeichen/)
     expect(codeFehler('LINZ!2026')).toMatch(/Nur Zeichen/)
     expect(kandidaten('LINZ2026')).toEqual(['LINZ2026', 'linz2026'])
+    expect(kandidaten('abC-1')).toEqual(['abC-1', 'ABC-1', 'abc-1'])
+    expect(tippbar('kuvqyD-nynfe9-sywbor')).toBe(true)
+    expect(tippbar('a!b')).toBe(false)
   })
   it('bremst ab dem 5. Fehlversuch, doppelt je weiterem, Erfolg setzt zurück', () => {
     const t = 1_000_000

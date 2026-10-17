@@ -1,14 +1,13 @@
-// Entsperren auf dem Röhrenfeld, nach dem Prototyp (screens.lock, Gerhard, 2026-10-16): 40 Röhren zünden,
-// gehen aus, man tippt den Code; richtig → die Röhren ordnen sich zum Bild der Vorlage, LN · URL · CASH
-// glüht auf, unten „by DNI“, dann öffnet die Wallet. Anders als im Prototyp kennt die Wallet die Länge des
-// Codes nicht (er schützt die Verschlüsselung, nichts liegt zum Vergleichen da) — darum zeigt eine Zeile
-// unter dem Feld, wie viele Zeichen getippt sind, mit ⌫ und „Öffnen“.
+// Entsperren auf dem Röhrenfeld, nach dem Prototyp (screens.lock, Gerhard, 2026-10-16): Code tippen, richtig →
+// LN · URL · CASH glüht auf, unten „by DNI“, dann öffnet die Wallet. Die Wallet kennt nur die Länge des
+// Codes (öffnet nach dem letzten Zeichen von selbst); der Schlüssel unten holt ihn aus dem Passwortmanager.
 import type {Component} from 'solid-js'
-import {createSignal, For, onCleanup, onMount, Show} from 'solid-js'
+import {createSignal} from 'solid-js'
 import {A} from '@solidjs/router'
 
 import {useWallet} from '../WalletContext'
 import {pruefePasswort} from './passwort'
+import Roehrenfeld from './Roehrenfeld'
 import {
   codeLaenge,
   fehlversuch,
@@ -16,257 +15,57 @@ import {
   kandidaten,
   merkeLaenge,
   vergissLaenge,
-  wartenBis,
-  ZEICHEN
+  tippbar,
+  wartenBis
 } from './roehrencode'
-import './roehren.css'
 
-// das Bild der Vorlage: nach dem Entsperren stehen hier L N · U R L · C A S H und unten b y D N I
-const BILD = 'BFG1&9QWEZ5LN7KMIJO8XURLPDCASH2V0T63.#Y4'
-const MARKE = [11, 12, 21, 22, 23, 26, 27, 28, 29]
-const DANK: [number, string][] = [
-  [35, 'b'],
-  [36, 'y'],
-  [37, 'D'],
-  [38, 'N'],
-  [39, 'I']
-]
 const ZEIGEN_MS = 2400
-
-type Phase = 'zuendet' | 'bereit' | 'prueft' | 'falsch' | 'offen'
-
-// J gezeichnet (≠ I), die 0 mit Punkt (≠ O) — wie im Prototyp keyInner/keyClass
-const Zeichen: Component<{z: string}> = props => (
-  <span
-    classList={{ch: true, 'ch-0': props.z === '0', 'ch-J': props.z === 'J'}}
-  >
-    <Show when={props.z === 'J'} fallback={props.z}>
-      <svg viewBox="0 0 46 100" aria-hidden="true">
-        <path d="M33 18V64a15 15 0 0 1-30 0" />
-      </svg>
-    </Show>
-  </span>
-)
 
 const Roehrenschloss: Component = () => {
   const {unlock} = useWallet()
-  const [phase, setPhase] = createSignal<Phase>('zuendet')
-  const [code, setCode] = createSignal('')
-  const [bild, setBild] = createSignal(false)
-  const [jetzt, setJetzt] = createSignal(Date.now())
-  const [gedrueckt, setGedrueckt] = createSignal<number | null>(null)
-  const [treffer, setTreffer] = createSignal<Record<number, number>>({})
-  const verzug = ZEICHEN.split('').map(() => (Math.random() * 0.9).toFixed(2))
-  const aus = ZEICHEN.split('').map(() => (Math.random() * 0.6).toFixed(2))
-  const uhren: ReturnType<typeof setTimeout>[] = []
-  const spaeter = (f: () => void, ms: number) => uhren.push(setTimeout(f, ms))
-
-  const sperre = () => Math.max(0, wartenBis() - jetzt())
-  // bekannte Länge: nach dem letzten Zeichen öffnet das Schloss von selbst (Steve)
   const [laenge, setLaenge] = createSignal(codeLaenge())
+  const [sperreBis, setSperreBis] = createSignal(wartenBis())
   let autoFehl = 0
 
-  onMount(() => {
-    document.body.classList.add('rz-gesperrt')
-    spaeter(() => phase() === 'zuendet' && setPhase('bereit'), 1900)
-    const takt = setInterval(() => setJetzt(Date.now()), 1000)
-    onCleanup(() => clearInterval(takt))
-  })
-  onCleanup(() => {
-    uhren.forEach(clearTimeout)
-    document.body.classList.remove('rz-gesperrt')
-  })
-
-  // Tippen zählt vom ersten Moment an, auch während die Röhren noch zünden (Steve)
-  const nimmtAn = () => phase() === 'bereit' || phase() === 'zuendet'
-  const tippe = (i: number) => {
-    if (!nimmtAn() || sperre() > 0) return
-    setCode(c => (c.length < 64 ? c + ZEICHEN[i] : c))
-    if (laenge() !== null && code().length === laenge()) void oeffne()
-    setTreffer(t => ({...t, [i]: (t[i] ?? 0) + 1}))
-    try {
-      navigator.vibrate?.(8)
-    } catch {
-      // kein Vibrieren
-    }
-  }
-  const loesche = () => nimmtAn() && setCode(c => c.slice(0, -1))
-
-  const oeffne = async () => {
-    if (!nimmtAn() || !code() || sperre() > 0) return
-    setPhase('prueft')
+  const pruefe = async (code: string, ausManager: boolean) => {
     let richtig: string | null = null
-    for (const k of kandidaten(code())) {
+    for (const k of kandidaten(code)) {
       if (await pruefePasswort(k)) {
         richtig = k
         break
       }
     }
     if (!richtig) {
-      fehlversuch()
+      setSperreBis(fehlversuch())
       // zweimal hintereinander falsch bei gemerkter Länge: vielleicht stimmt die Länge nicht mehr
       // (Sicherung eingespielt, anderswo geändert) — dann wieder mit Knopf, ohne Länge
-      if (laenge() !== null && ++autoFehl >= 2) {
+      if (!ausManager && laenge() !== null && ++autoFehl >= 2) {
         vergissLaenge()
         setLaenge(null)
       }
-      setJetzt(Date.now())
-      setPhase('falsch')
-      spaeter(() => {
-        setCode('')
-        setTreffer({})
-        setPhase('bereit')
-      }, 600)
-      return
+      return 'falsch' as const
     }
     geschafft()
-    merkeLaenge(code().length)
-    setTreffer({})
-    setCode('')
-    setBild(true)
-    setPhase('offen')
+    // nur ein auf den Röhren tippbarer Code bekommt eine Länge — der aus dem Manager wird nie getippt
+    if (!ausManager && tippbar(code)) merkeLaenge(code.length)
     const pw = richtig
-    spaeter(() => {
-      void unlock(pw).catch(() => {
-        // zwischen Prüfen und Öffnen geändert? dann noch einmal von vorn
-        setBild(false)
-        setCode('')
-        setPhase('bereit')
-      })
-    }, ZEIGEN_MS)
-  }
-
-  // Tastatur am Rechner: tippen, ⌫, Enter
-  const taste = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') return void oeffne()
-    if (e.key === 'Backspace') return void loesche()
-    const i = ZEICHEN.indexOf(e.key.toUpperCase())
-    if (i >= 0 && e.key.length === 1) tippe(i)
-  }
-  onMount(() => document.addEventListener('keydown', taste))
-  onCleanup(() => document.removeEventListener('keydown', taste))
-
-  const zeichenAn = (i: number): string => {
-    if (!bild()) return ZEICHEN[i]
-    const dank = DANK.find(([j]) => j === i)
-    return dank ? dank[1] : BILD[i]
-  }
-  const leuchtet = (i: number) =>
-    bild() && (MARKE.includes(i) || DANK.some(([j]) => j === i))
-
-  const warteText = () => {
-    const s = Math.ceil(sperre() / 1000)
-    return s >= 60
-      ? `Zu viele Versuche — noch ${Math.ceil(s / 60)} min warten`
-      : `Zu viele Versuche — noch ${s} s warten`
+    setTimeout(() => void unlock(pw).catch(() => location.reload()), ZEIGEN_MS)
+    return 'offen' as const
   }
 
   return (
-    <div class="rz-schloss" classList={{weg: phase() === 'offen'}}>
-      <div
-        class="rz-schloss-feld"
-        classList={{
-          zuendet: phase() === 'zuendet',
-          dunkel: phase() !== 'zuendet',
-          falsch: phase() === 'falsch',
-          offen: phase() === 'offen'
-        }}
-        role="group"
-        aria-label="Röhrenfeld: Code antippen"
-      >
-        <For each={ZEICHEN.split('')}>
-          {(_, i) => (
-            <button
-              type="button"
-              class="tube"
-              classList={{
-                marke: leuchtet(i()),
-                druck: gedrueckt() === i()
-              }}
-              style={{
-                '--d': `${leuchtet(i()) ? (Math.random() * 0.35).toFixed(2) : verzug[i()]}s`,
-                '--od': `${aus[i()]}s`
-              }}
-              aria-label={ZEICHEN[i()]}
-              onPointerDown={() => setGedrueckt(i())}
-              onPointerUp={() => setGedrueckt(null)}
-              onPointerLeave={() => setGedrueckt(null)}
-              onPointerCancel={() => setGedrueckt(null)}
-              onClick={() => tippe(i())}
-            >
-              <span class="glow" />
-              {/* key: nach jedem Tippen neu, damit das Nachglimmen von vorn beginnt */}
-              <Show
-                when={treffer()[i()] ?? 0}
-                keyed
-                fallback={<Zeichen z={zeichenAn(i())} />}
-              >
-                {n => (
-                  <span class="treffer" data-n={n}>
-                    <Zeichen z={zeichenAn(i())} />
-                  </span>
-                )}
-              </Show>
-            </button>
-          )}
-        </For>
-      </div>
-
-      <div class="rz-schloss-fuss">
-        <Show
-          when={sperre() === 0}
-          fallback={<p class="rz-schloss-warte">{warteText()}</p>}
-        >
-          <button
-            type="button"
-            class="rz-schloss-taste"
-            aria-label="Letztes Zeichen löschen"
-            disabled={!code() || !nimmtAn()}
-            onClick={loesche}
-          >
-            ⌫
-          </button>
-          <span class="rz-schloss-punkte" aria-live="polite">
-            <Show
-              when={code().length > 0 || laenge() !== null}
-              fallback={<span class="leer">Code antippen</span>}
-            >
-              {/* bekannte Länge: leere Punkte füllen sich — man sieht, wie viele noch fehlen */}
-              <For
-                each={Array.from(
-                  {length: Math.max(laenge() ?? 0, code().length)},
-                  (_, k) => k
-                )}
-              >
-                {k => (
-                  <span class="punkt" classList={{hohl: k >= code().length}} />
-                )}
-              </For>
-            </Show>
-          </span>
-          <Show
-            when={laenge() === null}
-            fallback={
-              <span class="rz-schloss-taste an" aria-hidden="true">
-                {phase() === 'prueft' ? '…' : ''}
-              </span>
-            }
-          >
-            <button
-              type="button"
-              class="rz-schloss-taste an"
-              disabled={!code() || !nimmtAn()}
-              onClick={() => void oeffne()}
-            >
-              {phase() === 'prueft' ? '…' : 'Öffnen'}
-            </button>
-          </Show>
-        </Show>
-      </div>
-      <A href="/passwort-vergessen" class="rz-schloss-vergessen">
-        Code vergessen?
-      </A>
-    </div>
+    <Roehrenfeld
+      onCode={pruefe}
+      aktion="Öffnen"
+      autocomplete="current-password"
+      laenge={laenge()}
+      sperreBis={sperreBis()}
+      unten={
+        <A href="/passwort-vergessen" class="rz-schloss-vergessen">
+          Code vergessen?
+        </A>
+      }
+    />
   )
 }
 

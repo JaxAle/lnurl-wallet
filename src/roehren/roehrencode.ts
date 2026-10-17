@@ -17,10 +17,13 @@ export const codeFehler = (code: string): string | null => {
   return null
 }
 export const normalisiere = (code: string) => code.toUpperCase()
+// nur Röhrenzeichen (Groß/klein egal)? Dann lässt er sich auch tippen — z. B. Apples Vorschläge (kuvqyD-…)
+export const tippbar = (code: string) =>
+  [...code.toUpperCase()].every(z => ZEICHEN.includes(z))
 
-// beim Entsperren probiert: wie getippt (groß), dann klein
+// beim Entsperren probiert: wie eingegeben (Röhren: groß; Passwortmanager: genau so), dann groß, dann klein
 export const kandidaten = (code: string): string[] => [
-  ...new Set([code, code.toLowerCase()])
+  ...new Set([code, code.toUpperCase(), code.toLowerCase()])
 ]
 
 // Bremse nach Fehlversuchen, übersteht Neuladen: ab dem 5. Fehler 30 s, dann je doppelt, höchstens 1 h
