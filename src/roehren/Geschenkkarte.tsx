@@ -23,7 +23,7 @@ import {scheinUeber, waehleSchein} from './abspalten'
 import {createBetrag, Tastatur} from './Betrag'
 import {merkeUnterwegs} from './einloesen'
 import {gebunden} from './klaerung'
-import {kartenText, TEXTE} from './geschenkkarte'
+import {euroNotiz, kartenText, TEXTE, vorschlag} from './geschenkkarte'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -58,8 +58,9 @@ const Geschenkkarte: Component = () => {
   const [schritt, setSchritt] = createSignal<'betrag' | 'gestalten' | 'fertig'>(
     'betrag'
   )
-  const [motiv, setMotiv] = createSignal<GiftCardTemplate>('classic')
-  const [nachricht, setNachricht] = createSignal('Viel Freude mit deinen Sats!')
+  const start = vorschlag()
+  const [motiv, setMotiv] = createSignal<GiftCardTemplate>(start.motiv)
+  const [nachricht, setNachricht] = createSignal(start.nachricht)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [schein, setSchein] = createSignal<Bearer | null>(null)
 
@@ -82,7 +83,10 @@ const Geschenkkarte: Component = () => {
       Math.floor(s.amount / 1000),
       motiv(),
       s.url,
-      TEXTE
+      {
+        ...TEXTE,
+        amountNote: euroNotiz(Math.floor(s.amount / 1000), ein.kurs())
+      }
     )
 
   const erstellen = async () => {

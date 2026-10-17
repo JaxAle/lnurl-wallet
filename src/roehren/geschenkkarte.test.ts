@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 
 import {buildGiftCardPdf} from '../addons/giftcard/pdf'
-import {kartenText, TEXTE} from './geschenkkarte'
+import {euroNotiz, kartenText, TEXTE, vorschlag} from './geschenkkarte'
 
 describe('Geschenkkarte', () => {
   it('ersetzt Zeichen, die die PDF-Schrift nicht kennt', () => {
@@ -19,5 +19,12 @@ describe('Geschenkkarte', () => {
     )
     expect(new TextDecoder().decode(pdf.slice(0, 5))).toBe('%PDF-')
     expect(pdf.length).toBeGreaterThan(1000)
+  })
+  it('nennt den Euro-Wert mit Datum und schlägt im Dezember Weihnachten vor', () => {
+    const tag = new Date(2026, 11, 5)
+    expect(euroNotiz(100, 70_000, tag)).toBe('ca. 0,07 € am 5.12.2026')
+    expect(euroNotiz(100, null, tag)).toBeUndefined()
+    expect(vorschlag(tag).nachricht).toBe('Frohe Weihnachten!')
+    expect(vorschlag(new Date(2026, 9, 17)).motiv).toBe('classic')
   })
 })

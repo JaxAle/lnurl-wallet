@@ -75,6 +75,7 @@ export type GiftCardTexts = {
   amount: (sat: number) => string
   scan: string
   footer: string
+  amountNote?: string // klein unter dem Betrag, z. B. „ca. 0,07 € am 17.10.2026“
 }
 const ENGLISH: GiftCardTexts = {
   title: 'GIFT CARD',
@@ -160,6 +161,17 @@ export const buildGiftCardPdf = async (
     maxWidth: contentWidth - 46 * MM // leave room for the QR to its right
   })
   cursorY -= 42
+  if (texts.amountNote) {
+    page.drawText(texts.amountNote, {
+      x: contentX,
+      y: cursorY + 6,
+      size: 9,
+      font,
+      color: text,
+      opacity: 0.75
+    })
+    cursorY -= 12
+  }
 
   const messageWidth = contentWidth - 46 * MM
   const messageLines = message ? wrapWords(message, font, 10, messageWidth) : []

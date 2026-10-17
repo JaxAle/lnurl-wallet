@@ -4,8 +4,9 @@ export const TEXTE = {
   title: 'GESCHENKKARTE',
   amount: (sat: number) => `${sat.toLocaleString('de-DE')} Sats`,
   scan: 'Scannen und einlösen',
+  // der erste Schritt für den Beschenkten — womit man scannt (Steve, 2026-10-17)
   footer:
-    'Bitcoin-Bargeld (LNURLcash): mit einer Lightning-Wallet scannen und einlösen. Wer diesen Code hat, hat das Geld.'
+    'Mit einer Lightning-Wallet scannen, z. B. Phoenix oder Zeus. Wer diesen Code hat, hat das Geld.'
 }
 
 // die PDF-Schrift (Helvetica, WinAnsi) kennt nur westeuropäische Zeichen — ein Emoji oder „…“ ließe
@@ -17,3 +18,20 @@ export const kartenText = (t: string): string =>
     .replace(/[–—]/g, '-')
     .replace(/…/g, '...')
     .replace(/[^\n\x20-\x7e\u00a0-\u00ff€]/g, '')
+
+// Euro-Wert für die Karte, mit Datum — der Kurs ändert sich, die Karte wird vielleicht später verschenkt
+export const euroNotiz = (
+  sats: number,
+  eurJeBtc: number | null,
+  heute = new Date()
+): string | undefined => {
+  if (!eurJeBtc) return undefined
+  const eur = (sats / 100_000_000) * eurJeBtc
+  return `ca. ${eur.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} € am ${heute.toLocaleDateString('de-DE')}`
+}
+
+// Voreinstellung: im Dezember festlich (Steve, 2026-10-17)
+export const vorschlag = (heute = new Date()) =>
+  heute.getMonth() === 11
+    ? {motiv: 'festive' as const, nachricht: 'Frohe Weihnachten!'}
+    : {motiv: 'classic' as const, nachricht: 'Viel Freude mit deinen Sats!'}
