@@ -10,8 +10,6 @@ import type {Component, JSX} from 'solid-js'
 import {createSignal, For, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
-import {allAddons} from '../addons/registry'
-import {enabledAddonIds} from '../addons/enabled'
 import {
   AUTO_LOCK_LABEL,
   AUTO_LOCK_OPTIONS,
@@ -179,12 +177,6 @@ const Einstellungen: Component = () => {
   const [verlaufFrage, setVerlaufFrage] = createSignal(false)
   const offen = () => state() === 'unlocked'
 
-  // eingeschaltete Extras mit eigener Seite — im Original standen sie im Menü
-  const extras = () =>
-    allAddons().filter(
-      a => enabledAddonIds().has(a.manifest.id) && a.manifest.nav
-    )
-
   const entfernen = () => {
     forgetWallet()
     setFragt(false)
@@ -251,27 +243,13 @@ const Einstellungen: Component = () => {
         </Show>
       </Gruppe>
 
+      {/* Extras: eine Zeile zur Seite mit den vier für Menschen; die Entwicklerwerkzeuge liegen
+      dort unter „Für Entwickler“ (Steve, 2026-10-17) */}
       <Gruppe titel="Extras">
-        <For each={extras()}>
-          {addon => (
-            <Zeile
-              label={addon.manifest.nav!.label}
-              href={addon.manifest.nav!.route ?? `/addons/${addon.manifest.id}`}
-            />
-          )}
-        </For>
+        <Zeile label="Extras" wert="Geschenkkarte, Tombola …" href="/extras" />
         <Show when={vaultEnabled()}>
           <Zeile label="Hardware-Tresor" href="/vault" />
         </Show>
-        <Zeile
-          label="Extras"
-          wert={
-            extras().length > 0
-              ? `${extras().length} an`
-              : 'Geschenkkarte, Zeitschloss …'
-          }
-          href="/settings/erweitert?teil=extras"
-        />
       </Gruppe>
 
       <Gruppe titel="Anzeige">

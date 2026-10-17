@@ -2232,3 +2232,90 @@ body.rz-gesperrt {
   width: calc(var(--rz-t) * 0.457);
   height: calc(var(--rz-t) * 0.914);
 }
+
+/* Extras im Röhren-Bild (Steve, 2026-10-17): der gemeinsame Baukasten des Originals (addons/Renderer)
+   bekommt Schrift, Felder, Knöpfe und Abstände wie der Rest — so sieht jede Erweiterung, auch die für
+   Entwickler, nicht mehr fremd aus. Die Kopfzeile kommt von AddonRun; der eigene Titel der Erweiterung
+   (erste Überschrift) fällt darum weg. */
+#addon-run .addon-root {
+  max-width: none;
+  color: #f4ebdf;
+  font-family: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  font-weight: 300;
+}
+#addon-run .addon-root > .addon-heading:first-child,
+#addon-run .addon-root > div > .addon-heading:first-child {
+  display: none;
+}
+#addon-run .addon-root p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #bfae98;
+}
+#addon-run .addon-heading {
+  font-size: 19px;
+  font-weight: 400;
+  color: #ead8bf;
+}
+#addon-run .addon-subheading {
+  margin: 22px 0 8px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a3907c;
+}
+#addon-run .addon-field {
+  display: block;
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: #a3907c;
+}
+#addon-run .addon-field input:not([type='checkbox']),
+#addon-run .addon-field select,
+#addon-run .addon-root textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid #2f2218;
+  border-radius: 14px;
+  background: #17110c;
+  color: #f4ebdf;
+  font:
+    300 16px/1.4 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  outline: none;
+}
+#addon-run .addon-field input:focus,
+#addon-run .addon-field select:focus,
+#addon-run .addon-root textarea:focus {
+  border-color: rgba(255, 154, 42, 0.55);
+}
+#addon-run .addon-root button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #3a2618;
+  border-radius: 14px;
+  background: #120c08;
+  color: #f2a65a;
+  font:
+    300 16px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+#addon-run .addon-root button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#addon-run .addon-root button:active:not(:disabled) {
+  border-color: rgba(255, 154, 42, 0.55);
+  color: #ffd59a;
+}
+#addon-run .addon-row {
+  gap: 8px;
+}

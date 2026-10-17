@@ -8,6 +8,7 @@ import {findAddon} from '../addons/registry'
 import {enabledAddonIds} from '../addons/enabled'
 import {addonSettingsStore} from '../addons/settingsStore'
 import type {Addon} from '../addons/types'
+import {extraName} from '../roehren/Extras'
 
 // runs one bundled or custom addon's own `ui` (see Settings.tsx's Addons
 // column for the enable/disable/edit list) - gated on both "enabled" (a
@@ -18,7 +19,7 @@ const AddonRun: Component = () => {
   const addon = () => findAddon(params.addonId)
 
   return (
-    <div id="addon-run" class="page">
+    <div id="addon-run" class="page rz-einstellungen">
       {/* keyed: switching between two ENABLED addons never flips this
       Show's truthiness (addon() is truthy the whole time, just a
       different addon), and a non-keyed Show only re-invokes its children
@@ -59,6 +60,17 @@ const AddonRun: Component = () => {
             }
           >
             <RequireWallet>
+              {/* Fork: Kopfzeile wie überall — ‹ zurück zu den Extras, deutscher Name (Steve, 2026-10-17) */}
+              <div class="rz-seitenkopf rz-extra-kopf">
+                <A
+                  href="/extras"
+                  class="rz-zurueck"
+                  aria-label="Zurück zu den Extras"
+                >
+                  ‹
+                </A>
+                <h2>{extraName(found.manifest.id) ?? found.manifest.name}</h2>
+              </div>
               <RunAddon addon={found} />
             </RequireWallet>
           </Show>
