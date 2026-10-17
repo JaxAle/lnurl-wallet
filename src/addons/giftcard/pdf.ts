@@ -157,11 +157,11 @@ export const buildGiftCardPdf = async (
     size: 26,
     font: boldFont,
     color: text,
-    maxWidth: contentWidth - 34 * MM // leave room for the QR to its right
+    maxWidth: contentWidth - 46 * MM // leave room for the QR to its right
   })
   cursorY -= 42
 
-  const messageWidth = contentWidth - 34 * MM
+  const messageWidth = contentWidth - 46 * MM
   const messageLines = message ? wrapWords(message, font, 10, messageWidth) : []
   for (const line of messageLines.slice(0, 4)) {
     page.drawText(line, {
@@ -174,13 +174,26 @@ export const buildGiftCardPdf = async (
     cursorY -= 13
   }
 
-  const qrSize = 26 * MM
-  const qrX = pageWidth - margin - qrSize
-  const qrY = margin + 6
+  // Fork: der QR auf einer weißen Platte mit Ruhezone — schwarz auf dunklem Motiv war er unsichtbar
+  // und ließ sich nicht scannen (Gerhard am Pixel, 2026-10-17); dazu größer, er ist das Wichtigste
+  const qrSize = 34 * MM
+  const ruhe = 3 * MM
+  const platte = qrSize + 2 * ruhe
+  const plateX = pageWidth - margin - platte
+  const plateY = margin + 8 // über der Fußzeile
+  page.drawRectangle({
+    x: plateX,
+    y: plateY,
+    width: platte,
+    height: platte,
+    color: rgb(1, 1, 1)
+  })
+  const qrX = plateX + ruhe
+  const qrY = plateY + ruhe
   drawQr(QRCode, rgb, page, toBech32Lnurl(url), qrX, qrY, qrSize)
   page.drawText(texts.scan, {
-    x: qrX,
-    y: qrY + qrSize + 4,
+    x: plateX,
+    y: plateY + platte + 4,
     size: 6.5,
     font,
     color: text
