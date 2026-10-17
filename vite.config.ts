@@ -87,10 +87,10 @@ export default defineConfig({
         background_color: '#0a0c10',
         theme_color: '#0a0c10',
         icons: [
-          {src: 'icon-192.png', sizes: '192x192', type: 'image/png'},
-          {src: 'icon-512.png', sizes: '512x512', type: 'image/png'},
+          {src: 'sats-192.png', sizes: '192x192', type: 'image/png'},
+          {src: 'sats-512.png', sizes: '512x512', type: 'image/png'},
           {
-            src: 'maskable-icon-512.png',
+            src: 'sats-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
