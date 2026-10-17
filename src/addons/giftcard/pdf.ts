@@ -77,6 +77,16 @@ export type GiftCardTexts = {
   footer: string
   amountNote?: string // klein unter dem Betrag, z. B. „ca. 0,07 € am 17.10.2026“
 }
+
+// Fork: eigenes Motiv statt einer der Vorlagen — Farben und eine Zeichnung (Linienzüge im
+// 100×100-Feld, y nach unten), roehren/motive.ts
+export type GiftCardDesign = {
+  bg: [number, number, number]
+  accent: [number, number, number]
+  text: [number, number, number]
+  art: string[]
+  artColor: [number, number, number]
+}
 const ENGLISH: GiftCardTexts = {
   title: 'GIFT CARD',
   amount: sat => `${sat.toLocaleString()} sats`,
@@ -90,14 +100,14 @@ export const buildGiftCardPdf = async (
   amountSat: number,
   template: GiftCardTemplate,
   url: string,
-  texts: GiftCardTexts = ENGLISH
+  texts: GiftCardTexts = ENGLISH,
+  design?: GiftCardDesign
 ): Promise<Uint8Array> => {
-  const [{PDFDocument, StandardFonts, rgb}, QRCode] = await Promise.all([
-    import('pdf-lib'),
-    import('qrcode')
-  ])
+  const [{PDFDocument, StandardFonts, rgb, LineCapStyle}, QRCode] =
+    await Promise.all([import('pdf-lib'), import('qrcode')])
 
-  const colors = GIFT_CARD_TEMPLATES[template] ?? GIFT_CARD_TEMPLATES.classic
+  const colors =
+    design ?? GIFT_CARD_TEMPLATES[template] ?? GIFT_CARD_TEMPLATES.classic
   const bg = rgb(...colors.bg)
   const accent = rgb(...colors.accent)
   const text = rgb(...colors.text)
@@ -200,6 +210,25 @@ export const buildGiftCardPdf = async (
     height: platte,
     color: rgb(1, 1, 1)
   })
+  // Fork: die Zeichnung des Motivs links unten, zwischen Nachricht und Fußzeile
+  if (design && design.art.length > 0) {
+    const unten = plateY
+    const oben = cursorY - 4
+    const groesse = Math.min(34 * MM, oben - unten)
+    if (groesse > 10 * MM) {
+      const massstab = groesse / 100
+      for (const pfad of design.art) {
+        page.drawSvgPath(pfad, {
+          x: contentX,
+          y: unten + groesse,
+          scale: massstab,
+          borderColor: rgb(...design.artColor),
+          borderWidth: 2.4,
+          borderLineCap: LineCapStyle.Round
+        })
+      }
+    }
+  }
   const qrX = plateX + ruhe
   const qrY = plateY + ruhe
   drawQr(QRCode, rgb, page, toBech32Lnurl(url), qrX, qrY, qrSize)

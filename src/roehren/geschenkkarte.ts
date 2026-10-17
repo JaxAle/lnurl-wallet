@@ -30,8 +30,6 @@ export const euroNotiz = (
   return `ca. ${eur.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} € am ${heute.toLocaleDateString('de-DE')}`
 }
 
-// Voreinstellung: im Dezember festlich (Steve, 2026-10-17)
+// Voreinstellung: im Dezember Weihnachten (Steve, 2026-10-17)
 export const vorschlag = (heute = new Date()) =>
-  heute.getMonth() === 11
-    ? {motiv: 'festive' as const, nachricht: 'Frohe Weihnachten!'}
-    : {motiv: 'classic' as const, nachricht: 'Viel Freude mit deinen Sats!'}
+  heute.getMonth() === 11 ? ('weihnachten' as const) : ('klassisch' as const)

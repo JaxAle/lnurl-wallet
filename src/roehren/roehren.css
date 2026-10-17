@@ -2360,3 +2360,11 @@ body.rz-gesperrt {
   font-size: 16px;
   word-break: normal;
 }
+.rz-karte {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 4px 0 6px;
+  border-radius: 6px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
