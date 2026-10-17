@@ -11,6 +11,8 @@ import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
 import Scanner, {canScan} from '../components/Scanner'
+import {notify, NotifyKind} from '../helpers'
+import {qrAusFoto} from './fotoQr'
 import {
   decodeBolt11AmountMsat,
   isBolt11Invoice,
@@ -116,6 +118,29 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
                 Schein oder Rechnung in den Rahmen halten — erkannt wird von
                 selbst.
               </p>
+              {/* Ausweg, wenn das Kamerabild schwarz bleibt (iPhone, 2026-10-17): Foto mit der
+              Kamera des Geräts, die Wallet liest den QR daraus */}
+              <label class="rz-leise rz-block rz-mitte rz-foto">
+                Bild bleibt schwarz? Stattdessen ein Foto machen ›
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  hidden
+                  onChange={async e => {
+                    const datei = e.currentTarget.files?.[0]
+                    e.currentTarget.value = ''
+                    if (!datei) return
+                    const text = await qrAusFoto(datei).catch(() => null)
+                    if (text) uebernimm(text)
+                    else
+                      notify(
+                        'Auf dem Foto ist kein QR-Code zu erkennen — näher heran, gerade und gut beleuchtet.',
+                        NotifyKind.ERROR
+                      )
+                  }}
+                />
+              </label>
             </Show>
           </Match>
 

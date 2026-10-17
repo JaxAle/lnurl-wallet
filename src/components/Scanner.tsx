@@ -49,6 +49,8 @@ const Scanner: Component<ScannerProps> = props => {
   let stream: MediaStream | null = null
   let timer: ReturnType<typeof setInterval> | null = null
   const [error, setError] = createSignal<string | null>(null)
+  // Fork: Safari am iPhone startet das Bild manchmal erst nach einer Berührung (Gerhard, 2026-10-17)
+  const [startKnopf, setStartKnopf] = createSignal(false)
   const hasBarcodeDetector = 'BarcodeDetector' in window
 
   const stop = () => {
@@ -104,7 +106,7 @@ const Scanner: Component<ScannerProps> = props => {
 
   onMount(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Camera access is not available in this browser.')
+      setError('Dieser Browser gibt die Kamera nicht frei.')
       return
     }
     try {
@@ -118,18 +120,39 @@ const Scanner: Component<ScannerProps> = props => {
       // is the far more common real-world case.
       setError(
         err instanceof DOMException && err.name === 'NotFoundError'
-          ? 'No camera was found.'
-          : 'Camera access was denied.'
+          ? 'Keine Kamera gefunden.'
+          : 'Der Zugriff auf die Kamera wurde verweigert.'
       )
       return
     }
     if (!videoRef) return
+    // Fork: iPhone (Safari, auch als App vom Home-Bildschirm) zeigt das Bild sonst schwarz, obwohl die
+    // Kamera läuft — stumm, inline und automatisch ausdrücklich setzen, Abspielen absichern; verweigert
+    // Safari es ohne Berührung, ein Knopf „Kamera starten“ (Gerhard am iPhone, 2026-10-17)
+    videoRef.muted = true
+    videoRef.playsInline = true
+    videoRef.autoplay = true
+    videoRef.setAttribute('playsinline', '')
+    videoRef.setAttribute('webkit-playsinline', '')
     videoRef.srcObject = stream
-    await videoRef.play()
+    try {
+      await videoRef.play()
+    } catch {
+      setStartKnopf(true)
+    }
 
     if (hasBarcodeDetector) scanWithBarcodeDetector()
     else scanWithJsQr()
   })
+
+  const starte = async () => {
+    try {
+      await videoRef?.play()
+      setStartKnopf(false)
+    } catch {
+      // bleibt sichtbar
+    }
+  }
 
   onCleanup(stop)
 
@@ -139,10 +162,23 @@ const Scanner: Component<ScannerProps> = props => {
       fallback={
         // playsinline/muted so iOS Safari renders the stream inline
         // instead of forcing fullscreen playback
-        <video ref={videoRef} class="scanner" playsinline muted />
+        <>
+          <video ref={videoRef} class="scanner" playsinline muted autoplay />
+          <Show when={startKnopf()}>
+            <button
+              type="button"
+              class="rz-knopf an rz-weiter"
+              onClick={() => void starte()}
+            >
+              <span class="lbl">Kamera starten</span>
+            </button>
+          </Show>
+        </>
       }
     >
-      <p class="warning">{error()} Paste the note instead, below.</p>
+      <p class="warning">
+        {error()} Füge den Schein stattdessen ein oder mach ein Foto.
+      </p>
     </Show>
   )
 }
