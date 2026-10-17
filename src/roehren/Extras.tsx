@@ -10,11 +10,17 @@ import {A, useNavigate} from '@solidjs/router'
 import {enabledAddonIds, setAddonEnabled} from '../addons/enabled'
 import './roehren.css'
 
-export const EXTRAS: {id: string; name: string; satz: string}[] = [
+export const EXTRAS: {
+  id: string
+  name: string
+  satz: string
+  seite?: string
+}[] = [
   {
     id: 'giftcard',
     name: 'Geschenkkarte',
-    satz: 'Sats verschenken — als Karte mit QR zum Ausdrucken.'
+    satz: 'Sats verschenken — als Karte mit QR zum Ausdrucken.',
+    seite: '/extras/geschenkkarte' // eigener Bildschirm (Geschenkkarte.tsx)
   },
   {
     id: 'raffle',
@@ -38,9 +44,10 @@ export const extraName = (id: string) => EXTRAS.find(e => e.id === id)?.name
 
 const Extras: Component = () => {
   const navigate = useNavigate()
-  const oeffne = (id: string) => {
-    if (!enabledAddonIds().has(id)) setAddonEnabled(id, true)
-    navigate(`/addons/${id}`)
+  const oeffne = (e: (typeof EXTRAS)[number]) => {
+    if (e.seite) return navigate(e.seite)
+    if (!enabledAddonIds().has(e.id)) setAddonEnabled(e.id, true)
+    navigate(`/addons/${e.id}`)
   }
   return (
     <div class="page rz-einstellungen">
@@ -57,11 +64,7 @@ const Extras: Component = () => {
       <div class="rz-gruppe">
         <For each={EXTRAS}>
           {e => (
-            <button
-              type="button"
-              class="rz-setting"
-              onClick={() => oeffne(e.id)}
-            >
+            <button type="button" class="rz-setting" onClick={() => oeffne(e)}>
               <span>
                 <span class="sl">{e.name}</span>
                 <span class="s">{e.satz}</span>

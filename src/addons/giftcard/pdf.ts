@@ -68,11 +68,28 @@ const CARD_HEIGHT_MM = 90
 const MARGIN_MM = 8
 const ACCENT_BAR_MM = 5
 
+// Fork: Texte auf der Karte austauschbar (deutsche Geschenkkarte, roehren/Geschenkkarte.tsx);
+// ohne Angabe wie im Original
+export type GiftCardTexts = {
+  title: string
+  amount: (sat: number) => string
+  scan: string
+  footer: string
+}
+const ENGLISH: GiftCardTexts = {
+  title: 'GIFT CARD',
+  amount: sat => `${sat.toLocaleString()} sats`,
+  scan: 'Scan to claim',
+  footer:
+    'A self-contained Lightning/LNURLcash bearer note - whoever holds this QR holds the funds.'
+}
+
 export const buildGiftCardPdf = async (
   message: string,
   amountSat: number,
   template: GiftCardTemplate,
-  url: string
+  url: string,
+  texts: GiftCardTexts = ENGLISH
 ): Promise<Uint8Array> => {
   const [{PDFDocument, StandardFonts, rgb}, QRCode] = await Promise.all([
     import('pdf-lib'),
@@ -124,7 +141,7 @@ export const buildGiftCardPdf = async (
   const contentWidth = pageWidth - accentBar - margin - margin
   let cursorY = pageHeight - margin
 
-  page.drawText('GIFT CARD', {
+  page.drawText(texts.title, {
     x: contentX,
     y: cursorY - 10,
     size: 11,
@@ -133,7 +150,7 @@ export const buildGiftCardPdf = async (
   })
   cursorY -= 22
 
-  const amountLabel = `${amountSat.toLocaleString()} sats`
+  const amountLabel = texts.amount(amountSat)
   page.drawText(amountLabel, {
     x: contentX,
     y: cursorY - 20,
@@ -161,7 +178,7 @@ export const buildGiftCardPdf = async (
   const qrX = pageWidth - margin - qrSize
   const qrY = margin + 6
   drawQr(QRCode, rgb, page, toBech32Lnurl(url), qrX, qrY, qrSize)
-  page.drawText('Scan to claim', {
+  page.drawText(texts.scan, {
     x: qrX,
     y: qrY + qrSize + 4,
     size: 6.5,
@@ -169,18 +186,15 @@ export const buildGiftCardPdf = async (
     color: text
   })
 
-  page.drawText(
-    'A self-contained Lightning/LNURLcash bearer note - whoever holds this QR holds the funds.',
-    {
-      x: contentX,
-      y: margin - 2,
-      size: 6,
-      font,
-      color: text,
-      maxWidth: contentWidth,
-      opacity: 0.7
-    }
-  )
+  page.drawText(texts.footer, {
+    x: contentX,
+    y: margin - 2,
+    size: 6,
+    font,
+    color: text,
+    maxWidth: contentWidth,
+    opacity: 0.7
+  })
 
   return doc.save()
 }

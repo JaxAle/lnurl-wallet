@@ -15,13 +15,12 @@ import {useDevice} from '../DeviceContext'
 import {requireDeviceClient} from '../deviceOrchestration'
 import {notify, NotifyKind} from '../helpers'
 import {serverOf, toBech32Lnurl} from '../lnurlcash'
-import {splitBearerIntoAmounts} from '../noteSplitting'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs, unterwegs} from './einloesen'
-import {merkeTeilGebuehr} from './gebuehren'
 import {schickeLink, WARNUNG} from './weitergabe'
-import {beobachte, erreichbar, gebunden, nichtErreichbar} from './klaerung'
+import {gebunden} from './klaerung'
+import {scheinUeber, waehleSchein} from './abspalten'
 import {zurueckholenAuftrag, zurueckzuholen} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
 import Zaehlwerk from './Zaehlwerk'
@@ -66,52 +65,22 @@ const Senden: Component = () => {
       ? `Mehr als dein Guthaben (${guthaben().toLocaleString('de-DE')})`
       : `Kein einzelner Schein hat so viel — höchstens ${groesster().toLocaleString('de-DE')}`
 
-  // genau passender Schein, sonst der kleinste, von dem sich der Betrag abspalten lässt
-  // (Spalten verlangt einen Rest: Betrag < Schein)
-  const waehleSchein = (msat: number): Bearer | null => {
-    const passend = verfuegbar().find(b => b.amount === msat)
-    if (passend) return passend
-    const groessere = verfuegbar()
-      .filter(b => b.amount > msat)
-      .sort((a, b) => a.amount - b.amount)
-    return groessere[0] ?? null
-  }
-
   const weiter = async () => {
     const msat = betrag() * 1000
-    const quelle = waehleSchein(msat)
+    const quelle = waehleSchein(verfuegbar(), msat)
     if (!quelle) return
     setArbeitet(true)
     try {
-      let ziel = quelle
-      if (quelle.amount !== msat) {
-        const host = serverOf(quelle.url)
-        if (!(await erreichbar(host))) {
-          notify(nichtErreichbar(host), NotifyKind.ERROR)
-          return
-        }
-        let ergebnis:
-          Awaited<ReturnType<typeof splitBearerIntoAmounts>> | undefined
-        await beobachte('teilen', [quelle], bearers, async () => {
-          ergebnis = await splitBearerIntoAmounts(
-            quelle,
-            [{amountMsat: msat}],
-            {
-              addBearer,
-              updateBearer,
-              removeBearer,
-              logActivity,
-              deviceClient,
-              requireDeviceClient
-            },
-            {plain: false}
-          )
-        })
-        if (!ergebnis) return
-        ziel = ergebnis.parts[0]
-        merkeTeilGebuehr(serverOf(quelle.url), ergebnis.lastFeeMsat)
-      }
-      setSchein(ziel)
+      const ziel = await scheinUeber(quelle, msat, {
+        bearers,
+        addBearer,
+        updateBearer,
+        removeBearer,
+        logActivity,
+        deviceClient,
+        requireDeviceClient
+      })
+      if (ziel) setSchein(ziel)
     } catch (err) {
       notify(
         `Senden geht gerade nicht: ${(err as Error).message}`,

@@ -2319,3 +2319,44 @@ body.rz-gesperrt {
 #addon-run .addon-row {
   gap: 8px;
 }
+
+/* Geschenkkarte: Motive als Kacheln mit Farbprobe */
+.rz-motive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+}
+.rz-motiv {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #2f2218;
+  border-radius: 14px;
+  background: #0c0806;
+  color: rgba(238, 152, 90, 0.75);
+  font:
+    300 15px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.rz-motiv.an {
+  border-color: rgba(255, 154, 42, 0.7);
+  color: #ffd59a;
+  box-shadow: 0 0 10px rgba(255, 120, 20, 0.25);
+}
+.rz-motiv-farbe {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 5px;
+  border: 2px solid;
+}
+.rz-feld-text {
+  font-family: 'Jost', 'Futura', system-ui, sans-serif;
+  font-size: 16px;
+  word-break: normal;
+}
