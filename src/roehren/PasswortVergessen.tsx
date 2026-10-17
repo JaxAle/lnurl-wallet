@@ -10,6 +10,7 @@ import {useWallet} from '../WalletContext'
 import {passwortVergessen} from './passwort'
 import CodeFestlegen from './CodeFestlegen'
 import {merkeLaenge, vergissLaenge} from './roehrencode'
+import {woerterProblem} from './woerter'
 import './roehren.css'
 
 const PasswortVergessen: Component = () => {
@@ -20,10 +21,7 @@ const PasswortVergessen: Component = () => {
   const [codeSchritt, setCodeSchritt] = createSignal(false)
   const [fehler, setFehler] = createSignal<string | null>(null)
 
-  const problem = () =>
-    woerter().trim().split(/\s+/).length < 12
-      ? 'Bitte alle zwölf Wörter eingeben.'
-      : null
+  const problem = () => woerterProblem(woerter())
 
   const setze = async (code: string, ausManager: boolean) => {
     try {

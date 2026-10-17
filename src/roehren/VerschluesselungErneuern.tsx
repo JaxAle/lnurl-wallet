@@ -7,9 +7,9 @@ import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
 import {notify} from '../helpers'
-import {isValidSeedPhrase} from '../keys'
 import {MIN_PASSWORD_LENGTH} from '../pages/Setup'
 import {useWallet} from '../WalletContext'
+import {satzAus, woerterProblem} from './woerter'
 import './roehren.css'
 
 const VerschluesselungErneuern: Component = () => {
@@ -24,8 +24,8 @@ const VerschluesselungErneuern: Component = () => {
 
   const problem = () => {
     if (!woerter().trim()) return null
-    if (!isValidSeedPhrase(woerter()))
-      return 'Das sind keine gültigen zwölf Wörter.'
+    const w = woerterProblem(woerter())
+    if (w) return w
     if (mitPasswort && pw().length < MIN_PASSWORD_LENGTH)
       return `Das Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`
     if (mitPasswort && pw() !== pw2())
@@ -39,7 +39,7 @@ const VerschluesselungErneuern: Component = () => {
     setFehler(null)
     try {
       await upgradeEncryption(
-        woerter().trim().toLowerCase(),
+        satzAus(woerter()),
         mitPasswort ? pw() : undefined
       )
       setWoerter('')

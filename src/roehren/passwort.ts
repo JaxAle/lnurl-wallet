@@ -17,7 +17,6 @@ import {
   deriveStorageRootKey,
   deriveWalletLinkingKey,
   encryptRecord,
-  isValidSeedPhrase,
   decryptSavedCashRootKeyHex,
   decryptSavedLinkingKey,
   decryptSavedStorageRootKey,
@@ -33,6 +32,7 @@ import {
   savedStorageRootKeyIsEncrypted
 } from '../keys'
 import {noteK1} from '../lnurlcash'
+import {satzAus, woerterProblem} from './woerter'
 
 const EINTRAEGE = [
   'lnurlwallet_storage_root_key',
@@ -200,9 +200,9 @@ export const passwortVergessen = async (
   woerter: string,
   neu: string
 ): Promise<{scheine: number; doppelt: number}> => {
-  const seed = woerter.trim().toLowerCase().split(/\s+/).join(' ')
-  if (!isValidSeedPhrase(seed))
-    throw new Error('Das sind keine gültigen zwölf Wörter.')
+  const seed = satzAus(woerter)
+  const problem = woerterProblem(woerter)
+  if (problem) throw new Error(problem)
   const speicher = deriveStorageRootKey(seed)
   const verknuepfung = deriveWalletLinkingKey(seed)
   const bargeld = cashRootToHex(deriveLud25CashRootNode(seed))

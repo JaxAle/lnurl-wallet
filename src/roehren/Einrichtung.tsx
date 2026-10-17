@@ -10,11 +10,12 @@ import {createSignal, For, Match, Show, Switch} from 'solid-js'
 import {A, useNavigate, useSearchParams} from '@solidjs/router'
 import {wordlist} from '@scure/bip39/wordlists/english.js'
 
-import {generateSeedPhrase, isValidSeedPhrase} from '../keys'
+import {generateSeedPhrase} from '../keys'
 import {useWallet} from '../WalletContext'
 import Wiederfinden from './Wiederfinden'
 import CodeFestlegen from './CodeFestlegen'
 import {merkeLaenge, vergissLaenge} from './roehrencode'
+import {satzAus, woerterAus, woerterProblem} from './woerter'
 import './roehren.css'
 
 type Schritt = 'woerter' | 'pruefung' | 'eingabe' | 'passwort' | 'suchen'
@@ -75,9 +76,7 @@ const Einrichtung: Component = () => {
     setArbeitet(true)
     setFehler(null)
     try {
-      const s = wiederherstellen()
-        ? eingabe().trim().toLowerCase().split(/\s+/).join(' ')
-        : seed()
+      const s = wiederherstellen() ? satzAus(eingabe()) : seed()
       await setup(s, code, !wiederherstellen())
       if (code && !ausManager) merkeLaenge(code.length)
       else vergissLaenge()
@@ -258,18 +257,16 @@ const Einrichtung: Component = () => {
             />
             <Show
               when={
-                eingabe().trim().split(/\s+/).length >= 12 &&
-                !isValidSeedPhrase(eingabe().trim().toLowerCase())
+                woerterAus(eingabe()).length >= 12 &&
+                !!woerterProblem(eingabe())
               }
             >
-              <p class="rz-hinweis">
-                Das sind keine gültigen zwölf Wörter — ein Tippfehler?
-              </p>
+              <p class="rz-hinweis">{woerterProblem(eingabe())}</p>
             </Show>
             <button
               type="button"
               class="rz-knopf an rz-weiter"
-              disabled={!isValidSeedPhrase(eingabe().trim().toLowerCase())}
+              disabled={!!woerterProblem(eingabe())}
               onClick={() => setSchritt('passwort')}
             >
               <span class="lbl">Weiter</span>
