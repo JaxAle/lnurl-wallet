@@ -74,6 +74,11 @@ const Roehrenfeld: Component<{
   const uhren: ReturnType<typeof setTimeout>[] = []
   const spaeter = (f: () => void, ms: number) => uhren.push(setTimeout(f, ms))
   let verborgen: HTMLInputElement | undefined
+  // Schlüssel angetippt: die Zeile für den Passwortmanager ist sichtbar — mit Feld (Autofill, langes
+  // Drücken › Einfügen) und Knopf „Einfügen“; unsichtbar ließ sich am Handy nichts einfügen
+  // (Gerhard am Pixel, 2026-10-18)
+  const [manager, setManager] = createSignal(false)
+  const [managerHinweis, setManagerHinweis] = createSignal<string | null>(null)
 
   const sperre = () => Math.max(0, (props.sperreBis ?? 0) - jetzt())
   const laenge = () => props.laenge ?? null
@@ -153,7 +158,32 @@ const Roehrenfeld: Component<{
     if (verborgen) verborgen.value = ''
     vorher = 0
     verborgen?.blur()
+    setManager(false)
     void reiche(v, true)
+  }
+  const oeffneManager = () => {
+    setManagerHinweis(null)
+    setManager(true)
+    // im selben Tipp fokussieren, sonst öffnet iOS die Tastatur nicht
+    verborgen?.focus()
+  }
+  const einfuegen = async () => {
+    try {
+      const t = (await navigator.clipboard.readText()).trim()
+      if (!t) {
+        setManagerHinweis(
+          'Die Zwischenablage ist leer — erst im Passwortmanager kopieren.'
+        )
+        return
+      }
+      if (verborgen) verborgen.value = t
+      verborgenFertig()
+    } catch {
+      setManagerHinweis(
+        'Einfügen ging nicht — lang ins Feld drücken und „Einfügen“ wählen.'
+      )
+      verborgen?.focus()
+    }
   }
 
   const zeichenAn = (i: number): string => {
@@ -269,7 +299,7 @@ const Roehrenfeld: Component<{
                 aria-label="Mit dem Passwortmanager"
                 title="Mit dem Passwortmanager"
                 disabled={phase() === 'prueft' || phase() === 'offen'}
-                onClick={() => verborgen?.focus()}
+                onClick={oeffneManager}
               >
                 {phase() === 'prueft' ? '…' : <Schluessel />}
               </button>
@@ -286,11 +316,14 @@ const Roehrenfeld: Component<{
           </Show>
         </Show>
       </div>
-      {props.unten}
-
-      {/* unsichtbar, aber fokussierbar: hier setzen Schlüsselbund und Bitwarden ein */}
+      {/* Feld für den Passwortmanager: unsichtbar, bis der Schlüssel es öffnet — dann eine Zeile mit
+      Feld, „Einfügen“ und ✕; hier setzen Schlüsselbund und Bitwarden ein */}
+      <Show when={manager() && managerHinweis()}>
+        <p class="rz-schloss-warte rz-schloss-zeile">{managerHinweis()}</p>
+      </Show>
       <form
         class="rz-verborgen"
+        classList={{offen: manager()}}
         onSubmit={e => {
           e.preventDefault()
           verborgenFertig()
@@ -313,9 +346,31 @@ const Roehrenfeld: Component<{
           autocapitalize="off"
           spellcheck={false}
           aria-label="Code aus dem Passwortmanager"
+          placeholder="Code aus dem Passwortmanager"
           onInput={verborgenEingabe}
         />
+        <Show when={manager()}>
+          <button
+            type="button"
+            class="rz-schloss-taste an"
+            onClick={() => void einfuegen()}
+          >
+            Einfügen
+          </button>
+          <button
+            type="button"
+            class="rz-schloss-taste"
+            aria-label="Schließen"
+            onClick={() => {
+              setManager(false)
+              verborgen?.blur()
+            }}
+          >
+            ✕
+          </button>
+        </Show>
       </form>
+      {props.unten}
     </div>
   )
 }

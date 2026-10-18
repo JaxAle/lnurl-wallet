@@ -2372,3 +2372,30 @@ body.rz-gesperrt {
   cursor: pointer;
   margin-top: 4px;
 }
+/* geöffnet: eine Zeile unter dem Feld — Passwortfeld, Einfügen, ✕ */
+.rz-verborgen.offen {
+  position: static;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin: 0 auto;
+  padding: 4px 14px 10px;
+  overflow: visible;
+  opacity: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 6px;
+}
+.rz-verborgen.offen input[name='username'] {
+  display: none;
+}
+.rz-verborgen.offen input[type='password'] {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #3a2618;
+  border-radius: 12px;
+  background: #17110c;
+  color: #f4ebdf;
+}
