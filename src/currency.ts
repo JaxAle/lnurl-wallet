@@ -53,6 +53,18 @@ type RatesResponse = {
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
+// Fork: zweite Quelle, wenn price.lnurlcash.com nicht antwortet — im Firmen-WLAN fehlte der Euro-Kurs
+// auf allen drei Wallets am Pixel (Gerhard, 2026-10-19). mempool.space liefert {USD, EUR, GBP, …}
+const ERSATZ_URL = 'https://mempool.space/api/v1/prices'
+const ersatzKurse = async (): Promise<Rates> => {
+  const res = await fetch(ERSATZ_URL)
+  if (!res.ok) throw new Error(`mempool.space returned ${res.status}`)
+  const d = (await res.json()) as Record<string, number>
+  if (!d.USD || !d.EUR || !d.GBP)
+    throw new Error('mempool.space response is missing a rate')
+  return {usd: d.USD, eur: d.EUR, gbp: d.GBP}
+}
+
 const fetchRates = async (): Promise<void> => {
   try {
     const res = await fetch(RATES_URL)
@@ -67,7 +79,12 @@ const fetchRates = async (): Promise<void> => {
     setRates({usd, eur, gbp})
     setRatesError(null)
   } catch (err) {
-    setRatesError((err as Error).message)
+    try {
+      setRates(await ersatzKurse())
+      setRatesError(null)
+    } catch {
+      setRatesError((err as Error).message)
+    }
   }
 }
 
