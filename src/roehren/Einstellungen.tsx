@@ -25,6 +25,7 @@ import {useWallet} from '../WalletContext'
 import {isCk1, noteK1} from '../lnurlcash'
 import {Gruppe, Zeile} from './Bedienfeld'
 import Rueckfrage from './Rueckfrage'
+import {vergissWoerter} from './woerterTresor'
 import './roehren.css'
 
 // Bauzeit in Ortszeit, z. B. „11.10.2026, 21:40“ — daran erkennt man am Gerät, ob „Neu laden“ gegriffen hat
@@ -80,6 +81,7 @@ const Einstellungen: Component = () => {
 
   const entfernen = () => {
     forgetWallet()
+    vergissWoerter()
     setFragt(false)
     navigate('/')
   }
@@ -91,11 +93,17 @@ const Einstellungen: Component = () => {
       <Gruppe titel="Sicherheit">
         <Show when={offen()}>
           <Zeile
-            label={encrypted() ? 'Passwort ändern' : 'Passwort setzen'}
+            label={encrypted() ? 'Code ändern' : 'Code setzen'}
             unter={
               encrypted() ? undefined : 'Schützt die Wallet auf diesem Gerät'
             }
             href="/settings/passwort"
+          />
+          {/* die Wörter hinter dem Code (Gerhard/Steve, 2026-10-19) */}
+          <Zeile
+            label="Zwölf Wörter"
+            unter="Anzeigen oder prüfen — mit deinem Code"
+            href="/settings/woerter"
           />
         </Show>
         <Zeile

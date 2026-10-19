@@ -16,6 +16,7 @@ import Wiederfinden from './Wiederfinden'
 import CodeFestlegen from './CodeFestlegen'
 import {merkeLaenge, vergissLaenge} from './roehrencode'
 import {satzAus, woerterAus, woerterProblem} from './woerter'
+import {speichereWoerter} from './woerterTresor'
 import './roehren.css'
 
 type Schritt = 'woerter' | 'pruefung' | 'eingabe' | 'passwort' | 'suchen'
@@ -78,6 +79,8 @@ const Einrichtung: Component = () => {
     try {
       const s = wiederherstellen() ? satzAus(eingabe()) : seed()
       await setup(s, code, !wiederherstellen())
+      // die Wörter hinter dem Code ablegen, damit sie später abrufbar sind (woerterTresor.ts)
+      await speichereWoerter(s, code)
       if (code && !ausManager) merkeLaenge(code.length)
       else vergissLaenge()
       if (wiederherstellen()) setSchritt('suchen')

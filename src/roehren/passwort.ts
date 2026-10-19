@@ -294,3 +294,20 @@ export const passwortVergessen = async (
   }
   return {scheine: unterS.length + unterL.length - doppelt, doppelt}
 }
+
+// Gehören diese Wörter zu dieser Wallet? Leitet die Schlüssel aus den Wörtern ab und vergleicht sie mit
+// den gespeicherten (mit dem Code geöffnet) — für „Wörter hinterlegen“ (woerterTresor.ts)
+export const woerterPassen = async (
+  woerter: string,
+  code: string | undefined
+): Promise<boolean> => {
+  const seed = satzAus(woerter)
+  if (woerterProblem(seed)) return false
+  const o = await oeffne(code)
+  if (o.speicher) return gleich(o.speicher, deriveStorageRootKey(seed))
+  if (o.verknuepfung)
+    return gleich(o.verknuepfung, deriveWalletLinkingKey(seed))
+  if (o.bargeld)
+    return o.bargeld === cashRootToHex(deriveLud25CashRootNode(seed))
+  return false
+}

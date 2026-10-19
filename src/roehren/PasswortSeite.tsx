@@ -13,6 +13,7 @@ import CodeFestlegen from './CodeFestlegen'
 import {pruefePasswort, setzePasswort} from './passwort'
 import Roehrenfeld from './Roehrenfeld'
 import {codeLaenge, kandidaten, merkeLaenge, vergissLaenge} from './roehrencode'
+import {woerterUmschluesseln} from './woerterTresor'
 import './roehren.css'
 
 const PasswortSeite: Component = () => {
@@ -37,6 +38,8 @@ const PasswortSeite: Component = () => {
   const setze = async (code: string, ausManager: boolean) => {
     try {
       await setzePasswort(hatte ? alt()! : undefined, code)
+      // abgelegte Wörter mit dem neuen Code neu verschlüsseln
+      await woerterUmschluesseln(hatte ? alt()! : undefined, code)
       if (ausManager) vergissLaenge()
       else merkeLaenge(code.length)
       setFertig(true)

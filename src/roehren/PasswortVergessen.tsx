@@ -11,6 +11,8 @@ import {passwortVergessen} from './passwort'
 import CodeFestlegen from './CodeFestlegen'
 import {merkeLaenge, vergissLaenge} from './roehrencode'
 import {woerterProblem} from './woerter'
+import {speichereWoerter} from './woerterTresor'
+import {satzAus} from './woerter'
 import './roehren.css'
 
 const PasswortVergessen: Component = () => {
@@ -26,6 +28,8 @@ const PasswortVergessen: Component = () => {
   const setze = async (code: string, ausManager: boolean) => {
     try {
       const r = await passwortVergessen(woerter(), code)
+      // die eben bestätigten Wörter gleich hinter dem neuen Code ablegen
+      await speichereWoerter(satzAus(woerter()), code)
       if (ausManager) vergissLaenge()
       else merkeLaenge(code.length)
       // mit dem neuen Code öffnen — so lädt die Wallet alles unter dem einen Schlüssel neu

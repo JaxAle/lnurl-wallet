@@ -40,6 +40,7 @@ import Extras from './roehren/Extras'
 import {meldeNeueFassung} from './roehren/NeueFassung'
 import Geschenkkarte from './roehren/Geschenkkarte'
 import Entwickler from './roehren/Entwickler'
+import WoerterSeite from './roehren/WoerterSeite'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
 import AddonRun from './pages/AddonRun'
 
@@ -154,6 +155,7 @@ const cleanup = render(
       <Route path="/extras" component={Extras} />
       <Route path="/extras/geschenkkarte" component={Geschenkkarte} />
       <Route path="/extras/entwickler" component={Entwickler} />
+      <Route path="/settings/woerter" component={WoerterSeite} />
       <Route
         path="/settings/sicherung-einspielen"
         component={SicherungEinspielen}
