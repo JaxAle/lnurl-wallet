@@ -1250,115 +1250,7 @@ select {
 .rz-note-knopf.gedaempft {
   opacity: 0.45;
 }
-.rz-note {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  aspect-ratio: 1.95 / 1;
-  width: 100%;
-  padding: 14px 16px;
-  overflow: hidden;
-  border-radius: 14px;
-  text-align: left;
-  color: #2c2a24;
-  background:
-    repeating-radial-gradient(
-      circle at 18% 120%,
-      transparent 0 7px,
-      rgba(44, 42, 36, 0.13) 7px 8px
-    ),
-    repeating-radial-gradient(
-      circle at 92% -30%,
-      transparent 0 9px,
-      rgba(44, 42, 36, 0.13) 9px 10px
-    ),
-    #f2e9d8;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
-}
-.rz-note::after {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(44, 42, 36, 0.13);
-  border-radius: 10px;
-  pointer-events: none;
-}
-.rz-note .n-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-}
-.rz-note .n-mint {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.rz-note .n-serial,
-.rz-note .n-micro,
-.rz-note .n-stamp {
-  font-family:
-    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-}
-.rz-note .n-serial {
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  opacity: 0.75;
-}
-.rz-note .n-amt {
-  align-self: center;
-  font-family: 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
-  font-weight: 700;
-  font-size: 40px;
-  line-height: 1;
-  font-variant-numeric: lining-nums;
-}
-.rz-note .n-amt small {
-  margin-left: 6px;
-  font-family: 'Jost', system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-}
-.rz-note .n-micro {
-  overflow: hidden;
-  white-space: nowrap;
-  font-size: 7.5px;
-  letter-spacing: 0.14em;
-  opacity: 0.55;
-}
-.rz-note .n-stamp {
-  position: absolute;
-  right: 16px;
-  bottom: 26px;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  font-size: 8.5px;
-  line-height: 1.15;
-  text-align: center;
-  opacity: 0.55;
-}
-.rz-note.sel {
-  outline: 3px solid #f0832a;
-  outline-offset: 2px;
-}
-.rz-note.hue-a .n-mint,
-.rz-note.hue-a .n-amt {
-  color: #8a4a0f;
-}
-.rz-note.hue-b .n-mint,
-.rz-note.hue-b .n-amt {
-  color: #1d5d5a;
-}
-.rz-note.hue-c .n-mint,
-.rz-note.hue-c .n-amt {
-  color: #4a3f73;
-}
+/* Scheine: siehe „Banknoten“ am Ende der Datei */
 .rz-etikett {
   padding-left: 4px;
   font-size: 13px;
@@ -1460,37 +1352,6 @@ select {
 .rz-scheine .rz-notes {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-}
-.rz-note.klein {
-  padding: 8px 10px;
-  border-radius: 10px;
-  grid-template-rows: auto 1fr;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
-}
-.rz-note.klein::after {
-  inset: 4px;
-  border-radius: 7px;
-}
-.rz-note.klein .n-serial,
-.rz-note.klein .n-micro,
-.rz-note.klein .n-stamp {
-  display: none;
-}
-.rz-note.klein .n-mint {
-  font-size: 9px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rz-note.klein .n-amt {
-  font-size: 26px;
-}
-.rz-note.klein .n-amt small {
-  margin-left: 4px;
-  font-size: 10px;
-}
-.rz-note.klein.sel {
-  outline-width: 2px;
 }
 .rz-gruppe-zu {
   display: block;
@@ -1677,20 +1538,6 @@ select {
   align-items: center;
   gap: 6px;
   color: #ffb35c;
-}
-
-/* sechs Druckfarben nach Listenreihenfolge (Scheine.tsx farbe) */
-.rz-note.hue-d .n-mint,
-.rz-note.hue-d .n-amt {
-  color: #7a2230;
-}
-.rz-note.hue-e .n-mint,
-.rz-note.hue-e .n-amt {
-  color: #2f5a1f;
-}
-.rz-note.hue-f .n-mint,
-.rz-note.hue-f .n-amt {
-  color: #1f3f6e;
 }
 
 /* ungeprüft: noch nicht ganz gedruckt (Steve) */
@@ -2459,4 +2306,211 @@ body.rz-gesperrt {
 .rz-neue-fassung-tun {
   margin-left: auto;
   color: #ffb35c;
+}
+
+/* ---------- Banknoten (Steve, 2026-10-19) ----------
+   Vorher Kreditkarten (runde Ecken, blasser Ton, Stempel „LUD 25“), zwei Stellen kaum zu unterscheiden.
+   Jetzt: links ein helles Wasserzeichenfeld mit der Rosette der Stelle, rechts das bedruckte Feld in der
+   kräftigen Farbe der Stelle mit Guilloche; Betrag groß oben rechts und klein unten links; Seriennummer
+   rot auf dem Papier; fast scharfe Ecken. */
+.rz-note {
+  --druck: #b8661a;
+  --druck-hell: #e8a25a;
+  --papier: #f1e8d6;
+  position: relative;
+  display: grid;
+  /* minmax(0, …): die Mikroschrift (nowrap) darf das Feld nicht breiter als den Schein machen */
+  grid-template-columns: 31% minmax(0, 1fr);
+  aspect-ratio: 1.95 / 1;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+  text-align: left;
+  background: var(--papier);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.32);
+}
+.rz-note.hue-a {
+  --druck: #b8661a;
+  --druck-hell: #f0b26a;
+}
+.rz-note.hue-b {
+  --druck: #1d6b6a;
+  --druck-hell: #6cc0b8;
+}
+.rz-note.hue-c {
+  --druck: #55468c;
+  --druck-hell: #a99ae0;
+}
+.rz-note.hue-d {
+  --druck: #9a3340;
+  --druck-hell: #e88a94;
+}
+.rz-note.hue-e {
+  --druck: #3c7535;
+  --druck-hell: #9fd08f;
+}
+.rz-note.hue-f {
+  --druck: #2b5694;
+  --druck-hell: #8fb2e6;
+}
+/* Wasserzeichenfeld: Papier, blasse Rosette, rote Seriennummer */
+.rz-note .n-wasser {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  color: var(--druck);
+}
+.rz-note .n-wasser .n-rosette {
+  width: 82%;
+  opacity: 0.28;
+}
+.rz-note .n-serial {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #c2342a;
+}
+/* bedrucktes Feld */
+.rz-note .n-druck {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  padding: 10px 12px 8px;
+  color: #fbf3e3;
+  background:
+    repeating-radial-gradient(
+      circle at 0% 100%,
+      transparent 0 6px,
+      color-mix(in srgb, var(--druck-hell) 35%, transparent) 6px 7px
+    ),
+    repeating-radial-gradient(
+      circle at 100% 0%,
+      transparent 0 8px,
+      color-mix(in srgb, var(--druck-hell) 22%, transparent) 8px 9px
+    ),
+    var(--druck);
+}
+.rz-note .n-druck::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid color-mix(in srgb, var(--druck-hell) 55%, transparent);
+  pointer-events: none;
+}
+.rz-note .n-kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+.rz-note .n-kopf > .n-amt {
+  flex: none;
+}
+.rz-note .n-mint {
+  flex: 1;
+  min-width: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rz-note .n-amt {
+  font-family: 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 0.95;
+  font-variant-numeric: lining-nums;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+.rz-note .n-mitte {
+  display: grid;
+  align-items: center;
+}
+.rz-note .n-mitte .n-rosette {
+  width: 34%;
+  opacity: 0.9;
+  color: var(--druck-hell);
+}
+.rz-note .n-fuss {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.rz-note .n-amt-klein {
+  font-family: 'Bodoni Moda', 'Didot', Georgia, serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.rz-note .n-sats {
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+}
+.rz-note .n-micro {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.14em;
+  opacity: 0.6;
+}
+.rz-note.sel {
+  outline: 3px solid #f0832a;
+  outline-offset: 2px;
+}
+/* klein: zwei Spalten in „Scheine“ */
+.rz-note.klein {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 5px 12px rgba(0, 0, 0, 0.3);
+}
+.rz-note.klein .n-druck {
+  padding: 6px 7px 5px;
+}
+.rz-note.klein .n-druck::before {
+  inset: 3px;
+}
+.rz-note.klein .n-mint {
+  font-size: 7.5px;
+}
+.rz-note.klein .n-amt {
+  font-size: 22px;
+}
+/* lange Beträge (ab 5 Zeichen, z. B. „2.100“) kleiner — der Betrag geht vor dem Namen */
+.rz-note.klein .n-amt.lang {
+  font-size: 17px;
+}
+.rz-note .n-amt.lang {
+  font-size: 32px;
+}
+.rz-note.klein .n-amt-klein {
+  font-size: 10px;
+}
+.rz-note.klein .n-sats {
+  font-size: 7.5px;
+}
+.rz-note.klein .n-micro,
+.rz-note.klein .n-mitte .n-rosette {
+  display: none;
+}
+.rz-note.klein .n-serial {
+  left: 5px;
+  bottom: 3px;
+  font-size: 7px;
+}
+.rz-note.klein.sel {
+  outline-width: 2px;
 }

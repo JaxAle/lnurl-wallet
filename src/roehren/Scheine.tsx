@@ -67,14 +67,70 @@ const zahl = (n: number) => n.toLocaleString('de-DE')
 // Druckfarbe nach der Reihenfolge in der Liste der Ausgabestellen — sechs gut unterscheidbare,
 // keine zwei Stellen gleich bis zur sechsten (Gerhard, 2026-10-12: aus dem Namen gerechnet kamen bei
 // nur drei Farben zwei Stellen gleich heraus). Unbekannte Stellen: aus dem Namen.
+// Farbe der Stelle (Steve, 2026-10-19): fest nach dem Namen der Stelle, damit sie nach dem
+// Wiederherstellen gleich aussieht; nur wenn zwei eingetragene Stellen dieselbe träfen, bekommt die
+// spätere die nächste freie — zwei Stellen sollen sich auf einen Blick unterscheiden
 const FARBEN = 'abcdef'
-const farbe = (host: string) => {
-  const i = trustedMints().findIndex(t => serverOf(t.server) === host)
-  return FARBEN[
-    (i >= 0 ? i : [...host].reduce((a, c) => a + c.charCodeAt(0), 0)) %
-      FARBEN.length
-  ]
+const grundFarbe = (host: string) =>
+  [...host].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) %
+  FARBEN.length
+export const farbe = (host: string) => {
+  const vergeben = new Set<number>()
+  for (const t of trustedMints()) {
+    const h = serverOf(t.server)
+    let f = grundFarbe(h)
+    for (let k = 0; k < FARBEN.length && vergeben.has(f); k++)
+      f = (f + 1) % FARBEN.length
+    if (h === host) return FARBEN[f]
+    vergeben.add(f)
+  }
+  return FARBEN[grundFarbe(host)]
 }
+
+// Kürzel der Stelle für die Rosette: ohne lnurl./mint./www.; führende Ziffern plus ein Buchstabe
+// („21L“ für 21linz, „21M“ für 21mint), sonst die ersten zwei Buchstaben
+export const kuerzel = (host: string): string => {
+  const teil =
+    host
+      .split('.')
+      .find(x => !['lnurl', 'mint', 'www', 'ln', 'pay'].includes(x)) ?? host
+  const ziffern = teil.match(/^\d+/)?.[0] ?? ''
+  const rest = teil.slice(ziffern.length).replace(/[^a-z]/gi, '')
+  return (ziffern ? ziffern.slice(0, 3) + rest.slice(0, 1) : rest.slice(0, 2))
+    .toUpperCase()
+    .slice(0, 4)
+}
+
+// Rosette wie auf Banknoten: gedrehte Ellipsen aus feinen Linien, in der Mitte das Kürzel
+const Rosette: Component<{text: string}> = props => (
+  <svg class="n-rosette" viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="none" stroke="currentColor" stroke-width="0.9">
+      {Array.from({length: 12}, (_, i) => (
+        <ellipse
+          cx="50"
+          cy="50"
+          rx="46"
+          ry="17"
+          transform={`rotate(${i * 15} 50 50)`}
+        />
+      ))}
+      <circle cx="50" cy="50" r="21" stroke-width="1.6" />
+    </g>
+    <circle cx="50" cy="50" r="19.5" fill="var(--papier)" />
+    <text
+      x="50"
+      y="50"
+      text-anchor="middle"
+      dominant-baseline="central"
+      font-family="'Bodoni Moda', Georgia, serif"
+      font-weight="700"
+      font-size={props.text.length > 2 ? '15' : '20'}
+      fill="currentColor"
+    >
+      {props.text}
+    </text>
+  </svg>
+)
 
 const Symbol: Component<{d: string}> = props => (
   <svg
@@ -146,25 +202,36 @@ export const Schein: Component<{
         ungeprueft: offenZurPruefung(props.schein)
       }}
     >
-      <div class="n-top">
-        <span class="n-mint">{host()}</span>
+      {/* Wasserzeichenfeld: Papier, blasse Rosette, rote Seriennummer */}
+      <div class="n-wasser">
+        <Rosette text={kuerzel(host())} />
         <span class="n-serial">
-          Nr. {props.schein.id.slice(0, 6).toUpperCase()}
+          {props.schein.id.slice(0, 6).toUpperCase()}
         </span>
       </div>
-      <div class="n-amt">
-        {zahl(sats(props.schein))}
-        <small>SATS</small>
+      {/* bedrucktes Feld: Herausgeber, Betrag groß oben rechts und klein unten links */}
+      <div class="n-druck">
+        <div class="n-kopf">
+          <span class="n-mint">{host()}</span>
+          <span
+            class="n-amt"
+            classList={{lang: zahl(sats(props.schein)).length > 4}}
+          >
+            {zahl(sats(props.schein))}
+          </span>
+        </div>
+        <div class="n-mitte">
+          <Rosette text={kuerzel(host())} />
+        </div>
+        <div class="n-fuss">
+          <span class="n-amt-klein">{zahl(sats(props.schein))}</span>
+          <span class="n-sats">SATS</span>
+          <span class="n-micro">
+            INHABERSCHEIN · {host().toUpperCase()} · INHABERSCHEIN ·{' '}
+            {host().toUpperCase()}
+          </span>
+        </div>
       </div>
-      <div class="n-micro">
-        INHABERSCHEIN · LUD·25 · {host().toUpperCase()} · INHABERSCHEIN · LUD·25
-        · {host().toUpperCase()}
-      </div>
-      <span class="n-stamp">
-        LUD
-        <br />
-        25
-      </span>
     </div>
   )
 }
