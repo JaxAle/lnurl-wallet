@@ -2425,3 +2425,9 @@ body.rz-gesperrt {
   background: none;
   cursor: pointer;
 }
+.rz-kursstand {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(238, 152, 90, 0.55);
+}

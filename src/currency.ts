@@ -40,11 +40,58 @@ export {currency}
 
 type Rates = {usd: number; eur: number; gbp: number}
 
-const [rates, setRates] = createSignal<Rates | null>(null)
+// Fork: zuletzt geholten Kurs merken (mit Uhrzeit) — ohne Verbindung steht der alte Kurs mit dem
+// Hinweis „Kurs von 18:56“ da statt nichts (Gerhard, 2026-10-19)
+const KURS_KEY = 'fork_kurs'
+type Gemerkt = Rates & {zeit: number}
+const liesGemerkt = (): Gemerkt | null => {
+  try {
+    const g = JSON.parse(localStorage.getItem(KURS_KEY) ?? 'null')
+    return g && g.eur && g.usd && g.gbp && g.zeit ? (g as Gemerkt) : null
+  } catch {
+    return null
+  }
+}
+const gemerkt = liesGemerkt()
+
+const [rates, setRatesSignal] = createSignal<Rates | null>(gemerkt)
 // surfaced by CurrencyMenu so a failed fetch (offline, service down) is
 // visible instead of a silently-missing fiat estimate
 const [ratesError, setRatesError] = createSignal<string | null>(null)
-export {rates, ratesError}
+// Fork: Zeit des angezeigten Kurses; frisch = in dieser Sitzung zuletzt erfolgreich geholt
+const [kursZeit, setKursZeit] = createSignal<number | null>(
+  gemerkt?.zeit ?? null
+)
+const [kursFrisch, setKursFrisch] = createSignal(false)
+export {rates, ratesError, kursZeit, kursFrisch}
+
+const setRates = (r: Rates) => {
+  const zeit = Date.now()
+  setRatesSignal(r)
+  setKursZeit(zeit)
+  setKursFrisch(true)
+  try {
+    localStorage.setItem(KURS_KEY, JSON.stringify({...r, zeit}))
+  } catch {
+    // ohne Speicher eben nur für diese Sitzung
+  }
+}
+
+// „Kurs von 18:56“, an einem anderen Tag „Kurs vom 17.10., 18:56“; null, solange der Kurs frisch ist
+// oder noch keine Antwort ausblieb
+export const kursHinweis = (jetzt = new Date()): string | null => {
+  const z = kursZeit()
+  // nur, wenn das Holen gescheitert ist — nicht schon beim Start, bevor die erste Antwort da ist
+  if (kursFrisch() || z === null || ratesError() === null) return null
+  const d = new Date(z)
+  const uhr = d.toLocaleTimeString('de-AT', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+  return d.toDateString() === jetzt.toDateString()
+    ? `Kurs von ${uhr}`
+    : `Kurs vom ${d.toLocaleDateString('de-AT', {day: 'numeric', month: 'numeric'})}, ${uhr}`
+}
 
 type RatesResponse = {
   base: string
@@ -84,6 +131,7 @@ const fetchRates = async (): Promise<void> => {
       setRatesError(null)
     } catch {
       setRatesError((err as Error).message)
+      setKursFrisch(false) // der gemerkte Kurs bleibt stehen, mit Hinweis
     }
   }
 }

@@ -12,7 +12,7 @@ import {
   Show
 } from 'solid-js'
 
-import {currency, satsToFiat} from '../currency'
+import {currency, kursHinweis, satsToFiat} from '../currency'
 // Jost, die Schrift der Röhren — im Paket, nicht von Google Fonts (die App lädt nichts nach)
 import '@fontsource/jost/300.css'
 import './roehren.css'
@@ -207,6 +207,10 @@ const Zaehlwerk: Component<{
             <Show when={props.euroAnzeige ?? fiat()}>
               <div>
                 <span class="rz-euro">{props.euroAnzeige ?? fiat()}</span>
+                {/* alter Kurs: ehrlich sagen, von wann (Gerhard, 2026-10-19) */}
+                <Show when={kursHinweis()}>
+                  <span class="rz-kursstand">{kursHinweis()}</span>
+                </Show>
               </div>
             </Show>
           }
