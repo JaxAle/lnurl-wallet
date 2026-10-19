@@ -38,6 +38,7 @@ import SicherungEinspielen from './roehren/SicherungEinspielen'
 import ScheineWiederfinden from './roehren/ScheineWiederfinden'
 import Extras from './roehren/Extras'
 import Geschenkkarte from './roehren/Geschenkkarte'
+import Entwickler from './roehren/Entwickler'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
 import AddonRun from './pages/AddonRun'
 
@@ -151,6 +152,7 @@ const cleanup = render(
       <Route path="/settings/wiederfinden" component={ScheineWiederfinden} />
       <Route path="/extras" component={Extras} />
       <Route path="/extras/geschenkkarte" component={Geschenkkarte} />
+      <Route path="/extras/entwickler" component={Entwickler} />
       <Route
         path="/settings/sicherung-einspielen"
         component={SicherungEinspielen}

@@ -74,10 +74,7 @@ const Extras: Component = () => {
           )}
         </For>
       </div>
-      <A
-        href="/settings/erweitert?teil=extras"
-        class="rz-aendern rz-block rz-mitte"
-      >
+      <A href="/extras/entwickler" class="rz-aendern rz-block rz-mitte">
         Für Entwickler ›
       </A>
     </div>

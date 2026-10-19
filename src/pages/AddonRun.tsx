@@ -35,10 +35,7 @@ const AddonRun: Component = () => {
         fallback={
           <div class="setup-card">
             <p>That addon doesn't exist.</p>
-            <A
-              href="/settings/erweitert?teil=extras"
-              class="hero-btn hero-btn-primary"
-            >
+            <A href="/extras/entwickler" class="hero-btn hero-btn-primary">
               Back to Settings
             </A>
           </div>
@@ -50,10 +47,7 @@ const AddonRun: Component = () => {
             fallback={
               <div class="setup-card">
                 <p>{found.manifest.name} is turned off.</p>
-                <A
-                  href="/settings/erweitert?teil=extras"
-                  class="hero-btn hero-btn-primary"
-                >
+                <A href="/extras/entwickler" class="hero-btn hero-btn-primary">
                   Turn it on
                 </A>
               </div>

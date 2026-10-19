@@ -18,18 +18,12 @@ import {
 } from '../autoLock'
 import {currency, setCurrency} from '../currency'
 import type {Currency} from '../currency'
-import {
-  GAP_LIMIT_LABEL,
-  GAP_LIMIT_OPTIONS,
-  gapLimit,
-  setGapLimit
-} from '../gapLimit'
-import {offlineMode, setOfflineMode} from '../offlineMode'
 import {downloadBackupFile} from '../storage'
 import {trustedMints} from '../trustedMints'
-import {setVaultEnabled, vaultEnabled} from '../vaultFeature'
+import {vaultEnabled} from '../vaultFeature'
 import {useWallet} from '../WalletContext'
 import {isCk1, noteK1} from '../lnurlcash'
+import {Gruppe, Zeile} from './Bedienfeld'
 import Rueckfrage from './Rueckfrage'
 import './roehren.css'
 
@@ -61,99 +55,6 @@ const host = (origin: string): string => {
     return origin
   }
 }
-
-const Pfeil: Component = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.5"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M9 5l7 7-7 7" />
-  </svg>
-)
-
-type ZeileProps = {
-  label: string
-  wert?: JSX.Element
-  unter?: string
-  href?: string
-  onClick?: () => void
-  gefahr?: boolean
-}
-// eine Zeile: links Beschriftung (Drahtschrift), rechts Wert in mattem Orange mit ›
-const Zeile: Component<ZeileProps> = props => {
-  const innen = (
-    <>
-      <span>
-        <span class="sl">{props.label}</span>
-        <Show when={props.unter}>
-          <span class="s">{props.unter}</span>
-        </Show>
-      </span>
-      <span class="val">
-        {props.wert}
-        <Pfeil />
-      </span>
-    </>
-  )
-  return (
-    <Show
-      when={props.href}
-      fallback={
-        <button
-          type="button"
-          class="rz-setting"
-          classList={{gefahr: props.gefahr}}
-          onClick={() => props.onClick?.()}
-        >
-          {innen}
-        </button>
-      }
-    >
-      <A
-        href={props.href!}
-        class="rz-setting"
-        classList={{gefahr: props.gefahr}}
-      >
-        {innen}
-      </A>
-    </Show>
-  )
-}
-
-const Schalter: Component<{
-  label: string
-  an: boolean
-  unter?: string
-  onClick: () => void
-}> = props => (
-  <button
-    type="button"
-    class="rz-setting"
-    role="switch"
-    aria-checked={props.an}
-    onClick={() => props.onClick()}
-  >
-    <span>
-      <span class="sl">{props.label}</span>
-      <Show when={props.unter}>
-        <span class="s">{props.unter}</span>
-      </Show>
-    </span>
-    <span class="rz-switch" classList={{on: props.an}} />
-  </button>
-)
-
-const Gruppe: Component<{titel: string; children: JSX.Element}> = props => (
-  <div class="rz-gruppe">
-    <span class="rz-eyebrow">{props.titel}</span>
-    {props.children}
-  </div>
-)
 
 const Einstellungen: Component = () => {
   const {
@@ -274,52 +175,32 @@ const Einstellungen: Component = () => {
         />
       </Gruppe>
 
-      <Gruppe titel="Werkzeuge">
-        <details class="rz-erweitert">
-          <summary>
-            Erweitert <Pfeil />
-          </summary>
-          <Schalter
-            label="Offline-Betrieb"
-            unter="Keine Verbindung zu Ausgabestellen"
-            an={offlineMode()}
-            onClick={() => setOfflineMode(!offlineMode())}
-          />
+      {/* Technisches (Offline, Suchtiefe, Tresor) liegt unter Extras › Für Entwickler; hier nur, was
+      jeder braucht — vorher doppelt versteckt unter „Werkzeuge › Erweitert“ (Gerhard, 2026-10-19) */}
+      <Gruppe titel="Über die Wallet">
+        <Zeile label="So funktioniert die Wallet" href="/ueber" />
+        <Show when={offen() && activity().length > 0}>
           <Zeile
-            label="Suchtiefe beim Wiederherstellen"
-            wert={GAP_LIMIT_LABEL[gapLimit()]}
-            onClick={() => setGapLimit(weiter(GAP_LIMIT_OPTIONS, gapLimit()))}
+            label="Verlauf löschen"
+            onClick={() => setVerlaufFrage(true)}
           />
-          <Schalter
-            label="Hardware-Tresor (Alpha)"
-            unter="LNURLvault über USB oder Bluetooth"
-            an={vaultEnabled()}
-            onClick={() => setVaultEnabled(!vaultEnabled())}
-          />
-          <Zeile label="So funktioniert die Wallet" href="/ueber" />
-          <Show when={offen() && activity().length > 0}>
-            <Zeile
-              label="Verlauf löschen"
-              onClick={() => setVerlaufFrage(true)}
-            />
-            <Show when={verlaufFrage()}>
-              <Rueckfrage
-                titel="Verlauf löschen?"
-                ja="Löschen"
-                onJa={() => {
-                  clearActivity()
-                  setVerlaufFrage(false)
-                }}
-                onNein={() => setVerlaufFrage(false)}
-              >
-                <p>
-                  Nur die Liste im Verlauf verschwindet — deine Scheine bleiben
-                  unberührt.
-                </p>
-              </Rueckfrage>
-            </Show>
+          <Show when={verlaufFrage()}>
+            <Rueckfrage
+              titel="Verlauf löschen?"
+              ja="Löschen"
+              onJa={() => {
+                clearActivity()
+                setVerlaufFrage(false)
+              }}
+              onNein={() => setVerlaufFrage(false)}
+            >
+              <p>
+                Nur die Liste im Verlauf verschwindet — deine Scheine bleiben
+                unberührt.
+              </p>
+            </Rueckfrage>
           </Show>
-        </details>
+        </Show>
       </Gruppe>
 
       <Show when={state() !== 'none'}>

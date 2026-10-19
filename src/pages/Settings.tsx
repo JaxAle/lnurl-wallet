@@ -348,20 +348,20 @@ const Settings: Component = () => {
 
   return (
     <div id="settings" class="page">
-      {/* Fork: die Einstellungen selbst sind jetzt das Bedienfeld (roehren/Einstellungen.tsx);
-          hier bleibt das Original als „Erweitert“, erreichbar über dessen Zeilen */}
+      {/* Fork: alles hier außer den Addons steht im neuen Bild (Einstellungen, Extras › Für Entwickler);
+          die Seite bleibt nur als Werkstatt — die doppelten Abschnitte sind ausgeblendet (Steve, 2026-10-19) */}
       <div class="rz-seitenkopf">
         <A
-          href="/settings"
+          href="/extras/entwickler"
           class="rz-zurueck"
-          aria-label="Zurück zu den Einstellungen"
+          aria-label="Zurück zu Für Entwickler"
         >
           ‹
         </A>
-        <h2>Erweitert</h2>
+        <h2>Werkstatt</h2>
       </div>
       <div class="two-columns">
-        <div class="two-col">
+        <div class="two-col" hidden>
           <div class="setup-card">
             <h4>
               <IoTimeSharp />
