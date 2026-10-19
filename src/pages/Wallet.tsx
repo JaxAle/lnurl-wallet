@@ -44,6 +44,7 @@ import {useWallet, groupByServer} from '../WalletContext'
 import {storeableMeltAddresses} from '../storeableLinks'
 import type {Bearer} from '../storage'
 import {downloadBackupFile} from '../storage'
+import NeueFassung from '../roehren/NeueFassung'
 import {splitBearerIntoAmounts, type SplitTarget} from '../noteSplitting'
 import {
   serverOf,
@@ -1594,6 +1595,8 @@ const Wallet: Component<{
               </Dialog>
             </Show>
             <Show when={!scheineAnsicht()}>
+              {/* Fork: neue Fassung hier, nicht über dem Schloss (Gerhard, 2026-10-19) */}
+              <NeueFassung />
               <section class="wallet-hero">
                 {/* Fork: Guthaben im Röhren-Zählwerk statt "Total balance" (roehren/) */}
                 <Zaehlwerk sats={Math.floor(sicherTotal() / 1000)}>

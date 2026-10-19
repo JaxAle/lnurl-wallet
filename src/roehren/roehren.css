@@ -2431,3 +2431,32 @@ body.rz-gesperrt {
   font-size: 13px;
   color: rgba(238, 152, 90, 0.55);
 }
+/* Neue Fassung: eine leuchtende Zeile oben auf der Startseite */
+.rz-neue-fassung {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin: 4px 0 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 154, 42, 0.45);
+  border-radius: 14px;
+  background: #120c08;
+  color: #ffd59a;
+  font:
+    300 16px/1.2 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 120, 20, 0.18);
+}
+.rz-neue-fassung .rz-lampe-klein {
+  animation: rz-puls 1.6s ease-in-out infinite;
+}
+.rz-neue-fassung-tun {
+  margin-left: auto;
+  color: #ffb35c;
+}

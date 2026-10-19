@@ -2,7 +2,7 @@
 import {ErrorBoundary} from 'solid-js'
 import {render} from 'solid-js/web'
 import {Route, HashRouter, Navigate} from '@solidjs/router'
-import toast, {Toaster} from 'solid-toast'
+import {Toaster} from 'solid-toast'
 import {registerSW} from 'virtual:pwa-register'
 
 import {WalletProvider} from './WalletContext'
@@ -37,6 +37,7 @@ import SoFunktioniert from './roehren/SoFunktioniert'
 import SicherungEinspielen from './roehren/SicherungEinspielen'
 import ScheineWiederfinden from './roehren/ScheineWiederfinden'
 import Extras from './roehren/Extras'
+import {meldeNeueFassung} from './roehren/NeueFassung'
 import Geschenkkarte from './roehren/Geschenkkarte'
 import Entwickler from './roehren/Entwickler'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
@@ -180,26 +181,13 @@ if (import.meta.hot) {
 }
 
 // 'prompt' registerType (see vite.config.ts) means a waiting update never
-// takes over on its own - the reload is only ever whatever this toast's
+// takes over on its own - the reload is only ever whatever this notice's
 // button triggers, so a build never swaps out from under an in-progress
 // signing/melt action
 const updateSW = registerSW({
-  onNeedRefresh: () => {
-    const id = toast.custom(
-      <span>
-        Eine neue Fassung ist da.&nbsp;
-        <button
-          onClick={() => {
-            toast.dismiss(id)
-            updateSW(true)
-          }}
-        >
-          Neu laden
-        </button>
-      </span>,
-      {duration: Infinity}
-    )
-  },
+  // Fork: nicht als schwebendes Kästchen (über dem Röhrenschloss kaum lesbar), sondern als Zeile oben
+  // auf der Startseite der geöffneten Wallet (roehren/NeueFassung.tsx, Gerhard 2026-10-19)
+  onNeedRefresh: () => meldeNeueFassung(() => void updateSW(true)),
   // Fork: keine Erfolgsmeldung beim ersten Start — sie sagt dem Teilnehmer nichts (Steve)
   onOfflineReady: () => {}
 })
