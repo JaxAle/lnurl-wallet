@@ -63,7 +63,9 @@ export default defineConfig({
       // app makes is a live LNURL/mint protocol call, and those must always
       // hit the network, never be served from a cache as if still current
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff,woff2,svg,png}'],
+        // Fork: webp dazu — das Röhrenbild (roehre.webp) fehlte im Firmen-WLAN über GitHub Pages, weil es
+        // nicht vorab gespeichert war und der Filter es sperrte (Gerhard am Pixel, 2026-10-20)
+        globPatterns: ['**/*.{js,css,html,woff,woff2,svg,png,webp}'],
         // cleanupOutdatedCaches (on by default) drops the old precache
         // entries - old bundle files - once a new SW activates. clientsClaim
         // is what makes that activation actually reach an already-open tab:
