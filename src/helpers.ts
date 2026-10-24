@@ -22,7 +22,21 @@ export const notify = (
   const m = meldung(message)
   message = m.text
   if (m.art === 'ruhig') _type = null
-  const options = position ? {position} : undefined
+  // Fork: Meldungen im Röhren-Bild (Steve, 2026-10-24) — dunkles Glas statt weißem Kästchen, vorn ein
+  // Lämpchen statt Symbol: bernstein = gut zu wissen, orangerot = ging nicht, pulsierend = läuft noch
+  const lampe = (art: string) => {
+    const l = document.createElement('span')
+    l.className = `rz-lampe-klein rz-meldung-lampe ${art}`
+    return l
+  }
+  const fehler = _type === NotifyKind.ERROR
+  const options = {
+    ...(position ? {position} : {}),
+    icon: lampe(
+      fehler ? 'rot' : _type === NotifyKind.LOADING ? 'puls' : 'ruhig'
+    ),
+    ...(fehler ? {style: {border: '1px solid rgba(255, 98, 50, 0.55)'}} : {})
+  }
   switch (_type) {
     case NotifyKind.SUCCESS:
       toast.success(message, options)

@@ -213,29 +213,54 @@ const Senden: Component = () => {
               >
                 {/* wie bei Phoenix: zuerst „wohin?“ — Rechnung oder Adresse einfügen oder scannen
                 (Gerhard am Pixel, Steve 2026-10-24); darunter Bargeld übergeben */}
-                <div class="rz-bezahlen-zeile">
-                  <span class="t">Rechnung oder Adresse?</span>
+                <span class="rz-eyebrow rz-abschnitt">
+                  Rechnung oder Adresse
+                </span>
+                <div class="rz-duo rz-duo-flach">
                   <button
                     type="button"
-                    class="rz-bezahlen-knopf"
+                    class="rz-knopf flach"
                     onClick={() => void einfuegen()}
                   >
-                    Einfügen
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="6" y="4" width="12" height="17" rx="2" />
+                      <path d="M9 4V3h6v1M9 10h6M9 14h6" />
+                    </svg>
+                    <span class="lbl">Einfügen</span>
                   </button>
                   <button
                     type="button"
-                    class="rz-bezahlen-knopf"
+                    class="rz-knopf flach"
                     onClick={() => {
                       setBezahlenScannen(true)
                       navigate('/bezahlen')
                     }}
                   >
-                    Scannen
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" />
+                    </svg>
+                    <span class="lbl">Scannen</span>
                   </button>
                 </div>
-                <p class="rz-hinweis rz-mitte rz-oder">
-                  oder Betrag als Schein übergeben
-                </p>
+                <span class="rz-eyebrow rz-abschnitt">
+                  Oder als Schein übergeben
+                </span>
                 <Zaehlwerk
                   sats={betrag()}
                   sofort

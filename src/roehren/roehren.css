@@ -2511,36 +2511,41 @@ body.rz-gesperrt {
 .rz-fehlt {
   color: #ff8a5c;
 }
-/* Senden: oben „Rechnung oder Adresse?“ mit Einfügen/Scannen, wie bei Phoenix (Steve, 2026-10-24) */
-.rz-bezahlen-zeile {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+/* Senden: zwei gleichwertige Abschnitte — Rechnung oder Adresse (flache Glasknöpfe wie Empfangen/Senden)
+   und Schein übergeben (Zählwerk) — statt eines Kastens mit Formularknöpfen (Steve, 2026-10-24) */
+.rz-eyebrow.rz-abschnitt {
+  display: block;
+  margin: 14px 0 8px;
+}
+.rz-duo.rz-duo-flach {
+  margin: 0 0 4px;
+}
+.rz-knopf.flach {
+  grid-auto-flow: column;
   align-items: center;
-  gap: 8px;
-  margin: 6px 0 2px;
-  padding: 10px 12px;
-  border: 1px solid #3a2618;
-  border-radius: 14px;
-  background: #0c0806;
+  justify-content: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 8px 10px;
 }
-.rz-bezahlen-zeile .t {
-  color: #ead8bf;
-  font-size: 15px;
+.rz-knopf.flach svg {
+  width: 22px;
+  height: 22px;
 }
-.rz-bezahlen-knopf {
-  min-height: 40px;
-  padding: 0 14px;
-  border: 1px solid rgba(255, 154, 42, 0.45);
-  border-radius: 12px;
-  background: #120c08;
-  color: #ffb35c;
-  font:
-    300 15px/1 'Jost',
-    'Futura',
-    system-ui,
-    sans-serif;
-  cursor: pointer;
+.rz-knopf.flach .lbl {
+  padding: 4px 6px;
 }
-.rz-oder {
-  margin: 8px 0 0;
+/* Meldungen: Lämpchen statt Symbol (helpers.ts notify) */
+.rz-meldung-lampe {
+  display: inline-block;
+  margin: 0 2px 0 0;
+}
+.rz-meldung-lampe.rot {
+  background: #ff6232;
+  box-shadow:
+    0 0 4px #ff6232,
+    0 0 9px rgba(255, 60, 20, 0.6);
+}
+.rz-meldung-lampe.puls {
+  animation: rz-puls 1.6s ease-in-out infinite;
 }

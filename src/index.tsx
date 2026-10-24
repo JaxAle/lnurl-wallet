@@ -63,10 +63,27 @@ const App = (props: any) => {
         {/* Fork: Meldungen unten statt oben rechts — oben steht das Röhren-Zählwerk, und eine
         Meldung genau darüber verdeckte das Hinaufzählen (Gerhard am Pixel, 2026-10-11); 104 px:
         über der Reiterleiste */}
+        {/* Fork: Meldungen oben unter der Kopfzeile, nicht über Tastatur und Knöpfen; dunkles Glas
+        statt weißem Kästchen (Steve, 2026-10-24) */}
         <Toaster
-          position="bottom-center"
-          toastOptions={{duration: 5000}}
-          containerStyle={{bottom: '104px'}}
+          position="top-center"
+          containerStyle={{top: 'calc(env(safe-area-inset-top, 0px) + 58px)'}}
+          toastOptions={{
+            duration: 5000,
+            style: {
+              background: 'rgba(14, 10, 7, 0.96)',
+              color: '#f4ebdf',
+              border: '1px solid rgba(255, 154, 42, 0.35)',
+              'border-radius': '14px',
+              'box-shadow': '0 10px 28px rgba(0, 0, 0, 0.55)',
+              'font-family': "'Jost', 'Futura', system-ui, sans-serif",
+              'font-weight': '300',
+              'font-size': '15px',
+              'line-height': '1.35',
+              padding: '10px 14px',
+              'max-width': '92vw'
+            }
+          }}
         />
         <Nav />
         {/* mounted once, wallet-wide, regardless of which page is open -
