@@ -75,17 +75,30 @@ const FARBEN = 'abcdef'
 const grundFarbe = (host: string) =>
   [...host].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) %
   FARBEN.length
+// feste Farben: der Verein in Bernstein, der Farbe der Röhren (Gerhard, 2026-10-24) — keine andere Stelle
+// bekommt eine feste Farbe
+const FEST: Record<string, number> = {'lnurl.21linz.at': 0}
+const reserviert = new Set(Object.values(FEST))
+const frei = (f: number, vergeben: Set<number>) => {
+  for (
+    let k = 0;
+    k < FARBEN.length && (vergeben.has(f) || reserviert.has(f));
+    k++
+  )
+    f = (f + 1) % FARBEN.length
+  return f
+}
 export const farbe = (host: string) => {
+  if (host in FEST) return FARBEN[FEST[host]]
   const vergeben = new Set<number>()
   for (const t of trustedMints()) {
     const h = serverOf(t.server)
-    let f = grundFarbe(h)
-    for (let k = 0; k < FARBEN.length && vergeben.has(f); k++)
-      f = (f + 1) % FARBEN.length
+    if (h in FEST) continue
+    const f = frei(grundFarbe(h), vergeben)
     if (h === host) return FARBEN[f]
     vergeben.add(f)
   }
-  return FARBEN[grundFarbe(host)]
+  return FARBEN[frei(grundFarbe(host), new Set())]
 }
 
 // Kürzel der Stelle für die Rosette: ohne lnurl./mint./www.; führende Ziffern plus ein Buchstabe
