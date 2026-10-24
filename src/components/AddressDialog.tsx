@@ -1,11 +1,5 @@
 import type {Component} from 'solid-js'
 import {Show, createMemo, createSignal} from 'solid-js'
-import {
-  IoAtCircleSharp,
-  IoRefreshSharp,
-  IoTrashSharp,
-  IoCopySharp
-} from 'solid-icons/io'
 
 import Dialog from './Dialog'
 import {useWallet} from '../WalletContext'
@@ -56,12 +50,12 @@ const AddressDialog: Component<AddressDialogProps> = props => {
   const claim = async () => {
     const name = username().trim().toLowerCase()
     if (!name) {
-      notify('Enter a username.', NotifyKind.ERROR)
+      notify('Gib einen Namen ein.', NotifyKind.ERROR)
       return
     }
     const npubValue = npub().trim()
     if (npubValue && !isValidNpub(npubValue)) {
-      notify('Not a valid npub.', NotifyKind.ERROR)
+      notify('Das ist kein gültiger npub.', NotifyKind.ERROR)
       return
     }
     // cashAddressBranch/cashAddressSecretAtIndex derive under the bare
@@ -77,7 +71,7 @@ const AddressDialog: Component<AddressDialogProps> = props => {
     const proofKey = cashAddressSecretAtIndex(serverOf(props.server), 0)
     if (!branch || !proofKey) {
       notify(
-        'No seed-derived key is loaded for this wallet - restore or re-enter your seed first.',
+        'Dafür braucht die Wallet ihre zwölf Wörter — stell sie zuerst wieder her.',
         NotifyKind.ERROR
       )
       return
@@ -94,7 +88,7 @@ const AddressDialog: Component<AddressDialogProps> = props => {
       )
       addRegisteredAddress(props.server, name, npubValue || undefined)
       notify(
-        `Registered ${name}@${serverOf(props.server)}.`,
+        `${name}@${serverOf(props.server)} gehört jetzt dir.`,
         NotifyKind.SUCCESS
       )
       // stays open - registered() flips truthy now, so this same dialog
@@ -114,7 +108,7 @@ const AddressDialog: Component<AddressDialogProps> = props => {
     const proofKey = cashAddressSecretAtIndex(serverOf(addr.server), 0)
     if (!proofKey) {
       notify(
-        'No seed-derived key is loaded for this wallet - restore or re-enter your seed first.',
+        'Dafür braucht die Wallet ihre zwölf Wörter — stell sie zuerst wieder her.',
         NotifyKind.ERROR
       )
       return
@@ -125,7 +119,7 @@ const AddressDialog: Component<AddressDialogProps> = props => {
       removeRegisteredAddress(addr.server, addr.username)
       setConfirmUnclaim(false)
       notify(
-        `Freed ${addr.username}@${serverOf(addr.server)}.`,
+        `${addr.username}@${serverOf(addr.server)} ist freigegeben.`,
         NotifyKind.SUCCESS
       )
       props.onClose()
@@ -136,124 +130,148 @@ const AddressDialog: Component<AddressDialogProps> = props => {
     }
   }
 
+  // Röhren-Bild statt des Original-Formulars (Steve, 2026-10-24): ein Feld, darunter die fertige Adresse
+  // groß; angelegt steht sie groß da, mit Kopieren. Logik oben unverändert.
+  const stelle = () => serverOf(props.server)
+  const name = () => username().trim().toLowerCase()
+
   return (
     <Dialog onClose={props.onClose}>
-      <Show
-        when={registered()}
-        fallback={
-          <>
-            <h4>
-              <IoAtCircleSharp />
-              &nbsp;Claim an address at {serverOf(props.server)}
-            </h4>
-            <p>
-              First-come-first-served - claiming proves nothing about who you
-              are, and costs nothing but the name if someone else claims it
-              first. Your funds are never at risk either way: only this wallet's
-              own seed can ever derive spendable notes from it.
-            </p>
-            <label>Username</label>
-            <input
-              type="text"
-              placeholder="alice"
-              value={username()}
-              onInput={e => setUsername(e.currentTarget.value)}
-            />
-            <label>Nostr npub (optional)</label>
-            <input
-              type="text"
-              placeholder="npub1..."
-              value={npub()}
-              onInput={e => setNpub(e.currentTarget.value)}
-            />
-            <p class="bearer-hint">
-              If you give an npub, this mint will also serve{' '}
-              {username().trim().toLowerCase() || 'username'}@
-              {serverOf(props.server)} as a NIP-05 identity for it (
-              <code>.well-known/nostr.json</code>) - anyone can look up that
-              npub by this same address.
-            </p>
-            <div class="btns">
-              <button
-                disabled={claiming() || offlineMode() || state() !== 'unlocked'}
-                onClick={claim}
-              >
-                <Show when={claiming()} fallback={<IoAtCircleSharp />}>
-                  <IoRefreshSharp class="spin" />
-                </Show>
-                &nbsp;Claim
-              </button>
-              <button disabled={claiming()} onClick={props.onClose}>
-                Cancel
-              </button>
-            </div>
-          </>
-        }
-      >
-        {addr => (
-          <>
-            <h4>
-              <IoAtCircleSharp />
-              &nbsp;{addr().username}@{serverOf(addr().server)}
-            </h4>
-            <Show when={addr().npub}>
-              {npubValue => (
-                <p class="address-npub">
-                  Nostr: <code>{npubValue()}</code>
-                  <button
-                    class="icon-btn icon-btn-gap"
-                    title="Copy npub"
-                    onClick={() => copyToClipboard(npubValue())}
-                  >
-                    <IoCopySharp />
-                  </button>
+      <div class="rz-blatt rz-schein-blatt rz-umziehen rz-adresse-blatt">
+        <Show
+          when={registered()}
+          fallback={
+            <>
+              <h3>Deine Adresse bei {stelle()}</h3>
+              <label class="rz-feldname" for="ad-name">
+                Name
+              </label>
+              <input
+                id="ad-name"
+                class="rz-feld"
+                type="text"
+                placeholder="gerhard"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck={false}
+                value={username()}
+                onInput={e => setUsername(e.currentTarget.value)}
+                onKeyDown={e => e.key === 'Enter' && void claim()}
+              />
+              <p class="rz-adresse-gross" classList={{leer: !name()}}>
+                {name() || 'name'}@{stelle()}
+              </p>
+              <p class="rz-hinweis">
+                Wer zuerst kommt, bekommt den Namen. Wer an diese Adresse zahlt,
+                zahlt in diese Wallet — einlösen kann nur sie.
+              </p>
+              <details class="rz-erweitert">
+                <summary>Mit Nostr verknüpfen (freiwillig)</summary>
+                <input
+                  class="rz-feld"
+                  type="text"
+                  placeholder="npub1…"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck={false}
+                  value={npub()}
+                  onInput={e => setNpub(e.currentTarget.value)}
+                />
+                <p class="rz-hinweis">
+                  Dann gilt die Adresse auch als Nostr-Name (NIP-05) für diesen
+                  Schlüssel — jeder kann ihn darüber nachschlagen.
                 </p>
-              )}
-            </Show>
-            <p class="mint-date">
-              registered {new Date(addr().registeredAt).toLocaleDateString()}
-            </p>
-            <Show
-              when={confirmUnclaim()}
-              fallback={
-                <div class="btns">
+              </details>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                disabled={
+                  claiming() ||
+                  offlineMode() ||
+                  state() !== 'unlocked' ||
+                  !name()
+                }
+                onClick={() => void claim()}
+              >
+                <span class="lbl">
+                  {claiming() ? 'Einen Moment …' : 'Adresse anlegen'}
+                </span>
+              </button>
+            </>
+          }
+        >
+          {addr => (
+            <>
+              <h3>Deine Adresse</h3>
+              <p class="rz-adresse-gross">
+                {addr().username}@{serverOf(addr().server)}
+              </p>
+              <p class="rz-hinweis rz-mitte">
+                Angelegt am{' '}
+                {new Date(addr().registeredAt).toLocaleDateString('de-AT')}
+              </p>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                onClick={() =>
+                  void copyToClipboard(
+                    `${addr().username}@${serverOf(addr().server)}`
+                  )
+                }
+              >
+                <span class="lbl">Adresse kopieren</span>
+              </button>
+              <Show when={addr().npub}>
+                {npubValue => (
                   <button
-                    class="icon-btn"
+                    type="button"
+                    class="rz-leise rz-block rz-mitte"
+                    onClick={() => void copyToClipboard(npubValue())}
+                  >
+                    Verknüpfter Nostr-Schlüssel kopieren
+                  </button>
+                )}
+              </Show>
+              <Show
+                when={confirmUnclaim()}
+                fallback={
+                  <button
+                    type="button"
+                    class="rz-leise rz-block rz-mitte"
                     disabled={busy()}
                     onClick={() => setConfirmUnclaim(true)}
                   >
-                    <IoTrashSharp />
-                    &nbsp;Unclaim
+                    Adresse freigeben
                   </button>
-                </div>
-              }
-            >
-              <p class="warning">
-                Unclaim {addr().username}@{serverOf(addr().server)}? This frees
-                the username at the mint - since claiming is
-                first-come-first-served, anyone else can claim it the moment
-                it's free, and you will not be able to reclaim it yourself
-                unless you register it again before they do.
-              </p>
-              <div class="btns">
-                <button disabled={busy()} onClick={() => unclaim(addr())}>
-                  <Show when={busy()}>
-                    <IoRefreshSharp class="spin" />
-                    &nbsp;
-                  </Show>
-                  Yes, unclaim
+                }
+              >
+                <p class="rz-hinweis">
+                  Danach kann jeder den Namen sofort für sich anlegen — du
+                  bekommst ihn nur zurück, wenn du schneller bist.
+                </p>
+                <button
+                  type="button"
+                  class="rz-knopf rz-weiter"
+                  disabled={busy()}
+                  onClick={() => void unclaim(addr())}
+                >
+                  <span class="lbl">
+                    {busy() ? 'Einen Moment …' : 'Freigeben'}
+                  </span>
                 </button>
                 <button
+                  type="button"
+                  class="rz-leise rz-block rz-mitte"
                   disabled={busy()}
                   onClick={() => setConfirmUnclaim(false)}
                 >
-                  Cancel
+                  Behalten
                 </button>
-              </div>
-            </Show>
-          </>
-        )}
-      </Show>
+              </Show>
+            </>
+          )}
+        </Show>
+      </div>
     </Dialog>
   )
 }
