@@ -1,12 +1,19 @@
 import type {Component} from 'solid-js'
-import {Show, For, createSignal, createMemo, onCleanup} from 'solid-js'
+import {
+  Show,
+  For,
+  Switch,
+  Match,
+  createSignal,
+  createMemo,
+  onCleanup
+} from 'solid-js'
 import {useNavigate} from '@solidjs/router'
-import {IoRefreshSharp} from 'solid-icons/io'
 
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {useDevice} from '../DeviceContext'
-import type {PayRequestInfo} from '../lnurlcash'
+import type {MintFee, PayRequestInfo} from '../lnurlcash'
 import {
   resolveMintInput,
   fetchPayRequest,
@@ -23,7 +30,6 @@ import {
   isPreimage,
   isCk1,
   applyMintFee,
-  describeMintFee,
   probeBurnedNote,
   sameInvoice,
   requestInvoice,
@@ -38,18 +44,11 @@ import {
   markDeviceNoteSpent,
   requireDeviceClient
 } from '../deviceOrchestration'
-import {
-  notify,
-  NotifyKind,
-  msatToSats,
-  floorMsatToSat,
-  copyToClipboard
-} from '../helpers'
+import {notify, NotifyKind, msatToSats, floorMsatToSat} from '../helpers'
 import {isMintTrusted, addTrustedMint, trustedMints} from '../trustedMints'
 import {offlineMode} from '../offlineMode'
-import Qr from './Qr'
 import Dialog from './Dialog'
-import FiatValue from './FiatValue'
+import {PFADE, Schein, Werkzeug} from '../roehren/Scheine'
 
 export type TransferDialogProps = {
   sourceBearer: Bearer
@@ -78,7 +77,7 @@ const TRANSFER_POLL_SECONDS = 5
 // there is no destination note for this wallet to claim - the transfer is
 // done once the payment is confirmed.
 const TransferDialog: Component<TransferDialogProps> = props => {
-  const {addBearer, updateBearer, logActivity} = useWallet()
+  const {bearers, addBearer, updateBearer, logActivity} = useWallet()
   const {client: deviceClient} = useDevice()
   const navigate = useNavigate()
 
@@ -117,7 +116,10 @@ const TransferDialog: Component<TransferDialogProps> = props => {
   const lookup = async () => {
     const url = resolveMintInput(mintInput())
     if (!url) {
-      notify('Enter a mint LNURL or Lightning Address.', NotifyKind.ERROR)
+      notify(
+        'Gib eine Ausgabestelle oder Lightning-Adresse ein.',
+        NotifyKind.ERROR
+      )
       return
     }
     setPendingTrust(null)
@@ -126,7 +128,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
       const info = await fetchPayRequest(url)
       if (!info.withdrawLink) {
         notify(
-          'This payRequest does not advertise lnurlcash minting (no withdrawLink).',
+          'Dort gibt es keine Scheine (LNURLcash) — das ist keine Ausgabestelle.',
           NotifyKind.ERROR
         )
         return
@@ -134,7 +136,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
       const server = serverOf(info.withdrawLink)
       const origin = serviceOriginOf(info.withdrawLink)
       if (origin === serviceOriginOf(props.sourceBearer.url)) {
-        notify("That's the mint this note is already on.", NotifyKind.ERROR)
+        notify('Da liegt der Schein schon.', NotifyKind.ERROR)
         return
       }
       if (
@@ -142,7 +144,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
         props.sourceBearer.amount > info.maxSendable
       ) {
         notify(
-          `${server} only accepts ${msatToSats(info.minSendable)}-${msatToSats(info.maxSendable)} sats - this note is ${msatToSats(props.sourceBearer.amount)}.`,
+          `${server} nimmt nur ${msatToSats(info.minSendable)} bis ${msatToSats(info.maxSendable)} Sats — dieser Schein hat ${msatToSats(props.sourceBearer.amount)}.`,
           NotifyKind.ERROR
         )
         return
@@ -178,7 +180,10 @@ const TransferDialog: Component<TransferDialogProps> = props => {
 
   const cancelTrust = () => {
     setPendingTrust(null)
-    notify('Mint not trusted - lookup cancelled.', NotifyKind.ERROR)
+    notify(
+      'Abgebrochen — der Ausgabestelle wird nicht vertraut.',
+      NotifyKind.ERROR
+    )
   }
 
   // `payRequest() && !pendingTrust()` would return the boolean from the
@@ -250,10 +255,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
         await finishAddressPayment()
         return
       }
-      notify(
-        'Melting the note to fund the transfer - confirming...',
-        NotifyKind.LOADING
-      )
+      notify('Der Schein zieht um …', NotifyKind.LOADING)
       startPolling()
     } catch (err) {
       notify((err as Error).message, NotifyKind.ERROR)
@@ -309,7 +311,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
           props.sourceBearer.label
         )
         notify(
-          `Transferred ${msatToSats(noteInfo.maxWithdrawable)} sats to ${serverOf(url)}.`,
+          `${msatToSats(noteInfo.maxWithdrawable)} Sats sind zu ${serverOf(url)} umgezogen.`,
           NotifyKind.SUCCESS
         )
         navigate('/wallet')
@@ -350,7 +352,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
           props.sourceBearer.label
         )
         notify(
-          `Transferred ${msatToSats(result.amountMsat)} sats to ${serverOf(result.url)}.`,
+          `${msatToSats(result.amountMsat)} Sats sind zu ${serverOf(result.url)} umgezogen.`,
           NotifyKind.SUCCESS
         )
         navigate('/wallet')
@@ -439,12 +441,12 @@ const TransferDialog: Component<TransferDialogProps> = props => {
       // separately from the transfer it's actually part of
       if (rotationError) {
         notify(
-          `Transferred ${msatToSats(noteInfo.maxWithdrawable)} sats to ${serverOf(url)}, but could not rotate (${rotationError}) - the note secret was just transmitted, treat this note as exposed.`,
+          `${msatToSats(noteInfo.maxWithdrawable)} Sats sind bei ${serverOf(url)} angekommen, aber der Schein ließ sich nicht erneuern (${rotationError}) — behandle ihn als bekannt und gib ihn bald weiter.`,
           NotifyKind.ERROR
         )
       } else {
         notify(
-          `Transferred ${msatToSats(noteInfo.maxWithdrawable)} sats to ${serverOf(url)}.`,
+          `${msatToSats(noteInfo.maxWithdrawable)} Sats sind zu ${serverOf(url)} umgezogen.`,
           NotifyKind.SUCCESS
         )
       }
@@ -470,7 +472,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
       props.sourceBearer.label
     )
     notify(
-      `Sent ${msatToSats(props.sourceBearer.amount)} sats to ${address}.`,
+      `${msatToSats(props.sourceBearer.amount)} Sats an ${address} gesendet.`,
       NotifyKind.SUCCESS
     )
     navigate('/wallet')
@@ -518,7 +520,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
             ) {
               stopPolling()
               notify(
-                "The destination mint's verify response is for a different invoice than requested - this transfer's state is uncertain; check both notes before retrying.",
+                'Die neue Ausgabestelle meldet eine andere Rechnung als angefordert — unklar, wo das Geld steht. Prüf beide Scheine, bevor du es nochmal versuchst.',
                 NotifyKind.ERROR
               )
               return
@@ -569,7 +571,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
             spent: false
           })
           notify(
-            'Transfer failed - the note is still yours (freshly rotated). You can try again.',
+            'Umziehen hat nicht geklappt — der Schein ist weiter deiner (frisch erneuert). Du kannst es nochmal versuchen.',
             NotifyKind.ERROR
           )
           props.onClose()
@@ -596,7 +598,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
             })
             setSourceConfirmed(true)
             notify(
-              "The source note's state is uncertain - a possible rotated copy is stored unverified; refresh your notes to reconcile.",
+              'Unklar, ob der Schein erneuert wurde — die Wallet hebt beide Fassungen auf und klärt es, sobald die Ausgabestelle antwortet.',
               NotifyKind.ERROR
             )
           } else if (!(err instanceof PendingNoteError)) {
@@ -633,169 +635,247 @@ const TransferDialog: Component<TransferDialogProps> = props => {
 
   onCleanup(stopPolling)
 
+  // Röhren-Bild statt des Original-Formulars (Steve, 2026-10-24): oben der Schein, der umzieht; Ziele als
+  // Karten mit dem eigenen Bestand dort; vor dem Auslösen Von/Nach/Gebühr/Kommt an. Die Logik oben ist
+  // unverändert die des Originals.
+  const zahl = (msat: number) => Math.floor(msat / 1000).toLocaleString('de-DE')
+  const quelle = () => serverOf(props.sourceBearer.url)
+  const bestandBei = (server: string) =>
+    bearers()
+      .filter(b => !b.spent && serverOf(b.url) === serverOf(server))
+      .reduce((n, b) => n + b.amount, 0)
+  const ziele = createMemo(() =>
+    trustedMints().filter(
+      m => serverOf(m.server) !== serverOf(props.sourceBearer.url)
+    )
+  )
+  const gebuehr = () => props.sourceBearer.amount - expectedNet()
+  // describeMintFee des Originals ist englisch
+  const gebuehrArt = (fee: MintFee) =>
+    [
+      fee.baseFeeMsat > 0 ? `${zahl(fee.baseFeeMsat)} Sats fix` : null,
+      fee.feePpm > 0
+        ? `${(fee.feePpm / 10000).toLocaleString('de-DE', {maximumFractionDigits: 2})} % vom Betrag`
+        : null
+    ]
+      .filter(Boolean)
+      .join(' + ')
+
   return (
     <Dialog onClose={props.onClose}>
-      <>
-        <h4>
-          Transfer {msatToSats(props.sourceBearer.amount)} sats
-          <FiatValue msat={props.sourceBearer.amount} />{' '}
-          {payingAddress() ? 'to a Lightning Address' : 'to another mint'}
-        </h4>
-        <Show when={!invoice()}>
-          <label>Destination mint or Lightning Address (or LNURL)</label>
-          <input
-            type="text"
-            placeholder="lnurl1... or mint@example.com"
-            value={mintInput()}
-            onInput={e => setMintInput(e.currentTarget.value)}
-            onKeyDown={e => e.key === 'Enter' && lookup()}
-          />
-          <div class="btns">
-            <button disabled={busy() || offlineMode()} onClick={lookup}>
-              <Show when={busy()}>
-                <IoRefreshSharp class="spin" />
-                &nbsp;
+      <div class="rz-blatt rz-schein-blatt rz-umziehen">
+        <Show
+          when={!invoice()}
+          fallback={
+            <>
+              <h3>Zieht um</h3>
+              <p class="rz-status">
+                <span class="rz-lampe-klein" />{' '}
+                {zahl(props.sourceBearer.amount)} Sats von {quelle()} unterwegs
+              </p>
+              <p class="rz-hinweis">
+                Der Schein ist gesperrt, bis die neue Ausgabestelle die Zahlung
+                bestätigt. Die Wallet sieht von selbst nach
+                <Show when={canCheckTransfer()}>
+                  {' '}
+                  — wieder in {secondsLeft()} s
+                </Show>
+                .
+              </p>
+              <Show when={canCheckTransfer()}>
+                <button
+                  type="button"
+                  class="rz-leise rz-block rz-mitte"
+                  disabled={checking() || offlineMode()}
+                  onClick={manualCheck}
+                >
+                  {checking() ? 'Sieht nach …' : 'Jetzt nachsehen'}
+                </button>
               </Show>
-              Look up mint
-            </button>
-            <button onClick={props.onClose}>Cancel</button>
-          </div>
-          <Show when={trustedMints().length > 0}>
-            <div class="mint-picker">
-              <For each={trustedMints()}>
-                {mint => (
-                  <button
-                    disabled={busy() || offlineMode()}
-                    onClick={() => selectMint(`mint@${serverOf(mint.server)}`)}
-                  >
-                    {serverOf(mint.server)}
-                  </button>
-                )}
-              </For>
-            </div>
-          </Show>
-          <Show when={pendingTrust()}>
-            {pending => (
-              <>
-                <p>
-                  First time seeing a signing key from{' '}
-                  <strong>{pending().server}</strong>. Trusting it lets its
-                  notes show as offline-verified against this key.
-                </p>
-                <pre>{pending().mintPubkey}</pre>
-                <div class="btns">
-                  <button onClick={confirmTrust}>Trust this mint</button>
-                  <button onClick={cancelTrust}>Cancel</button>
-                </div>
-              </>
-            )}
-          </Show>
-          <Show when={readyPayRequest()}>
-            {info => (
-              <>
-                <Show when={info().mintFee}>
-                  {fee => (
-                    <p class="warning">
-                      {serverOf(info().callback)} withholds a fee on minting:{' '}
-                      {describeMintFee(fee())}. The note that ends up there will
-                      be worth less than the one you're melting.
-                    </p>
+              {/* ohne Prüfadresse am Ziel: abholen von Hand, erst wenn die Zahlung durch ist (Original) */}
+              <Show when={!verifyUrl()}>
+                <Show when={mintSecret()}>
+                  {secret => (
+                    <>
+                      <p class="rz-hinweis">
+                        Diese Ausgabestelle meldet nicht von selbst, wann die
+                        Zahlung angekommen ist. Hol den Schein ab, sobald sie
+                        durch ist — der neue Schein gehört nur dieser Wallet.
+                      </p>
+                      <button
+                        type="button"
+                        class="rz-knopf an rz-weiter"
+                        disabled={checking() || offlineMode()}
+                        onClick={() => claimDestination(secret())}
+                      >
+                        <span class="lbl">Am Ziel abholen</span>
+                      </button>
+                    </>
                   )}
                 </Show>
-                <p class="bearer-hint">
-                  <Show
-                    when={payingAddress()}
-                    fallback={
-                      <>
-                        Transfer exactly {msatToSats(props.sourceBearer.amount)}{' '}
-                        sats to {serverOf(info().callback)}?
-                      </>
-                    }
-                  >
-                    Send exactly {msatToSats(props.sourceBearer.amount)} sats to{' '}
-                    {mintInput().trim()}? It lands as a note owned by that
-                    address, not by this wallet.
-                  </Show>{' '}
-                  The source note is melted to fund it - this can't be undone.
-                  <Show when={info().mintFee}>
-                    {' '}
-                    {payingAddress() ? "They'll" : "You'll"} end up with ~
-                    {msatToSats(expectedNet())} sats there.
-                  </Show>
-                </p>
-                <div class="btns">
+              </Show>
+            </>
+          }
+        >
+          <Schein schein={props.sourceBearer} />
+          <Switch>
+            <Match when={pendingTrust()}>
+              {pending => (
+                <>
+                  <h3>Neue Ausgabestelle</h3>
+                  <p class="rz-hinweis">
+                    Die Wallet sieht {pending().server} zum ersten Mal. Wenn du
+                    ihr vertraust, merkt sie sich ihren Schlüssel und prüft ihre
+                    Scheine damit — auch ohne Netz.
+                  </p>
+                  <p class="rz-klein rz-schluessel-text">
+                    {pending().mintPubkey}
+                  </p>
                   <button
+                    type="button"
+                    class="rz-knopf an rz-weiter"
+                    onClick={confirmTrust}
+                  >
+                    <span class="lbl">Vertrauen</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="rz-leise rz-block rz-mitte"
+                    onClick={cancelTrust}
+                  >
+                    Abbrechen
+                  </button>
+                </>
+              )}
+            </Match>
+            <Match when={readyPayRequest()}>
+              {info => (
+                <>
+                  <h3>
+                    {payingAddress() ? 'An eine Adresse senden' : 'Umziehen'}
+                  </h3>
+                  <div class="rz-gruppe">
+                    <div class="rz-setting rz-still">
+                      <span class="sl">Von</span>
+                      <span class="val">{quelle()}</span>
+                    </div>
+                    <div class="rz-setting rz-still">
+                      <span class="sl">Nach</span>
+                      <span class="val">
+                        {payingAddress()
+                          ? mintInput().trim()
+                          : serverOf(info().callback)}
+                      </span>
+                    </div>
+                    <div class="rz-setting rz-still">
+                      <span class="sl">Gebühr</span>
+                      <span class="val">
+                        {info().mintFee
+                          ? `${zahl(gebuehr())} Sats (${gebuehrArt(info().mintFee!)})`
+                          : 'keine'}
+                      </span>
+                    </div>
+                    <div class="rz-setting rz-still">
+                      <span class="sl">Kommt an</span>
+                      <span class="val">
+                        {info().mintFee ? '≈ ' : ''}
+                        {zahl(expectedNet())} Sats
+                      </span>
+                    </div>
+                  </div>
+                  <p class="rz-hinweis">
+                    <Show
+                      when={payingAddress()}
+                      fallback={
+                        <>
+                          Der Schein wird bei {quelle()} eingelöst und kommt als
+                          neuer Schein bei {serverOf(info().callback)} an.
+                        </>
+                      }
+                    >
+                      Der Betrag gehört danach der Adresse, nicht mehr dieser
+                      Wallet.
+                    </Show>{' '}
+                    Das lässt sich nicht rückgängig machen.
+                  </p>
+                  <button
+                    type="button"
+                    class="rz-knopf an rz-weiter"
                     disabled={busy() || offlineMode()}
                     onClick={startTransfer}
                   >
-                    <Show when={busy()}>
-                      <IoRefreshSharp class="spin" />
-                      &nbsp;
-                    </Show>
-                    Confirm transfer
+                    <span class="lbl">
+                      {busy()
+                        ? 'Einen Moment …'
+                        : payingAddress()
+                          ? `${zahl(props.sourceBearer.amount)} Sats senden`
+                          : 'Umziehen'}
+                    </span>
                   </button>
-                </div>
-              </>
-            )}
-          </Show>
-        </Show>
-        <Show when={invoice()}>
-          <p class="bearer-hint">
-            Melting the source note to fund this invoice at the destination mint
-            - it's locked as spent until this confirms.
-          </p>
-          <Qr value={invoice()!.toUpperCase()} />
-          <div class="btns">
-            <button onClick={() => copyToClipboard(invoice()!)}>
-              Copy invoice
-            </button>
-            <Show when={canCheckTransfer()}>
-              <button
-                disabled={checking() || offlineMode()}
-                onClick={manualCheck}
-              >
-                <Show when={checking()}>
-                  <IoRefreshSharp class="spin" />
-                  &nbsp;
-                </Show>
-                {checking()
-                  ? 'Checking...'
-                  : `Check transfer (${secondsLeft()}s)`}
-              </button>
-            </Show>
-          </div>
-          {/* unlike Mint.tsx, this wallet pays the invoice itself
-          (meltNote above) rather than a human paying an external one - so
-          there's no "I know I've paid" moment for a holder to act on early.
-          This manual claim button must stay gated behind !verifyUrl(): with
-          verify available, the automatic poll (checkTransfer) is the only
-          thing that should ever trigger a claim, since it's the only thing
-          that actually confirms the destination settled - offering an
-          always-on button here would invite claiming (and rotating)
-          against a melt that's still only "in flight", not confirmed. */}
-          <Show when={!verifyUrl()}>
-            <Show when={mintSecret()}>
-              {secret => (
-                <>
-                  <label>
-                    This mint doesn't support checking automatically. This
-                    destination is bound to this wallet's secret - nothing to
-                    paste. Claim it below once the transfer has settled.
-                  </label>
-                  <div class="btns">
-                    <button
-                      disabled={checking() || offlineMode()}
-                      onClick={() => claimDestination(secret())}
-                    >
-                      Claim at destination
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    class="rz-leise rz-block rz-mitte"
+                    disabled={busy()}
+                    onClick={() => setPayRequest(null)}
+                  >
+                    Anderes Ziel
+                  </button>
                 </>
               )}
-            </Show>
-          </Show>
+            </Match>
+            <Match when={true}>
+              <h3>Wohin soll der Schein?</h3>
+              <For each={ziele()}>
+                {mint => (
+                  <Werkzeug
+                    pfad={PFADE.umziehen}
+                    titel={serverOf(mint.server)}
+                    unter={
+                      bestandBei(mint.server)
+                        ? `Dort hast du ${zahl(bestandBei(mint.server))} Sats`
+                        : 'Dort hast du noch nichts'
+                    }
+                    aus={busy() || offlineMode()}
+                    onClick={() => selectMint(`mint@${serverOf(mint.server)}`)}
+                  />
+                )}
+              </For>
+              <label class="rz-feldname" for="uz-feld">
+                {ziele().length
+                  ? 'oder eine andere Ausgabestelle oder Lightning-Adresse'
+                  : 'Ausgabestelle oder Lightning-Adresse'}
+              </label>
+              <input
+                id="uz-feld"
+                class="rz-feld"
+                type="text"
+                placeholder="mint@stelle.at oder lnurl1…"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck={false}
+                value={mintInput()}
+                onInput={e => setMintInput(e.currentTarget.value)}
+                onKeyDown={e => e.key === 'Enter' && lookup()}
+              />
+              <Show when={offlineMode()}>
+                <p class="rz-hinweis">Ohne Netz geht Umziehen nicht.</p>
+              </Show>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                disabled={busy() || offlineMode() || !mintInput().trim()}
+                onClick={lookup}
+              >
+                <span class="lbl">{busy() ? 'Sieht nach …' : 'Weiter'}</span>
+              </button>
+              <p class="rz-hinweis">
+                Umziehen kostet eine kleine Gebühr: Der Schein wird eingelöst
+                und am Ziel neu ausgegeben.
+              </p>
+            </Match>
+          </Switch>
         </Show>
-      </>
+      </div>
     </Dialog>
   )
 }

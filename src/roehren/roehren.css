@@ -2600,3 +2600,15 @@ body.rz-gesperrt {
 .rz-senden .rz-option + .rz-option {
   margin-top: 12px;
 }
+/* Umziehen im Blatt (TransferDialog im Röhren-Bild, Steve 2026-10-24) */
+.rz-umziehen .rz-option + .rz-option {
+  margin-top: 10px;
+}
+.rz-umziehen .rz-feldname {
+  margin-top: 16px;
+}
+.rz-schluessel-text {
+  word-break: break-all;
+  font-family: ui-monospace, monospace;
+  opacity: 0.7;
+}
