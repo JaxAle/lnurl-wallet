@@ -2511,3 +2511,36 @@ body.rz-gesperrt {
 .rz-fehlt {
   color: #ff8a5c;
 }
+/* Senden: oben „Rechnung oder Adresse?“ mit Einfügen/Scannen, wie bei Phoenix (Steve, 2026-10-24) */
+.rz-bezahlen-zeile {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+  padding: 10px 12px;
+  border: 1px solid #3a2618;
+  border-radius: 14px;
+  background: #0c0806;
+}
+.rz-bezahlen-zeile .t {
+  color: #ead8bf;
+  font-size: 15px;
+}
+.rz-bezahlen-knopf {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 154, 42, 0.45);
+  border-radius: 12px;
+  background: #120c08;
+  color: #ffb35c;
+  font:
+    300 15px/1 'Jost',
+    'Futura',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.rz-oder {
+  margin: 8px 0 0;
+}

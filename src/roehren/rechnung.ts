@@ -53,3 +53,6 @@ export const saeubere = (t: string): string =>
 import {createSignal} from 'solid-js'
 const [zuBezahlen, setZuBezahlen] = createSignal<string | null>(null)
 export {zuBezahlen, setZuBezahlen}
+// „Scannen“ aus Senden: die Bezahlen-Seite öffnet gleich die Kamera
+const [bezahlenScannen, setBezahlenScannen] = createSignal(false)
+export {bezahlenScannen, setBezahlenScannen}

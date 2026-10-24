@@ -14,7 +14,13 @@ import RequireWallet from '../components/RequireWallet'
 import {useDevice} from '../DeviceContext'
 import {requireDeviceClient} from '../deviceOrchestration'
 import {notify, NotifyKind} from '../helpers'
-import {serverOf, toBech32Lnurl} from '../lnurlcash'
+import {
+  isBolt11Invoice,
+  isLightningAddress,
+  serverOf,
+  toBech32Lnurl
+} from '../lnurlcash'
+import {saeubere, setBezahlenScannen, setZuBezahlen} from './rechnung'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs, unterwegs} from './einloesen'
@@ -44,6 +50,26 @@ const Senden: Component = () => {
     if (e === 'kopiert')
       notify('Link kopiert — füg ihn in deine Nachricht ein.')
     setWeg('link')
+  }
+
+  // Einfügen: Rechnung/Adresse aus der Zwischenablage → gleich zur Bestätigung beim Bezahlen
+  const einfuegen = async () => {
+    let t = ''
+    try {
+      t = saeubere(await navigator.clipboard.readText())
+    } catch {
+      // Zugriff verweigert: Bezahlen-Seite, dort von Hand einfügen
+      navigate('/bezahlen')
+      return
+    }
+    if (isBolt11Invoice(t) || isLightningAddress(t)) {
+      setZuBezahlen(t)
+      navigate('/bezahlen')
+    } else
+      notify(
+        'In der Zwischenablage ist keine Rechnung und keine Lightning-Adresse.',
+        NotifyKind.ERROR
+      )
   }
 
   // nur Scheine, deren Geheimnis in diesem Browser liegt (kein Vault) — die lassen sich spalten
@@ -185,6 +211,31 @@ const Senden: Component = () => {
                   </>
                 }
               >
+                {/* wie bei Phoenix: zuerst „wohin?“ — Rechnung oder Adresse einfügen oder scannen
+                (Gerhard am Pixel, Steve 2026-10-24); darunter Bargeld übergeben */}
+                <div class="rz-bezahlen-zeile">
+                  <span class="t">Rechnung oder Adresse?</span>
+                  <button
+                    type="button"
+                    class="rz-bezahlen-knopf"
+                    onClick={() => void einfuegen()}
+                  >
+                    Einfügen
+                  </button>
+                  <button
+                    type="button"
+                    class="rz-bezahlen-knopf"
+                    onClick={() => {
+                      setBezahlenScannen(true)
+                      navigate('/bezahlen')
+                    }}
+                  >
+                    Scannen
+                  </button>
+                </div>
+                <p class="rz-hinweis rz-mitte rz-oder">
+                  oder Betrag als Schein übergeben
+                </p>
                 <Zaehlwerk
                   sats={betrag()}
                   sofort
@@ -218,13 +269,6 @@ const Senden: Component = () => {
                   <span class="lbl">
                     {arbeitet() ? 'Einen Moment …' : 'Weiter'}
                   </span>
-                </button>
-                <button
-                  type="button"
-                  class="rz-leise"
-                  onClick={() => navigate('/bezahlen')}
-                >
-                  Rechnung oder Adresse bekommen? bezahlen ›
                 </button>
               </Show>
             </>

@@ -48,8 +48,10 @@ import {teilGebuehr} from './gebuehren'
 import {gebunden} from './klaerung'
 import {
   adressText,
+  bezahlenScannen,
   rechnungsZweck,
   saeubere,
+  setBezahlenScannen,
   setZuBezahlen,
   zuBezahlen
 } from './rechnung'
@@ -111,6 +113,10 @@ const Bezahlen: Component = () => {
 
   // von der Startseite oder aus Empfangen übergeben
   onMount(() => {
+    if (bezahlenScannen()) {
+      setBezahlenScannen(false)
+      setScannen(true)
+    }
     const t = zuBezahlen()
     if (t) {
       setZuBezahlen(null)
