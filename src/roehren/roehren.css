@@ -2597,3 +2597,6 @@ body.rz-gesperrt {
 .rz-senden .rz-taste {
   height: 50px;
 }
+.rz-senden .rz-option + .rz-option {
+  margin-top: 12px;
+}

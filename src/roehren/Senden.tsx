@@ -30,6 +30,7 @@ import {scheinUeber, waehleSchein} from './abspalten'
 import {zurueckholenAuftrag, zurueckzuholen} from './zurueckholen'
 import {createBetrag, Tastatur} from './Betrag'
 import Zaehlwerk from './Zaehlwerk'
+import {PFADE, Werkzeug} from './Scheine'
 import './roehren.css'
 
 const Senden: Component = () => {
@@ -365,35 +366,22 @@ const Senden: Component = () => {
                       <p class="rz-hinweis">
                         Wie soll der Schein zur anderen Person?
                       </p>
-                      <button
-                        type="button"
-                        class="rz-option"
+                      {/* dieselben Karten wie im Scheinblatt — mit Symbol, sonst rutscht der Text in dessen Spalte */}
+                      <Werkzeug
+                        pfad={PFADE.zeigen}
+                        titel="Zeigen"
+                        unter="Die Person steht neben dir und scannt"
                         onClick={() => {
                           merkeUnterwegs(s().id)
                           setWeg('zeigen')
                         }}
-                      >
-                        <span>
-                          <span class="t">Zeigen</span>
-                          <span class="s">
-                            Die Person steht neben dir und scannt
-                          </span>
-                        </span>
-                        <span aria-hidden="true">›</span>
-                      </button>
-                      <button
-                        type="button"
-                        class="rz-option"
+                      />
+                      <Werkzeug
+                        pfad={PFADE.link}
+                        titel="Als Link schicken"
+                        unter="Per Signal, Telegram oder E-Mail"
                         onClick={() => void linkSchicken(s())}
-                      >
-                        <span>
-                          <span class="t">Als Link schicken</span>
-                          <span class="s">
-                            Per Signal, Telegram oder E-Mail
-                          </span>
-                        </span>
-                        <span aria-hidden="true">›</span>
-                      </button>
+                      />
                       <p class="rz-hinweis">{WARNUNG}</p>
                       <button
                         type="button"

@@ -145,7 +145,7 @@ const Symbol: Component<{d: string}> = props => (
     <path d={props.d} />
   </svg>
 )
-const PFADE = {
+export const PFADE = {
   weiter: 'M4 12h13M13 6l6 6-6 6',
   zeigen:
     'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2',
@@ -162,7 +162,7 @@ const PFADE = {
 }
 
 // ein Werkzeug im Blatt — alle gleich gebaut, auch die unter „Weitere Werkzeuge“ (Gerhard am Pixel)
-const Werkzeug: Component<{
+export const Werkzeug: Component<{
   pfad: string
   titel: string
   unter: string
