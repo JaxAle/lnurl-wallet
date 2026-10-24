@@ -255,9 +255,9 @@ const Senden: Component = () => {
                     <span class="lbl">Rechnung scannen</span>
                   </button>
                 </div>
-                {/* zwei Wege, ohne Überschriften: die Knöpfe sagen, was sie tun; dazwischen „oder“ (Steve) */}
-                <div class="rz-oder-linie" aria-hidden="true">
-                  <span>oder</span>
+                {/* zwei Wege, ohne Überschriften: die Knöpfe sagen, was sie tun; dazwischen „oder als Schein senden“ (Steve, Gerhard) */}
+                <div class="rz-oder-linie">
+                  <span>oder als Schein senden</span>
                 </div>
                 <Zaehlwerk
                   sats={betrag()}
