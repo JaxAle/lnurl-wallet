@@ -2513,27 +2513,49 @@ body.rz-gesperrt {
 }
 /* Senden: zwei gleichwertige Abschnitte — Rechnung oder Adresse (flache Glasknöpfe wie Empfangen/Senden)
    und Schein übergeben (Zählwerk) — statt eines Kastens mit Formularknöpfen (Steve, 2026-10-24) */
-.rz-eyebrow.rz-abschnitt {
-  display: block;
-  margin: 14px 0 8px;
+.rz-oder-linie {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 4px 4px;
+  color: rgba(238, 152, 90, 0.55);
+  font-size: 14px;
+}
+.rz-oder-linie::before,
+.rz-oder-linie::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 154, 42, 0.3),
+    transparent
+  );
 }
 .rz-duo.rz-duo-flach {
-  margin: 0 0 4px;
+  margin: 8px 0 4px;
 }
+/* Symbol über dem Text: „Rechnung einfügen“ passt neben dem Symbol nicht in die halbe Breite */
 .rz-knopf.flach {
-  grid-auto-flow: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 58px;
-  padding: 8px 10px;
+  align-content: center;
+  gap: 2px;
+  min-height: 76px;
+  padding: 10px 8px;
 }
 .rz-knopf.flach svg {
   width: 22px;
   height: 22px;
 }
 .rz-knopf.flach .lbl {
-  padding: 4px 6px;
+  padding: 2px 4px;
+  font-size: 17px;
+  white-space: nowrap;
+}
+@media (max-width: 389px) {
+  .rz-knopf.flach .lbl {
+    font-size: 15px;
+  }
 }
 /* Meldungen: Lämpchen statt Symbol (helpers.ts notify) */
 .rz-meldung-lampe {

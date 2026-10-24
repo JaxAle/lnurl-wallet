@@ -213,9 +213,6 @@ const Senden: Component = () => {
               >
                 {/* wie bei Phoenix: zuerst „wohin?“ — Rechnung oder Adresse einfügen oder scannen
                 (Gerhard am Pixel, Steve 2026-10-24); darunter Bargeld übergeben */}
-                <span class="rz-eyebrow rz-abschnitt">
-                  Rechnung oder Adresse
-                </span>
                 <div class="rz-duo rz-duo-flach">
                   <button
                     type="button"
@@ -234,7 +231,7 @@ const Senden: Component = () => {
                       <rect x="6" y="4" width="12" height="17" rx="2" />
                       <path d="M9 4V3h6v1M9 10h6M9 14h6" />
                     </svg>
-                    <span class="lbl">Einfügen</span>
+                    <span class="lbl">Rechnung einfügen</span>
                   </button>
                   <button
                     type="button"
@@ -255,12 +252,13 @@ const Senden: Component = () => {
                     >
                       <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16" />
                     </svg>
-                    <span class="lbl">Scannen</span>
+                    <span class="lbl">Rechnung scannen</span>
                   </button>
                 </div>
-                <span class="rz-eyebrow rz-abschnitt">
-                  Oder als Schein übergeben
-                </span>
+                {/* zwei Wege, ohne Überschriften: die Knöpfe sagen, was sie tun; dazwischen „oder“ (Steve) */}
+                <div class="rz-oder-linie" aria-hidden="true">
+                  <span>oder</span>
+                </div>
                 <Zaehlwerk
                   sats={betrag()}
                   sofort
