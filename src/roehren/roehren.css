@@ -2571,3 +2571,29 @@ body.rz-gesperrt {
 .rz-meldung-lampe.puls {
   animation: rz-puls 1.6s ease-in-out infinite;
 }
+
+/* Senden passt auf einen Bildschirm (Gerhard am Pixel, 2026-10-24): mit Rechnungsknöpfen und „oder“-Linie
+   war die Seite ~875 px hoch; die Zahl reserviert unten nur noch Platz für eine Zeile „zu viel“ */
+.rz-senden .roehren-zaehlwerk {
+  padding: 4px 0 2px;
+}
+.rz-senden .roehren-zaehlwerk .rz-fuss {
+  height: 52px;
+  margin-top: 2px;
+}
+.rz-senden .rz-duo.rz-duo-flach {
+  margin: 4px 0 0;
+}
+.rz-senden .rz-knopf.flach {
+  min-height: 64px;
+  padding: 6px 8px;
+}
+.rz-senden .rz-oder-linie {
+  margin: 8px 4px 0;
+}
+.rz-senden .rz-tastatur {
+  margin: 8px 0;
+}
+.rz-senden .rz-taste {
+  height: 50px;
+}
