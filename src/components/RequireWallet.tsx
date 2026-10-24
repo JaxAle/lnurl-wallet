@@ -1,6 +1,6 @@
 import type {Component, JSX} from 'solid-js'
 import {Show} from 'solid-js'
-import {A, Navigate} from '@solidjs/router'
+import {Navigate} from '@solidjs/router'
 
 import {useWallet} from '../WalletContext'
 
@@ -13,22 +13,12 @@ const RequireWallet: Component<{children: JSX.Element}> = props => {
     <Show
       when={state() === 'unlocked'}
       fallback={
-        <div class="page">
-          <div class="setup-card">
-            <Show
-              when={state() === 'locked'}
-              fallback={
-                // Fork: ohne Wallet zur Begrüßung (neu / habe schon eine), nicht direkt zu neuen Wörtern
-                <Navigate href="/" />
-              }
-            >
-              <p>Deine Wallet ist gesperrt.</p>
-              <A href="/wallet" class="hero-btn hero-btn-primary">
-                Entsperren
-              </A>
-            </Show>
-          </div>
-        </div>
+        // Fork: gesperrt deckt das Röhrenschloss jede Seite (components/Nav.tsx) — hier nichts Eigenes
+        // mehr; die alte Karte „Deine Wallet ist gesperrt“ schien beim Entsperren durch (2026-10-24).
+        // Ohne Wallet zur Begrüßung (neu / habe schon eine), nicht direkt zu neuen Wörtern.
+        <Show when={state() !== 'locked'}>
+          <Navigate href="/" />
+        </Show>
       }
     >
       {props.children}

@@ -1724,14 +1724,8 @@ body.rz-gesperrt {
   background: #050403;
   transition: opacity 0.6s ease;
 }
-.rz-schloss.weg {
-  animation: rz-schloss-weg 0.6s ease 1.8s both;
-}
-@keyframes rz-schloss-weg {
-  to {
-    opacity: 0;
-  }
-}
+/* Kein Ausblenden auf Zeit mehr: das Schloss bleibt stehen, bis die Wallet wirklich offen ist — sonst sah
+   man beim Entschlüsseln für Augenblicke die Seite darunter (Gerhard am Pixel, 2026-10-24) */
 .rz-schloss-feld {
   flex: 1 1 auto;
   min-height: 0;
