@@ -49,6 +49,7 @@ import {isMintTrusted, addTrustedMint, trustedMints} from '../trustedMints'
 import {offlineMode} from '../offlineMode'
 import Dialog from './Dialog'
 import {PFADE, Schein, Werkzeug} from '../roehren/Scheine'
+import {bekannteStellen, VORSCHLAG} from '../roehren/vorschlaege'
 
 export type TransferDialogProps = {
   sourceBearer: Bearer
@@ -650,6 +651,8 @@ const TransferDialog: Component<TransferDialogProps> = props => {
     )
   )
   const gebuehr = () => props.sourceBearer.amount - expectedNet()
+  const [vonHand, setVonHand] = createSignal(false)
+  const neueZiele = () => bekannteStellen().filter(b => b.host !== quelle())
   // describeMintFee des Originals ist englisch
   const gebuehrArt = (fee: MintFee) =>
     [
@@ -724,9 +727,9 @@ const TransferDialog: Component<TransferDialogProps> = props => {
                 <>
                   <h3>Neue Ausgabestelle</h3>
                   <p class="rz-hinweis">
-                    Die Wallet sieht {pending().server} zum ersten Mal. Wenn du
-                    ihr vertraust, merkt sie sich ihren Schlüssel und prüft ihre
-                    Scheine damit — auch ohne Netz.
+                    Die Wallet sieht {serverOf(pending().server)} zum ersten
+                    Mal. Wenn du ihr vertraust, merkt sie sich ihren Schlüssel
+                    und prüft ihre Scheine damit — auch ohne Netz.
                   </p>
                   <p class="rz-klein rz-schluessel-text">
                     {pending().mintPubkey}
@@ -840,34 +843,58 @@ const TransferDialog: Component<TransferDialogProps> = props => {
                   />
                 )}
               </For>
-              <label class="rz-feldname" for="uz-feld">
-                {ziele().length
-                  ? 'oder eine andere Ausgabestelle oder Lightning-Adresse'
-                  : 'Ausgabestelle oder Lightning-Adresse'}
-              </label>
-              <input
-                id="uz-feld"
-                class="rz-feld"
-                type="text"
-                placeholder="mint@stelle.at oder lnurl1…"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck={false}
-                value={mintInput()}
-                onInput={e => setMintInput(e.currentTarget.value)}
-                onKeyDown={e => e.key === 'Enter' && lookup()}
-              />
+              {/* bekannte, noch nicht vertraute Stellen — dieselbe Liste wie beim Hinzufügen; Antippen führt
+              über die Vertrauensfrage, nie still (Gerhard am Pixel, Steve 2026-10-24) */}
+              <For each={neueZiele()}>
+                {b => (
+                  <Werkzeug
+                    pfad={PFADE.umziehen}
+                    titel={b.host}
+                    unter={`Neu · ${VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}`}
+                    aus={busy() || offlineMode()}
+                    onClick={() => selectMint(b.adresse)}
+                  />
+                )}
+              </For>
               <Show when={offlineMode()}>
                 <p class="rz-hinweis">Ohne Netz geht Umziehen nicht.</p>
               </Show>
-              <button
-                type="button"
-                class="rz-knopf an rz-weiter"
-                disabled={busy() || offlineMode() || !mintInput().trim()}
-                onClick={lookup}
+              <Show
+                when={vonHand() || !(ziele().length + neueZiele().length)}
+                fallback={
+                  <button
+                    type="button"
+                    class="rz-leise rz-block rz-mitte"
+                    onClick={() => setVonHand(true)}
+                  >
+                    Andere Ausgabestelle oder Adresse eingeben ›
+                  </button>
+                }
               >
-                <span class="lbl">{busy() ? 'Sieht nach …' : 'Weiter'}</span>
-              </button>
+                <label class="rz-feldname" for="uz-feld">
+                  Ausgabestelle oder Lightning-Adresse
+                </label>
+                <input
+                  id="uz-feld"
+                  class="rz-feld"
+                  type="text"
+                  placeholder="mint@stelle.at oder lnurl1…"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck={false}
+                  value={mintInput()}
+                  onInput={e => setMintInput(e.currentTarget.value)}
+                  onKeyDown={e => e.key === 'Enter' && lookup()}
+                />
+                <button
+                  type="button"
+                  class="rz-knopf an rz-weiter"
+                  disabled={busy() || offlineMode() || !mintInput().trim()}
+                  onClick={lookup}
+                >
+                  <span class="lbl">{busy() ? 'Sieht nach …' : 'Weiter'}</span>
+                </button>
+              </Show>
               <p class="rz-hinweis">
                 Umziehen kostet eine kleine Gebühr: Der Schein wird eingelöst
                 und am Ziel neu ausgegeben.

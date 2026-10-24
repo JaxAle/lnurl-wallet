@@ -10,7 +10,7 @@ import type {Accessor, Component} from 'solid-js'
 import {createEffect, createMemo, createSignal, For, Show} from 'solid-js'
 import {A, useNavigate, useParams} from '@solidjs/router'
 
-import {resolveMintInput, serverOf, serviceOriginOf} from '../lnurlcash'
+import {serverOf} from '../lnurlcash'
 import {registeredAddresses} from '../addressRegistry'
 import Scanner, {canScan} from '../components/Scanner'
 import {copyToClipboard, mempoolNodeUrl} from '../helpers'
@@ -18,7 +18,6 @@ import {offlineMode} from '../offlineMode'
 import {
   getTrustedMintAddress,
   isMintTrusted,
-  PUBLIC_MINTS,
   trustedMints
 } from '../trustedMints'
 import type {TrustedMint} from '../trustedMints'
@@ -28,6 +27,7 @@ import Dialog from '../components/Dialog'
 import Rueckfrage from './Rueckfrage'
 import Wiederfinden from './Wiederfinden'
 import {setStandard, standardStelle} from './standard'
+import {bekannteStellen, VORSCHLAG} from './vorschlaege'
 import './roehren.css'
 
 export type HinzufuegeMotor = {
@@ -41,15 +41,6 @@ export type HinzufuegeMotor = {
 }
 
 const zahl = (n: number) => n.toLocaleString('de-DE')
-
-// vorgeschlagen, nie still eingetragen (Gerhard, 2026-10-12): am Meetup verwenden alle die Stelle des Vereins
-// vorerst nicht vorschlagen (von Hand eintragen geht weiter): lnurl.21mint.me meldete einen Schein bei der
-// Nachfrage als gültig, Zeus kurz danach als unbekannt — 100 Sats ungeklärt (BEFUNDE, 2026-10-15)
-const NICHT_VORSCHLAGEN = new Set(['lnurl.21mint.me'])
-
-const VORSCHLAG: Record<string, string> = {
-  'lnurl.21linz.at': 'Bitcoin Club Linz — am Meetup verwendet'
-}
 
 const Bank: Component = () => (
   <svg
@@ -225,12 +216,7 @@ export const AusgabestelleHinzufuegen: Component<{
   const [handStelle, setHandStelle] = createSignal('')
   const [handSchluessel, setHandSchluessel] = createSignal('')
 
-  const bekannte = () =>
-    PUBLIC_MINTS.map(a => ({adresse: a, url: resolveMintInput(a)}))
-      .filter(x => x.url && !isMintTrusted(serviceOriginOf(x.url)))
-      .map(x => ({adresse: x.adresse, host: serverOf(x.url!)}))
-      .filter(x => !NICHT_VORSCHLAGEN.has(x.host))
-      .sort((a, b) => Number(!!VORSCHLAG[b.host]) - Number(!!VORSCHLAG[a.host]))
+  const bekannte = bekannteStellen
 
   createEffect(() => {
     for (const b of bekannte()) frageAufladeGebuehr(b.adresse)
