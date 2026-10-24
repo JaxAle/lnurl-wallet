@@ -30,7 +30,8 @@ export const EXTRAS: {
   {
     id: 'pos',
     name: 'Kassa',
-    satz: 'Am Stand kassieren — Betrag tippen, der Gast zahlt mit Lightning.'
+    satz: 'Am Stand kassieren — Betrag tippen, der Gast zahlt mit Lightning.',
+    seite: '/extras/kassa' // eigener Bildschirm (Kassa.tsx), Tastatur wie bei Senden
   },
   {
     id: 'timelocker',

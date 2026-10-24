@@ -2630,3 +2630,36 @@ body.rz-gesperrt {
 .rz-adresse-blatt .rz-erweitert {
   margin: 10px 0;
 }
+/* Kassa (Kassa.tsx): auf welche Adresse kassiert wird — eine leise Zeile, bei mehreren Adressen Wahl */
+.rz-kassa-an {
+  margin: 0 0 8px;
+  text-align: center;
+  color: rgba(238, 152, 90, 0.6);
+  font-size: 14px;
+  word-break: break-all;
+}
+.rz-kassa-wahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin: 0 0 8px;
+}
+.rz-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #2f2218;
+  background: #0d0906;
+  color: rgba(238, 152, 90, 0.6);
+  font-size: 13px;
+}
+.rz-chip.an {
+  border-color: rgba(255, 154, 42, 0.55);
+  color: #ffd9a0;
+}
+.rz-kassa .rz-tastatur {
+  margin: 8px 0;
+}
+.rz-kassa .rz-taste {
+  height: 50px;
+}
