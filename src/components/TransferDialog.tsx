@@ -845,17 +845,27 @@ const TransferDialog: Component<TransferDialogProps> = props => {
               </For>
               {/* bekannte, noch nicht vertraute Stellen — dieselbe Liste wie beim Hinzufügen; Antippen führt
               über die Vertrauensfrage, nie still (Gerhard am Pixel, Steve 2026-10-24) */}
-              <For each={neueZiele()}>
-                {b => (
-                  <Werkzeug
-                    pfad={PFADE.umziehen}
-                    titel={b.host}
-                    unter={`Neu · ${VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}`}
-                    aus={busy() || offlineMode()}
-                    onClick={() => selectMint(b.adresse)}
-                  />
-                )}
-              </For>
+              <Show when={neueZiele().length}>
+                {/* einmal als Linie statt „Neu“ auf jeder Karte; die Karten darunter leiser (Steve) */}
+                <Show when={ziele().length}>
+                  <div class="rz-oder-linie">
+                    <span>noch nicht verwendet</span>
+                  </div>
+                </Show>
+                <div class="rz-neue-ziele">
+                  <For each={neueZiele()}>
+                    {b => (
+                      <Werkzeug
+                        pfad={PFADE.umziehen}
+                        titel={b.host}
+                        unter={VORSCHLAG[b.host] ?? 'Öffentliche Ausgabestelle'}
+                        aus={busy() || offlineMode()}
+                        onClick={() => selectMint(b.adresse)}
+                      />
+                    )}
+                  </For>
+                </div>
+              </Show>
               <Show when={offlineMode()}>
                 <p class="rz-hinweis">Ohne Netz geht Umziehen nicht.</p>
               </Show>

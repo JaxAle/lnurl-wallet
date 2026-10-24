@@ -2663,3 +2663,14 @@ body.rz-gesperrt {
 .rz-kassa .rz-taste {
   height: 50px;
 }
+/* Umziehen: noch nicht verwendete Ausgabestellen leiser als die eigenen (Steve, 2026-10-24) */
+.rz-umziehen .rz-oder-linie {
+  margin: 16px 4px 10px;
+}
+.rz-neue-ziele .rz-option {
+  background: transparent;
+  border-style: dashed;
+}
+.rz-neue-ziele .rz-option + .rz-option {
+  margin-top: 10px;
+}
