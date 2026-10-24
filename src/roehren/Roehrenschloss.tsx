@@ -3,7 +3,7 @@
 // Codes (öffnet nach dem letzten Zeichen von selbst); der Schlüssel unten holt ihn aus dem Passwortmanager.
 import type {Component} from 'solid-js'
 import {createSignal} from 'solid-js'
-import {A} from '@solidjs/router'
+import {A, useNavigate} from '@solidjs/router'
 
 import {useWallet} from '../WalletContext'
 import {pruefePasswort} from './passwort'
@@ -23,6 +23,7 @@ const ZEIGEN_MS = 2400
 
 const Roehrenschloss: Component = () => {
   const {unlock} = useWallet()
+  const navigate = useNavigate()
   const [laenge, setLaenge] = createSignal(codeLaenge())
   const [sperreBis, setSperreBis] = createSignal(wartenBis())
   let autoFehl = 0
@@ -49,7 +50,14 @@ const Roehrenschloss: Component = () => {
     // nur ein auf den Röhren tippbarer Code bekommt eine Länge — der aus dem Manager wird nie getippt
     if (!ausManager && tippbar(code)) merkeLaenge(code.length)
     const pw = richtig
-    setTimeout(() => void unlock(pw).catch(() => location.reload()), ZEIGEN_MS)
+    // nach dem Code immer auf die Startseite — zuerst die große Zahl (Steve, 2026-10-24)
+    setTimeout(
+      () =>
+        void unlock(pw)
+          .then(() => navigate('/wallet'))
+          .catch(() => location.reload()),
+      ZEIGEN_MS
+    )
     return 'offen' as const
   }
 

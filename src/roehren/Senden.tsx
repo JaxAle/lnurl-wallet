@@ -222,7 +222,7 @@ const Senden: Component = () => {
                 <button
                   type="button"
                   class="rz-leise"
-                  onClick={() => navigate('/wallet?bezahlen=1')}
+                  onClick={() => navigate('/bezahlen')}
                 >
                   Rechnung oder Adresse bekommen? bezahlen ›
                 </button>

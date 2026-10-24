@@ -2508,3 +2508,6 @@ body.rz-gesperrt {
 .rz-note.klein.sel {
   outline-width: 2px;
 }
+.rz-fehlt {
+  color: #ff8a5c;
+}

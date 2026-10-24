@@ -1,0 +1,489 @@
+// Bezahlen als eigene Seite (Steve, 2026-10-24; Prototyp screens.pay → pay-confirm → done): statt des
+// Dialogs mit zwei Symbolknöpfen. Wer bezahlt, will vorher sicher wissen: wem, wie viel, was es kostet.
+//   1. Eingeben: Rechnung oder Lightning-Adresse einfügen oder scannen; eine Zeile sagt, was erkannt wurde.
+//      Bei einer Adresse ohne Betrag folgt die Röhren-Tastatur wie beim Senden.
+//   2. Bestätigen: Betrag im Zählwerk, darunter An, Zweck, Gebühr, Bezahlt aus; dann „N Sats bezahlen“.
+//   3. Fertig: das Zählwerk zählt herunter, „Bezahlt“.
+// Bezahlen heißt hier: ein Schein über genau den Betrag wird bei seiner Ausgabestelle eingeschmolzen
+// (meltNote des Originals). Hat kein Schein genau den Betrag, wird er wie beim Senden abgespalten
+// (abspalten.ts); eine Gebühr der Stelle geht dabei vom Rest ab. Sonderwege des Originals (interne
+// Überweisung, Tresor, mehrere Scheine) bleiben über „Mehr Möglichkeiten“ im alten Dialog.
+import type {Component} from 'solid-js'
+import {
+  createMemo,
+  createSignal,
+  Match,
+  onCleanup,
+  onMount,
+  Show,
+  Switch
+} from 'solid-js'
+import {A, useNavigate} from '@solidjs/router'
+
+import RequireWallet from '../components/RequireWallet'
+import Scanner, {canScan} from '../components/Scanner'
+import {useDevice} from '../DeviceContext'
+import {requireDeviceClient} from '../deviceOrchestration'
+import {notify, NotifyKind} from '../helpers'
+import type {PayRequestInfo} from '../lnurlcash'
+import {
+  decodeBolt11AmountMsat,
+  fetchInvoiceVerification,
+  fetchPayRequest,
+  isBolt11Invoice,
+  isLightningAddress,
+  meltNote,
+  NoteSpentError,
+  requestInvoice,
+  requireNoteK1,
+  resolveMintInput,
+  sameInvoice,
+  serverOf
+} from '../lnurlcash'
+import type {Bearer} from '../storage'
+import {useWallet} from '../WalletContext'
+import {scheinUeber, waehleSchein} from './abspalten'
+import {createBetrag, Tastatur} from './Betrag'
+import {teilGebuehr} from './gebuehren'
+import {gebunden} from './klaerung'
+import {
+  adressText,
+  rechnungsZweck,
+  saeubere,
+  setZuBezahlen,
+  zuBezahlen
+} from './rechnung'
+import Zaehlwerk from './Zaehlwerk'
+import './roehren.css'
+
+type Schritt = 'eingabe' | 'betrag' | 'bestaetigen' | 'unterwegs' | 'fertig'
+
+const zahl = (n: number) => n.toLocaleString('de-DE')
+
+const Bezahlen: Component = () => {
+  const {bearers, addBearer, updateBearer, removeBearer, logActivity} =
+    useWallet()
+  const {client: deviceClient} = useDevice()
+  const navigate = useNavigate()
+  const ein = createBetrag()
+
+  const [schritt, setSchritt] = createSignal<Schritt>('eingabe')
+  const [text, setText] = createSignal('')
+  const [scannen, setScannen] = createSignal(false)
+  const [arbeitet, setArbeitet] = createSignal(false)
+  const [adresse, setAdresse] = createSignal<string | null>(null)
+  const [info, setInfo] = createSignal<PayRequestInfo | null>(null)
+  const [rechnung, setRechnung] = createSignal<string | null>(null)
+  const [bezahlt, setBezahlt] = createSignal<Bearer | null>(null)
+  let uhr: ReturnType<typeof setInterval> | undefined
+  onCleanup(() => uhr && clearInterval(uhr))
+
+  // was im Feld steht, erkannt
+  const erkannt = createMemo(() => {
+    const t = saeubere(text())
+    if (!t) return null
+    if (isBolt11Invoice(t)) {
+      const msat = decodeBolt11AmountMsat(t)
+      return {
+        art: 'rechnung' as const,
+        wert: t,
+        satz:
+          msat === null
+            ? 'Rechnung ohne Betrag — bitte mit Betrag ausstellen lassen'
+            : `Rechnung über ${zahl(Math.floor(msat / 1000))} Sats erkannt`,
+        geht: msat !== null && msat > 0
+      }
+    }
+    if (isLightningAddress(t))
+      return {
+        art: 'adresse' as const,
+        wert: t,
+        satz: `Lightning-Adresse ${t}`,
+        geht: true
+      }
+    return {
+      art: 'nichts' as const,
+      wert: t,
+      satz: 'Keine Rechnung und keine Lightning-Adresse',
+      geht: false
+    }
+  })
+
+  // von der Startseite oder aus Empfangen übergeben
+  onMount(() => {
+    const t = zuBezahlen()
+    if (t) {
+      setZuBezahlen(null)
+      setText(t)
+      void weiter()
+    }
+  })
+
+  const weiter = async () => {
+    const e = erkannt()
+    if (!e?.geht) return
+    if (e.art === 'rechnung') {
+      setRechnung(e.wert)
+      setSchritt('bestaetigen')
+      return
+    }
+    const url = resolveMintInput(e.wert)
+    if (!url) return
+    setArbeitet(true)
+    try {
+      setInfo(await fetchPayRequest(url))
+      setAdresse(e.wert)
+      setSchritt('betrag')
+    } catch (err) {
+      notify(
+        `Diese Adresse antwortet gerade nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
+    } finally {
+      setArbeitet(false)
+    }
+  }
+
+  // Adresse: Betrag → Rechnung holen
+  const grenzen = () => {
+    const i = info()
+    return i
+      ? {
+          min: Math.ceil(i.minSendable / 1000),
+          max: Math.floor(i.maxSendable / 1000)
+        }
+      : {min: 1, max: 0}
+  }
+  const betragGeht = () =>
+    ein.betrag() >= grenzen().min && ein.betrag() <= grenzen().max
+  const rechnungHolen = async () => {
+    const i = info()
+    if (!i || !betragGeht()) return
+    setArbeitet(true)
+    try {
+      const r = await requestInvoice(i, ein.betrag() * 1000)
+      setRechnung(r.pr)
+      setSchritt('bestaetigen')
+    } catch (err) {
+      notify(
+        `Die Rechnung kam nicht: ${(err as Error).message}`,
+        NotifyKind.ERROR
+      )
+    } finally {
+      setArbeitet(false)
+    }
+  }
+
+  // Bestätigen: wie viel, woraus, welche Gebühr
+  const msat = () => {
+    const r = rechnung()
+    return r ? (decodeBolt11AmountMsat(r) ?? 0) : 0
+  }
+  const sats = () => Math.floor(msat() / 1000)
+  const verfuegbar = createMemo(() => {
+    const g = gebunden()
+    return bearers().filter(
+      b => !b.spent && !b.deviceId && b.verified && !g.has(b.id)
+    )
+  })
+  const quelle = createMemo(() => waehleSchein(verfuegbar(), msat()))
+  const zweck = () => {
+    const r = rechnung()
+    return (r && rechnungsZweck(r)) || (info() && adressText(info()!.metadata))
+  }
+  const gebuehrText = () => {
+    const q = quelle()
+    if (!q) return '—'
+    if (q.amount === msat()) return 'keine'
+    // beim Abspalten fällt die Teil-Gebühr der Stelle an, vom Rest (gebuehren.ts: „zuletzt 1 Sat“)
+    const g = teilGebuehr(serverOf(q.url))
+    return g ? `${g}, vom Rest` : 'beim Abspalten möglich, vom Rest'
+  }
+
+  const bezahlen = async () => {
+    const r = rechnung()
+    const q = quelle()
+    if (!r || !q) return
+    setArbeitet(true)
+    try {
+      const schein = await scheinUeber(q, msat(), {
+        bearers,
+        addBearer,
+        updateBearer,
+        removeBearer,
+        logActivity,
+        deviceClient,
+        requireDeviceClient
+      })
+      if (!schein) return
+      let ergebnis
+      try {
+        ergebnis = await meltNote(schein.callback, requireNoteK1(schein.url), r)
+      } catch (err) {
+        if (err instanceof NoteSpentError) {
+          await updateBearer(schein.id, {spent: true})
+          logActivity(
+            'spent',
+            `${serverOf(schein.url)} meldet ${zahl(sats())} Sats als schon ausgegeben – hier markiert.`,
+            schein.label
+          )
+        }
+        throw err
+      }
+      await updateBearer(schein.id, {spent: true})
+      setBezahlt(schein)
+      const fuer = zweck()
+        ? ` (${zweck()})`
+        : adresse()
+          ? ` an ${adresse()}`
+          : ''
+      if (ergebnis.verify) {
+        // die Stelle bestätigt erst, wenn die Zahlung angekommen ist — nachfragen wie beim Aufladen
+        setSchritt('unterwegs')
+        const url = ergebnis.verify
+        uhr = setInterval(async () => {
+          try {
+            const v = await fetchInvoiceVerification(url)
+            if (!v.settled) return
+            clearInterval(uhr)
+            if (!sameInvoice(v.pr, r)) {
+              notify(
+                'Die Bestätigung der Stelle gehört zu einer anderen Rechnung — der Schein bleibt als ausgegeben gesperrt; bitte prüfen.',
+                NotifyKind.ERROR
+              )
+              return
+            }
+            logActivity(
+              'melt',
+              `${zahl(sats())} Sats bezahlt${fuer} — aus ${serverOf(schein.url)}.`,
+              schein.label
+            )
+            setSchritt('fertig')
+          } catch {
+            // nächster Versuch
+          }
+        }, 3000)
+      } else {
+        logActivity(
+          'melt',
+          `${zahl(sats())} Sats bezahlt${fuer} — aus ${serverOf(schein.url)} (ohne Bestätigung der Stelle).`,
+          schein.label
+        )
+        setSchritt('fertig')
+      }
+    } catch (err) {
+      notify(`Bezahlen ging nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+    } finally {
+      setArbeitet(false)
+    }
+  }
+
+  const kopf = (zurueck: () => void) => (
+    <div class="rz-seitenkopf">
+      <button
+        type="button"
+        class="rz-zurueck"
+        aria-label="Zurück"
+        onClick={zurueck}
+      >
+        ‹
+      </button>
+      <h2>Bezahlen</h2>
+    </div>
+  )
+
+  return (
+    <RequireWallet>
+      <div class="page rz-senden rz-bezahlen">
+        <Switch>
+          <Match when={schritt() === 'eingabe'}>
+            {kopf(() => navigate(-1))}
+            <label class="rz-feldname" for="bz-feld">
+              Rechnung oder Lightning-Adresse
+            </label>
+            <textarea
+              id="bz-feld"
+              class="rz-feld"
+              rows="3"
+              placeholder="lnbc… oder name@stelle.at"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck={false}
+              value={text()}
+              onInput={e => setText(e.currentTarget.value)}
+            />
+            <Show when={erkannt()}>
+              <p class="rz-erkannt" classList={{fremd: !erkannt()!.geht}}>
+                {erkannt()!.satz}
+              </p>
+            </Show>
+            <Show when={scannen()}>
+              <div class="rz-scanner">
+                <Scanner
+                  onScan={w => {
+                    setScannen(false)
+                    setText(saeubere(w))
+                  }}
+                />
+              </div>
+            </Show>
+            <div class="rz-duo">
+              <button
+                type="button"
+                class="rz-knopf"
+                disabled={!canScan()}
+                onClick={() => setScannen(s => !s)}
+              >
+                <span class="lbl">{scannen() ? 'Kamera aus' : 'Scannen'}</span>
+              </button>
+              <button
+                type="button"
+                class="rz-knopf an"
+                disabled={!erkannt()?.geht || arbeitet()}
+                onClick={() => void weiter()}
+              >
+                <span class="lbl">
+                  {arbeitet() ? 'Einen Moment …' : 'Weiter'}
+                </span>
+              </button>
+            </div>
+            <A href="/wallet?bezahlen=1" class="rz-aendern rz-block rz-mitte">
+              Mehr Möglichkeiten (interne Überweisung, Tresor) ›
+            </A>
+          </Match>
+
+          <Match when={schritt() === 'betrag'}>
+            {kopf(() => setSchritt('eingabe'))}
+            <p class="rz-hinweis rz-mitte">
+              An {adresse()}
+              <Show when={info() && adressText(info()!.metadata)}>
+                {' '}
+                · {adressText(info()!.metadata)}
+              </Show>
+            </p>
+            <Zaehlwerk
+              sats={ein.betrag()}
+              sofort
+              kalt={!betragGeht()}
+              wahl={ein.wahl()}
+              onWahl={ein.kurs() ? ein.waehle : undefined}
+              euroAnzeige={ein.euroAnzeige()}
+            >
+              <Show when={ein.betrag() > 0 && !betragGeht()}>
+                <div class="rz-ueber">
+                  <span>
+                    Möglich sind {zahl(grenzen().min)} bis {zahl(grenzen().max)}{' '}
+                    Sats
+                  </span>
+                </div>
+              </Show>
+            </Zaehlwerk>
+            <Tastatur betrag={ein} />
+            <button
+              type="button"
+              class="rz-knopf an rz-weiter"
+              disabled={!betragGeht() || arbeitet()}
+              onClick={() => void rechnungHolen()}
+            >
+              <span class="lbl">
+                {arbeitet() ? 'Einen Moment …' : 'Weiter'}
+              </span>
+            </button>
+          </Match>
+
+          <Match when={schritt() === 'bestaetigen'}>
+            {kopf(() => setSchritt(adresse() ? 'betrag' : 'eingabe'))}
+            <Zaehlwerk sats={sats()} sofort kalt={!quelle()} />
+            <div class="rz-gruppe">
+              <Show when={adresse()}>
+                <div class="rz-setting rz-still">
+                  <span class="sl">An</span>
+                  <span class="val">{adresse()}</span>
+                </div>
+              </Show>
+              <Show when={zweck()}>
+                <div class="rz-setting rz-still">
+                  <span class="sl">Zweck</span>
+                  <span class="val">{zweck()}</span>
+                </div>
+              </Show>
+              <div class="rz-setting rz-still">
+                <span class="sl">Gebühr</span>
+                <span class="val">{gebuehrText()}</span>
+              </div>
+              <div class="rz-setting rz-still">
+                <span class="sl">Bezahlt aus</span>
+                <span class="val" classList={{'rz-fehlt': !quelle()}}>
+                  {quelle()
+                    ? serverOf(quelle()!.url)
+                    : 'kein Schein reicht allein'}
+                </span>
+              </div>
+            </div>
+            <Show when={!quelle()}>
+              <p class="rz-hinweis">
+                Bezahlt wird aus einem Schein einer Ausgabestelle. Leg vorher
+                Scheine derselben Stelle zusammen oder lade auf.
+              </p>
+            </Show>
+            <button
+              type="button"
+              class="rz-knopf an rz-weiter"
+              disabled={!quelle() || arbeitet()}
+              onClick={() => void bezahlen()}
+            >
+              <span class="lbl">
+                {arbeitet()
+                  ? 'Einen Moment …'
+                  : `${zahl(sats())} Sats bezahlen`}
+              </span>
+            </button>
+          </Match>
+
+          <Match when={schritt() === 'unterwegs'}>
+            <div class="rz-fertig">
+              <Zaehlwerk sats={sats()} sofort kalt>
+                <p class="rz-status">
+                  <span class="rz-lampe-klein" /> Zahlung unterwegs — die
+                  Ausgabestelle bestätigt gleich
+                </p>
+              </Zaehlwerk>
+              <p class="rz-hinweis">
+                Der Schein ist schon als ausgegeben gesperrt. Du kannst die
+                Seite schließen; im Verlauf steht es, sobald es bestätigt ist.
+              </p>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                onClick={() => navigate('/wallet')}
+              >
+                <span class="lbl">Zur Wallet</span>
+              </button>
+            </div>
+          </Match>
+
+          <Match when={schritt() === 'fertig'}>
+            <div class="rz-fertig">
+              {/* wie beim Senden: eine Bewegung, kein Stand (Steve) */}
+              <Zaehlwerk sats={sats()} sofort vorzeichen="−">
+                <p class="rz-zeile-matt">Bezahlt</p>
+                <Show when={zweck() || adresse()}>
+                  <p class="rz-klein">{zweck() || adresse()}</p>
+                </Show>
+              </Zaehlwerk>
+              <button
+                type="button"
+                class="rz-knopf an rz-weiter"
+                onClick={() => navigate('/wallet')}
+              >
+                <span class="lbl">Zur Wallet</span>
+              </button>
+            </div>
+          </Match>
+        </Switch>
+      </div>
+    </RequireWallet>
+  )
+}
+
+export default Bezahlen

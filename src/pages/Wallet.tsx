@@ -92,6 +92,7 @@ import {
 import {notify, NotifyKind, msatToSats, pasteFromClipboard} from '../helpers'
 import {decodeTag, parseLabelTags} from '../noteTags'
 import {takeMeltInvoice} from '../meltHandoff'
+import {setZuBezahlen} from '../roehren/rechnung'
 import {receiveIntoWallet} from '../receive'
 import BearerCard from '../components/BearerCard'
 import Dialog from '../components/Dialog'
@@ -266,8 +267,9 @@ const Wallet: Component<{
   onMount(() => {
     const pr = takeMeltInvoice()
     if (pr && isBolt11Invoice(pr)) {
-      setMeltHandoffInvoice(pr)
-      setOpenDialog('melt')
+      // Fork: zur Bezahlen-Seite statt in den Dialog (Steve, 2026-10-24)
+      setZuBezahlen(pr)
+      navigate('/bezahlen')
     }
   })
 
@@ -391,16 +393,11 @@ const Wallet: Component<{
       receiveHero(trimmed)
       return
     }
-    if (isBolt11Invoice(trimmed)) {
-      setMeltHandoffInvoice(trimmed)
+    // Fork: Rechnung oder Adresse → Bezahlen-Seite statt Dialog (Steve, 2026-10-24)
+    if (isBolt11Invoice(trimmed) || isLightningAddress(trimmed)) {
       setHeroValue('')
-      setOpenDialog('melt')
-      return
-    }
-    if (isLightningAddress(trimmed)) {
-      setMeltHandoffAddress(trimmed)
-      setHeroValue('')
-      setOpenDialog('melt')
+      setZuBezahlen(trimmed)
+      navigate('/bezahlen')
       return
     }
     notify(

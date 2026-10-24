@@ -41,6 +41,7 @@ import {meldeNeueFassung} from './roehren/NeueFassung'
 import Geschenkkarte from './roehren/Geschenkkarte'
 import Entwickler from './roehren/Entwickler'
 import WoerterSeite from './roehren/WoerterSeite'
+import Bezahlen from './roehren/Bezahlen'
 import VerschluesselungErneuern from './roehren/VerschluesselungErneuern'
 import AddonRun from './pages/AddonRun'
 
@@ -111,6 +112,7 @@ const cleanup = render(
         component={() => <Wallet ansicht="werkstatt" />}
       />
       <Route path="/senden" component={Senden} />
+      <Route path="/bezahlen" component={Bezahlen} />
       <Route path="/empfangen" component={Empfangen} />
       <Route
         path="/empfangen/scannen"
