@@ -32,6 +32,7 @@ import {
 import {merkeUnterwegs} from './einloesen'
 import {schickeLink, WARNUNG} from './weitergabe'
 import Zaehlwerk from './Zaehlwerk'
+import {anSchluesselAn} from './anSchluessel'
 import './roehren.css'
 
 export type ScheineMotor = {
@@ -923,15 +924,18 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                       schliessen()
                     }}
                   />
-                  <Werkzeug
-                    pfad={PFADE.schluessel}
-                    titel="An einen Schlüssel übertragen"
-                    unter="Nur der Inhaber dieses Schlüssels kann einlösen"
-                    onClick={() => {
-                      m.anSchluessel(s())
-                      schliessen()
-                    }}
-                  />
+                  {/* nur wenn unter Für Entwickler eingeschaltet (Steve, 2026-10-24) */}
+                  <Show when={anSchluesselAn()}>
+                    <Werkzeug
+                      pfad={PFADE.schluessel}
+                      titel="An einen Schlüssel übertragen"
+                      unter="Nur der Inhaber dieses Schlüssels kann einlösen"
+                      onClick={() => {
+                        m.anSchluessel(s())
+                        schliessen()
+                      }}
+                    />
+                  </Show>
                   <Show when={m.absicherbar(s())}>
                     <Werkzeug
                       pfad={PFADE.erneuern}

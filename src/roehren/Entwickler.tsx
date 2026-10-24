@@ -21,6 +21,7 @@ import {
 } from '../gapLimit'
 import {offlineMode, setOfflineMode} from '../offlineMode'
 import {setVaultEnabled, vaultEnabled} from '../vaultFeature'
+import {anSchluesselAn, setAnSchluesselAn} from './anSchluessel'
 import {Gruppe, Schalter, Zeile} from './Bedienfeld'
 import {EXTRAS} from './Extras'
 import './roehren.css'
@@ -68,6 +69,12 @@ const Entwickler: Component = () => {
           unter="LNURLvault über USB oder Bluetooth"
           an={vaultEnabled()}
           onClick={() => setVaultEnabled(!vaultEnabled())}
+        />
+        <Schalter
+          label="An einen Schlüssel übertragen"
+          unter="Werkzeug im Scheinblatt: Schein an einen Nostr-Schlüssel binden"
+          an={anSchluesselAn()}
+          onClick={() => setAnSchluesselAn(!anSchluesselAn())}
         />
       </Gruppe>
 

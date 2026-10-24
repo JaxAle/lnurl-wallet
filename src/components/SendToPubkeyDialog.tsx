@@ -1,6 +1,5 @@
 import type {Component} from 'solid-js'
 import {Show, createMemo, createSignal} from 'solid-js'
-import {IoKeySharp, IoRefreshSharp} from 'solid-icons/io'
 
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
@@ -21,7 +20,6 @@ import {
 import {notify, NotifyKind, msatToSats} from '../helpers'
 import {offlineMode} from '../offlineMode'
 import Dialog from './Dialog'
-import FiatValue from './FiatValue'
 
 export type SendToPubkeyDialogProps = {
   // every selected, eligible, non-device-backed note - already guaranteed
@@ -62,10 +60,7 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
     if (picked.length === 0) return
     const cp1 = pubkeyInput().trim().toLowerCase()
     if (!isCp1(cp1)) {
-      notify(
-        'Enter a valid cp1 key (the recipient’s pubkey commitment).',
-        NotifyKind.ERROR
-      )
+      notify('Das ist kein gültiger cp1-Schlüssel.', NotifyKind.ERROR)
       return
     }
     const sum = totalMsat()
@@ -78,17 +73,14 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
       const sats = Math.trunc(Number(rawAmount))
       if (!Number.isFinite(sats) || sats <= 0) {
         notify(
-          'Enter a whole number of sats, or leave it blank to send everything.',
+          'Gib ganze Sats ein — oder lass das Feld leer für alles.',
           NotifyKind.ERROR
         )
         return
       }
       amountMsat = sats * 1000
       if (amountMsat > sum) {
-        notify(
-          "Amount can't exceed the selected notes' combined value.",
-          NotifyKind.ERROR
-        )
+        notify('Mehr, als der Schein wert ist.', NotifyKind.ERROR)
         return
       }
     }
@@ -120,7 +112,10 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
           `Sent ${msatToSats(sum)} sats from ${server} to pubkey ${cp1}.`,
           base.label
         )
-        notify(`Sent ${msatToSats(sum)} sats to ${cp1}.`, NotifyKind.SUCCESS)
+        notify(
+          `${msatToSats(sum)} Sats an ${cp1} übertragen.`,
+          NotifyKind.SUCCESS
+        )
       } else {
         // split: the recipient's cp1 is the first output, a fresh
         // wallet-held secret is the change - same shape as Combine & split,
@@ -194,7 +189,7 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
           })
         } catch (err) {
           notify(
-            `Sent, but settling your change note didn't complete (${(err as Error).message}) - it's tracked unverified; refresh it to repair.`,
+            `Übertragen — aber das Wechselgeld ist noch nicht bestätigt (${(err as Error).message}). Die Wallet klärt es beim nächsten Erneuern.`,
             NotifyKind.ERROR
           )
         }
@@ -204,7 +199,7 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
           base.label
         )
         notify(
-          `Sent ${msatToSats(amountMsat)} sats to ${cp1} - kept ${msatToSats(settledAmount)} sats change.`,
+          `${msatToSats(amountMsat)} Sats an ${cp1} übertragen, ${msatToSats(settledAmount)} Sats Wechselgeld behalten.`,
           NotifyKind.SUCCESS
         )
       }
@@ -216,59 +211,75 @@ const SendToPubkeyDialog: Component<SendToPubkeyDialogProps> = props => {
     }
   }
 
+  // Röhren-Bild statt des Original-Formulars (Steve, 2026-10-24); nur erreichbar, wenn unter
+  // Für Entwickler eingeschaltet. Logik oben unverändert.
+  const zahl = (msat: number) => Math.floor(msat / 1000).toLocaleString('de-DE')
+  const wechselgeld = () => {
+    const sats = Math.trunc(Number(amountSats()))
+    const rest = totalMsat() - sats * 1000
+    return amountSats().trim() !== '' && Number.isFinite(sats) && sats > 0
+      ? rest
+      : 0
+  }
+
   return (
     <Dialog onClose={props.onClose}>
-      <h4>
-        <IoKeySharp />
-        &nbsp;Send {msatToSats(totalMsat())} sats
-        <FiatValue msat={totalMsat()} /> to a pubkey
-      </h4>
-      <p class="bearer-hint">
-        Burns the {props.bearers.length} selected note
-        {props.bearers.length === 1 ? '' : 's'} and mints a note owned by the
-        cp1 pubkey below - only whoever holds its matching private key can later
-        prove ownership (a ck1 signature) and redeem it. This can't be undone,
-        and this wallet never asks for or sees that private key.
-      </p>
-      <label>Recipient cp1 key</label>
-      <input
-        type="text"
-        placeholder="cp1..."
-        value={pubkeyInput()}
-        onInput={e => setPubkeyInput(e.currentTarget.value)}
-      />
-      <label>Amount to send (sats) - leave blank to send everything</label>
-      <input
-        type="number"
-        placeholder={msatToSats(totalMsat())}
-        value={amountSats()}
-        onInput={e => setAmountSats(e.currentTarget.value)}
-        onKeyDown={e => e.key === 'Enter' && send()}
-      />
-      <Show when={amountSats().trim() !== ''}>
-        {(() => {
-          const sats = Math.trunc(Number(amountSats()))
-          const changeMsat = totalMsat() - sats * 1000
-          return (
-            <Show when={Number.isFinite(sats) && sats > 0 && changeMsat > 0}>
-              <p class="bearer-hint">
-                You'll keep ~{msatToSats(changeMsat)} sats change back in this
-                wallet.
-              </p>
-            </Show>
-          )
-        })()}
-      </Show>
-      <div class="btns">
-        <button disabled={busy() || offlineMode()} onClick={send}>
-          <Show when={busy()}>
-            <IoRefreshSharp class="spin" />
-            &nbsp;
-          </Show>
-          Send
+      <div class="rz-blatt rz-schein-blatt rz-umziehen">
+        <h3>An einen Schlüssel übertragen</h3>
+        <p class="rz-status">{zahl(totalMsat())} Sats</p>
+        <p class="rz-hinweis">
+          Der Schein wird eingelöst und neu ausgegeben, gebunden an den
+          cp1-Schlüssel unten. Einlösen kann ihn danach nur, wer den passenden
+          privaten Schlüssel hat — diese Wallet sieht ihn nie. Das lässt sich
+          nicht rückgängig machen.
+        </p>
+        <label class="rz-feldname" for="as-schluessel">
+          Schlüssel des Empfängers (cp1)
+        </label>
+        <input
+          id="as-schluessel"
+          class="rz-feld"
+          type="text"
+          placeholder="cp1…"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck={false}
+          value={pubkeyInput()}
+          onInput={e => setPubkeyInput(e.currentTarget.value)}
+        />
+        <label class="rz-feldname" for="as-betrag">
+          Betrag in Sats — leer lassen für alles
+        </label>
+        <input
+          id="as-betrag"
+          class="rz-feld"
+          type="number"
+          inputmode="numeric"
+          placeholder={zahl(totalMsat())}
+          value={amountSats()}
+          onInput={e => setAmountSats(e.currentTarget.value)}
+          onKeyDown={e => e.key === 'Enter' && send()}
+        />
+        <Show when={wechselgeld() > 0}>
+          <p class="rz-hinweis">
+            {zahl(wechselgeld())} Sats bleiben als Wechselgeld in dieser Wallet.
+          </p>
+        </Show>
+        <button
+          type="button"
+          class="rz-knopf an rz-weiter"
+          disabled={busy() || offlineMode() || !pubkeyInput().trim()}
+          onClick={send}
+        >
+          <span class="lbl">{busy() ? 'Einen Moment …' : 'Übertragen'}</span>
         </button>
-        <button disabled={busy()} onClick={props.onClose}>
-          Cancel
+        <button
+          type="button"
+          class="rz-leise rz-block rz-mitte"
+          disabled={busy()}
+          onClick={props.onClose}
+        >
+          Abbrechen
         </button>
       </div>
     </Dialog>
