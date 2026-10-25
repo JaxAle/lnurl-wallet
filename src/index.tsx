@@ -22,6 +22,7 @@ import Wallet from './pages/Wallet'
 import Reiter from './roehren/Reiter'
 import Senden from './roehren/Senden'
 import Kassa from './roehren/Kassa'
+import Tombola from './roehren/Tombola'
 import Empfangen from './roehren/Empfangen'
 import Mint from './pages/Mint'
 import Activity from './pages/Activity'
@@ -175,6 +176,7 @@ const cleanup = render(
       <Route path="/extras" component={Extras} />
       <Route path="/extras/geschenkkarte" component={Geschenkkarte} />
       <Route path="/extras/kassa" component={Kassa} />
+      <Route path="/extras/tombola" component={Tombola} />
       <Route path="/extras/entwickler" component={Entwickler} />
       <Route path="/settings/woerter" component={WoerterSeite} />
       <Route

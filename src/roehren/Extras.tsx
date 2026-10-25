@@ -25,7 +25,8 @@ export const EXTRAS: {
   {
     id: 'raffle',
     name: 'Tombola',
-    satz: 'Preise fürs Meetup — Lose mit Sats zum Ausdrucken.'
+    satz: 'Preise fürs Meetup — Lose mit Sats zum Ausdrucken.',
+    seite: '/extras/tombola' // eigener Bildschirm (Tombola.tsx) statt des Formulars der Erweiterung
   },
   {
     id: 'pos',

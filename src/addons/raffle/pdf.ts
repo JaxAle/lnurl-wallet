@@ -31,6 +31,29 @@ export type PdfConfig = {
   title: string
   paper: PaperSize
   showAmount: boolean
+  texte: TicketTexte
+}
+
+// Texte des Bogens — Standard wie im Original; der Fork reicht deutsche herein (Tombola.tsx)
+export type TicketTexte = {
+  untertitel: string
+  erklaerung: string
+  summe: (lose: number, sats: string) => string
+  stufen: string
+  los: (nr: string) => string
+  einheit: string
+}
+export const ENGLISCH: TicketTexte = {
+  untertitel: 'LNURLcash Raffle',
+  erklaerung:
+    'Each ticket on the following pages is a self-contained LNURLcash ' +
+    'bearer note: whoever holds it holds the prize. Scan its QR code with ' +
+    'any LNURL-compatible Lightning wallet to check its value and claim ' +
+    'it - no registration or verification with the organizer is needed.',
+  summe: (lose, sats) => `${lose} tickets total, ${sats} sat prize pool`,
+  stufen: 'Prize tiers',
+  los: nr => `Ticket #${nr}`,
+  einheit: 'sat'
 }
 
 const MM = 2.8346456693 // points per mm, pdf-lib works in points
@@ -74,7 +97,7 @@ const drawCoverPage = (
   })
   cursorY -= 10 * MM
 
-  page.drawText('LNURLcash Raffle', {
+  page.drawText(config.texte.untertitel, {
     x: margin,
     y: cursorY,
     size: 11,
@@ -83,11 +106,7 @@ const drawCoverPage = (
   })
   cursorY -= 9 * MM
 
-  const explanation =
-    'Each ticket on the following pages is a self-contained LNURLcash ' +
-    'bearer note: whoever holds it holds the prize. Scan its QR code with ' +
-    'any LNURL-compatible Lightning wallet to check its value and claim ' +
-    'it - no registration or verification with the organizer is needed.'
+  const explanation = config.texte.erklaerung
   for (const line of wrapWords(explanation, font, 9.5, contentWidth)) {
     page.drawText(line, {x: margin, y: cursorY, size: 9.5, font})
     cursorY -= 4.8 * MM
@@ -95,13 +114,15 @@ const drawCoverPage = (
   cursorY -= 5 * MM
 
   const totalSat = tickets.reduce((sum, t) => sum + t.amountSat, 0)
-  page.drawText(
-    `${tickets.length} tickets total, ${totalSat.toLocaleString()} sat prize pool`,
-    {x: margin, y: cursorY, size: 12, font: boldFont}
-  )
+  page.drawText(config.texte.summe(tickets.length, totalSat.toLocaleString()), {
+    x: margin,
+    y: cursorY,
+    size: 12,
+    font: boldFont
+  })
   cursorY -= 8 * MM
 
-  page.drawText('Prize tiers', {
+  page.drawText(config.texte.stufen, {
     x: margin,
     y: cursorY,
     size: 10,
@@ -112,7 +133,7 @@ const drawCoverPage = (
   for (const t of tiers) {
     const count = Math.max(0, Math.floor(t.count))
     if (count <= 0) continue
-    const line = `${count} × ${Math.max(0, t.amountSat).toLocaleString()} sat${t.label.trim() ? ` — ${t.label.trim()}` : ''}`
+    const line = `${count} × ${Math.max(0, t.amountSat).toLocaleString()} ${config.texte.einheit}${t.label.trim() ? ` — ${t.label.trim()}` : ''}`
     for (const wrapped of wrapWords(line, font, 9.5, contentWidth)) {
       page.drawText(wrapped, {x: margin, y: cursorY, size: 9.5, font})
       cursorY -= 4.6 * MM
@@ -125,14 +146,15 @@ export const buildTicketPdf = async (
   tickets: PrintedTicket[],
   showAmount: boolean,
   paper: PaperSize = 'a4',
-  tiers: PrizeTier[] = []
+  tiers: PrizeTier[] = [],
+  texte: TicketTexte = ENGLISCH
 ): Promise<Uint8Array> => {
   const [{PDFDocument, StandardFonts, rgb}, QRCode] = await Promise.all([
     import('pdf-lib'),
     import('qrcode')
   ])
 
-  const config: PdfConfig = {title, paper, showAmount}
+  const config: PdfConfig = {title, paper, showAmount, texte}
   const doc = await PDFDocument.create()
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold)
@@ -221,7 +243,7 @@ export const buildTicketPdf = async (
       maxWidth: textWidth
     })
     cursorY -= 3.3 * MM
-    p.drawText(`Ticket #${String(ticket.index + 1).padStart(3, '0')}`, {
+    p.drawText(config.texte.los(String(ticket.index + 1).padStart(3, '0')), {
       x: textX,
       y: cursorY,
       size: 6.5,
@@ -230,12 +252,15 @@ export const buildTicketPdf = async (
 
     if (config.showAmount) {
       cursorY -= 3 * MM
-      p.drawText(`${ticket.amountSat.toLocaleString()} sat`, {
-        x: textX,
-        y: cursorY,
-        size: 6.5,
-        font
-      })
+      p.drawText(
+        `${ticket.amountSat.toLocaleString()} ${config.texte.einheit}`,
+        {
+          x: textX,
+          y: cursorY,
+          size: 6.5,
+          font
+        }
+      )
     }
     if (ticket.label) {
       cursorY -= 3 * MM

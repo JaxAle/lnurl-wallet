@@ -73,3 +73,6 @@ export const teilGebuehr = (host: string): string | undefined => {
     ? `zuletzt ${zahl(sats, 3)} Sat${sats === 1 ? '' : 's'}`
     : 'zuletzt keine'
 }
+
+// zuletzt gemessene Teilgebühr in msat, 0 wenn unbekannt — für „reicht der Schein für n Teilungen?“
+export const teilGebuehrMsat = (host: string): number => teilen()[host] ?? 0
