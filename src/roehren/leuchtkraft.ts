@@ -24,9 +24,28 @@ const gelesen = (): Stufe => {
 const [leuchtkraft, setzeSignal] = createSignal<Stufe>(gelesen())
 export {leuchtkraft}
 
+// Der Filter nimmt jeden Farbwert mal v — auch den Hintergrund (Gerhard am Pixel: „hat sich auch der
+// Hintergrund geändert?“). Darum wird dessen Bild (styles/background.scss) mit Farben durch v gezeichnet:
+// mal v ergibt das genau den alten Hintergrund. Ändert sich background.scss, hier mitziehen.
+const durch = (hex: string, v: number) => {
+  const n = parseInt(hex.slice(1), 16)
+  const k = (x: number) => Math.round(x / v)
+  return `${k(n >> 16)}, ${k((n >> 8) & 255)}, ${k(n & 255)}`
+}
+const hintergrund = (v: number) => {
+  const glut = durch('#ff9d3f', v)
+  return [
+    `radial-gradient(ellipse 70% 50% at 15% -10%, rgba(${glut}, 0.1), transparent 60%)`,
+    `radial-gradient(ellipse 60% 45% at 100% 15%, rgba(${glut}, 0.07), transparent 60%)`,
+    `radial-gradient(ellipse 80% 60% at 50% 115%, rgba(${glut}, 0.08), transparent 65%)`,
+    `linear-gradient(160deg, rgb(${durch('#08090c', v)}) 0%, rgb(${durch('#0a0c10', v)}) 55%, rgb(${durch('#060708', v)}) 100%)`
+  ].join(', ')
+}
+
 const anwenden = (v: Stufe) => {
   if (typeof document === 'undefined') return
   document.documentElement.style.filter = v === 1 ? '' : `brightness(${v})`
+  document.body.style.backgroundImage = v === 1 ? '' : hintergrund(v)
 }
 anwenden(leuchtkraft())
 
