@@ -55,6 +55,8 @@ const Scanner: Component<ScannerProps> = props => {
   const [messung, setMessung] = createSignal<string | null>(null)
   let messer: ReturnType<typeof setInterval> | null = null
   let abspielen = 'ok'
+  // in welchem Schritt der Start gerade steht — bleibt iOS in einem hängen, zeigt die Messzeile welchen
+  let schritt = 'fragt nach der Kamera'
   const start = Date.now()
 
   const stop = () => {
@@ -133,10 +135,36 @@ const Scanner: Component<ScannerProps> = props => {
       setError('Dieser Browser gibt die Kamera nicht frei.')
       return
     }
+    // Fork: Messzeile (Gerhard, iPhone schwarz in Safari und als App, 2026-10-25). Läuft ab dem ersten
+    // Schritt — in der ersten Fassung erst nach dem Abspielen, und bei Gerhard kam sie nie: iOS hing also
+    // davor. Kommt nach 3 s kein Bild, steht da, in welchem Schritt es hängt und was die Kamera liefert.
+    messer = setInterval(() => {
+      if (videoRef && videoRef.videoWidth > 0 && videoRef.readyState >= 2) {
+        setMessung(null)
+        return
+      }
+      if (Date.now() - start < 3000) return
+      const spur = stream?.getVideoTracks()[0]
+      const e = spur?.getSettings?.()
+      setMessung(
+        [
+          `Schritt: ${schritt} (seit ${Math.round((Date.now() - start) / 1000)} s)`,
+          `Kamera: ${spur?.label || '–'}`,
+          spur
+            ? `Spur ${spur.readyState === 'live' ? 'läuft' : 'beendet'}${spur.muted ? ', liefert keine Bilder' : ''}${spur.enabled ? '' : ', abgeschaltet'}`
+            : 'keine Spur',
+          `angefordert ${e?.width ?? '?'} × ${e?.height ?? '?'}`,
+          `Bild ${videoRef?.videoWidth ?? '–'} × ${videoRef?.videoHeight ?? '–'}`,
+          `Video-Stand ${videoRef?.readyState ?? '–'}`,
+          `Abspielen ${abspielen}${videoRef?.paused ? ', angehalten' : ''}`
+        ].join(' · ')
+      )
+    }, 1000)
     try {
       // Fork: ohne Wunsch liefert Safari oft nur 640 × 480 — zu wenig für dichte Codes (Tombola-Lose).
       // Hohe Auflösung als Wunsch; lehnt ein Gerät das ab, wie bisher
       try {
+        schritt = 'fragt nach der Kamera (hohe Auflösung)'
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: {ideal: 'environment'},
@@ -147,6 +175,7 @@ const Scanner: Component<ScannerProps> = props => {
       } catch (err) {
         if (err instanceof DOMException && err.name === 'NotAllowedError')
           throw err
+        schritt = 'fragt nach der Kamera (einfach)'
         stream = await navigator.mediaDevices.getUserMedia({
           video: {facingMode: 'environment'}
         })
@@ -156,6 +185,7 @@ const Scanner: Component<ScannerProps> = props => {
       // race - the camera was unplugged/reclaimed between probing and
       // opening. Distinct message from an actual permission denial, which
       // is the far more common real-world case.
+      stop()
       setError(
         err instanceof DOMException && err.name === 'NotFoundError'
           ? 'Keine Kamera gefunden.'
@@ -163,7 +193,11 @@ const Scanner: Component<ScannerProps> = props => {
       )
       return
     }
-    if (!videoRef) return
+    schritt = 'Kamera erhalten, verbindet das Bild'
+    if (!videoRef) {
+      schritt = 'kein Videofeld'
+      return
+    }
     // Fork: iPhone (Safari, auch als App vom Home-Bildschirm) zeigt das Bild sonst schwarz, obwohl die
     // Kamera läuft — stumm, inline und automatisch ausdrücklich setzen, Abspielen absichern; verweigert
     // Safari es ohne Berührung, ein Knopf „Kamera starten“ (Gerhard am iPhone, 2026-10-17)
@@ -173,36 +207,22 @@ const Scanner: Component<ScannerProps> = props => {
     videoRef.setAttribute('playsinline', '')
     videoRef.setAttribute('webkit-playsinline', '')
     videoRef.srcObject = stream
-    try {
-      await videoRef.play()
-    } catch {
-      abspielen = 'verweigert'
-      setStartKnopf(true)
-    }
-    // Fork: Messzeile (Gerhard, iPhone schwarz in Safari und als App, 2026-10-25) — kommt nach 3 s
-    // noch kein Bild, steht da, was die Kamera liefert; ein Bildschirmfoto davon sagt, welcher Fall es ist
-    messer = setInterval(() => {
-      if (!videoRef) return
-      if (videoRef.videoWidth > 0 && videoRef.readyState >= 2) {
-        setMessung(null)
-        return
+    schritt = 'startet das Abspielen'
+    // nicht ewig warten: antwortet iOS nach 3 s weder ja noch nein, kommt der Knopf — eine Berührung
+    // löst das oft; gescannt wird trotzdem, sobald Bilder kommen
+    abspielen = 'keine Antwort'
+    const antwort = videoRef.play().then(
+      () => {
+        abspielen = 'ok'
+        schritt = 'spielt ab'
+      },
+      () => {
+        abspielen = 'verweigert'
+        setStartKnopf(true)
       }
-      if (Date.now() - start < 3000) return
-      const spur = stream?.getVideoTracks()[0]
-      const e = spur?.getSettings?.()
-      setMessung(
-        [
-          `Kamera: ${spur?.label || 'ohne Namen'}`,
-          spur
-            ? `Spur ${spur.readyState === 'live' ? 'läuft' : 'beendet'}${spur.muted ? ', liefert keine Bilder' : ''}${spur.enabled ? '' : ', abgeschaltet'}`
-            : 'keine Spur',
-          `angefordert ${e?.width ?? '?'} × ${e?.height ?? '?'}`,
-          `Bild ${videoRef.videoWidth} × ${videoRef.videoHeight}`,
-          `Video-Stand ${videoRef.readyState}`,
-          `Abspielen ${abspielen}${videoRef.paused ? ', angehalten' : ''}`
-        ].join(' · ')
-      )
-    }, 1000)
+    )
+    await Promise.race([antwort, new Promise(r => setTimeout(r, 3000))])
+    if (abspielen === 'keine Antwort') setStartKnopf(true)
 
     if (hasBarcodeDetector) scanWithBarcodeDetector()
     else scanWithJsQr()
