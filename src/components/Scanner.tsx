@@ -58,6 +58,7 @@ const Scanner: Component<ScannerProps> = props => {
   // ausgelesene Bilder und ihre mittlere Helligkeit (0–255): schwarz geliefert oder nur schwarz gezeichnet?
   let bilder = 0
   let hell: number | null = null
+  let dunkelSeit: number | null = null
   // in welchem Schritt der Start gerade steht — bleibt iOS in einem hängen, zeigt die Messzeile welchen
   let schritt = 'fragt nach der Kamera'
   const start = Date.now()
@@ -150,11 +151,16 @@ const Scanner: Component<ScannerProps> = props => {
     // Schritt — in der ersten Fassung erst nach dem Abspielen, und bei Gerhard kam sie nie: iOS hing also
     // davor. Kommt nach 3 s kein Bild, steht da, in welchem Schritt es hängt und was die Kamera liefert.
     messer = setInterval(() => {
-      // mit Bild: am Pixel (eingebauter Erkenner) keine Zeile; ohne ihn (Apple) bleibt sie, bis erkannt
-      // ist — sonst sieht man nicht, ob die Bilder schwarz kommen oder nur schwarz gezeichnet werden
+      // Zeile nur, wenn etwas nicht stimmt (Gerhard am iPhone, 2026-10-25: Kamera liefert, erkennt): kein
+      // Bild nach 3 s, oder 5 s lang nur schwarze Bilder (Helligkeit < 8 — Linse verdeckt, zu dunkel, oder
+      // die Kamera liefert schwarz; am iPhone war es einmal die Tischplatte). Der eingebaute Erkenner
+      // (Pixel) misst keine Helligkeit — dort genügt „Bild da“
       const bildDa =
         !!videoRef && videoRef.videoWidth > 0 && videoRef.readyState >= 2
-      if (bildDa && hasBarcodeDetector) {
+      if (!bildDa || hell === null || hell >= 8) dunkelSeit = null
+      else dunkelSeit ??= Date.now()
+      const dunkel = dunkelSeit !== null && Date.now() - dunkelSeit > 5000
+      if (bildDa && !dunkel) {
         setMessung(null)
         return
       }
@@ -163,6 +169,11 @@ const Scanner: Component<ScannerProps> = props => {
       const e = spur?.getSettings?.()
       setMessung(
         [
+          ...(dunkel
+            ? [
+                'Die Kamera sieht nur Schwarz — ist die Linse frei und genug Licht da?'
+              ]
+            : []),
           `Schritt: ${schritt} (seit ${Math.round((Date.now() - start) / 1000)} s)`,
           `Kamera: ${(spur?.label || '–').slice(0, 40)}`,
           spur
