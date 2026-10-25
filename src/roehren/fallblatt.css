@@ -3,22 +3,16 @@
    schmale Schrift mit Abrieb. Erster Durchstich war gezeichnet — am Pixel „lahm“ (Gerhard/Steve). Hinterleuchtet (gedrückt, beim Öffnen) bernsteinfarben — die Familie bleibt erkennbar.
    Nur unter html[data-haut='fallblatt']; ohne diese Kennung gilt nichts von hier. */
 
-/* Schloss: dunkler Metallrahmen */
+/* Schloss: ruhiger dunkler Grund */
 html[data-haut='fallblatt'] .rz-schloss {
   background:
     radial-gradient(120% 80% at 50% 0%, #24221e, transparent 70%),
     linear-gradient(180deg, #1a1916, #121110);
 }
 html[data-haut='fallblatt'] .rz-schloss-feld {
+  /* kein Rostrahmen (Gerhard am Pixel: „spricht mich nicht an“) — die Karten tragen das Bild allein */
   gap: 3px;
-  padding: 4px;
-  margin-top: 4px;
-  /* Rostblech mit Schrauben (fb-rahmen.webp, 240 × 366): die Ecken samt Schrauben ganz im Eckstück,
-     die Kanten gekachelt statt gedehnt — sonst wurden die Schrauben zu Ovalen */
-  border-style: solid;
-  border-width: 24px 21px 26px;
-  border-image: url('./fb-rahmen.webp') 70 62 78 / 24px 21px 26px round;
-  background: #0c0b0a;
+  padding: 6px;
   perspective: 600px;
 }
 /* die Karte: Gerhards Material (fallblatt/belege/2026-10-25-material-gerhard.webp) — vier dunkle

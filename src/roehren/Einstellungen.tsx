@@ -51,14 +51,6 @@ const WAEHRUNG_NAME: Record<Currency, string> = {
 const weiter = <T,>(reihe: readonly T[], jetzt: T): T =>
   reihe[(reihe.indexOf(jetzt) + 1) % reihe.length]
 
-const host = (origin: string): string => {
-  try {
-    return new URL(origin).host
-  } catch {
-    return origin
-  }
-}
-
 const Einstellungen: Component = () => {
   const {
     state,
@@ -192,12 +184,9 @@ const Einstellungen: Component = () => {
       <Gruppe titel="Ausgabestellen">
         <Zeile
           label={trustedMints().length > 1 ? 'Ausgabestellen' : 'Ausgabestelle'}
+          // wie viele, nicht welche — die Namen stießen an den Titel (Gerhard am Pixel, Steve 2026-10-25)
           wert={
-            trustedMints().length > 0
-              ? trustedMints()
-                  .map(m => host(m.server))
-                  .join(', ')
-              : 'keine'
+            trustedMints().length > 0 ? String(trustedMints().length) : 'keine'
           }
           href="/mint"
         />
