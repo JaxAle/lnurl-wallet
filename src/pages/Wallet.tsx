@@ -1009,7 +1009,9 @@ const Wallet: Component<{
   // (persistBearer reads localStorage fresh per-write, so concurrent
   // refreshes could race and clobber each other's records)
   const refreshAllNotes = async () => {
-    const picked = bearers().filter(b => !b.spent)
+    // Fork: Unterwegs-Scheine nie mit erneuern (siehe alleErneuern)
+    const weg = new Set(unterwegs())
+    const picked = bearers().filter(b => !b.spent && !weg.has(b.id))
     if (picked.length === 0) return
     setRefreshingAll(true)
     try {
@@ -1537,8 +1539,11 @@ const Wallet: Component<{
     // nur Geprüftes und nicht Gebundenes — was die Wallet gerade klärt, fasst niemand an (Steve)
     alleErneuern: async () => {
       const g = gebunden()
+      // Fork: Unterwegs-Scheine nie mit erneuern — Erneuern gibt ein neues Geheimnis, gezeigte QR,
+      // verschickte Links und gedruckte Lose wären danach wertlos (Gerhard, 2026-10-25)
+      const weg = new Set(unterwegs())
       const picked = bearers().filter(
-        b => !b.spent && b.verified && !g.has(b.id)
+        b => !b.spent && b.verified && !g.has(b.id) && !weg.has(b.id)
       )
       if (picked.length === 0) return
       setRefreshingAll(true)
