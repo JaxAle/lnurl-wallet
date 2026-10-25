@@ -25,6 +25,7 @@ import {useWallet} from '../WalletContext'
 import {isCk1, noteK1} from '../lnurlcash'
 import {Gruppe, Zeile} from './Bedienfeld'
 import {leuchtkraft, setLeuchtkraft, STUFE_TEXT, STUFEN} from './leuchtkraft'
+import {HAEUTE, haut, HAUT_TEXT, setHaut} from './haut'
 import Rueckfrage from './Rueckfrage'
 import {vergissWoerter} from './woerterTresor'
 import './roehren.css'
@@ -163,6 +164,14 @@ const Einstellungen: Component = () => {
       </Gruppe>
 
       <Gruppe titel="Anzeige">
+        <Zeile
+          label="Design"
+          unter="Antippen wechselt — Röhren oder Fallblatt"
+          wert={HAUT_TEXT[haut()]}
+          onClick={() =>
+            setHaut(HAEUTE[(HAEUTE.indexOf(haut()) + 1) % HAEUTE.length])
+          }
+        />
         <Zeile
           label="Leuchtkraft"
           unter="Die ganze Oberfläche heller — antippen wechselt"
