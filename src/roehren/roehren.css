@@ -2743,3 +2743,10 @@ body.rz-gesperrt {
   background: repeating-conic-gradient(#222 0 25%, #fff 0 50%) 0 0 / 14px 14px;
   opacity: 0.85;
 }
+/* Messzeile des Scanners, nur wenn das Bild schwarz bleibt (Scanner.tsx) */
+.rz-messzeile {
+  margin: 8px 4px;
+  text-align: center;
+  color: rgba(238, 152, 90, 0.7);
+  word-break: break-word;
+}

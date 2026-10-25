@@ -52,10 +52,16 @@ const Scanner: Component<ScannerProps> = props => {
   // Fork: Safari am iPhone startet das Bild manchmal erst nach einer Berührung (Gerhard, 2026-10-17)
   const [startKnopf, setStartKnopf] = createSignal(false)
   const hasBarcodeDetector = 'BarcodeDetector' in window
+  const [messung, setMessung] = createSignal<string | null>(null)
+  let messer: ReturnType<typeof setInterval> | null = null
+  let abspielen = 'ok'
+  const start = Date.now()
 
   const stop = () => {
     if (timer) clearInterval(timer)
     timer = null
+    if (messer) clearInterval(messer)
+    messer = null
     stream?.getTracks().forEach(track => track.stop())
     stream = null
   }
@@ -95,11 +101,29 @@ const Scanner: Component<ScannerProps> = props => {
     if (!ctx) return
     timer = setInterval(() => {
       if (!videoRef || videoRef.readyState < 2) return
-      canvas.width = videoRef.videoWidth
-      canvas.height = videoRef.videoHeight
-      ctx.drawImage(videoRef, 0, 0, canvas.width, canvas.height)
-      const frame = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const result = jsQR(frame.data, frame.width, frame.height)
+      // Fork: nur das mittlere Quadrat (3/4 der kürzeren Seite) — dorthin hält man den Code; weniger
+      // Bildpunkte, die jsQR durchsuchen muss, und der Code füllt mehr davon (iPad/iPhone, 2026-10-25)
+      const w = videoRef.videoWidth
+      const h = videoRef.videoHeight
+      const seite = Math.floor(Math.min(w, h) * 0.75)
+      if (!seite) return
+      canvas.width = seite
+      canvas.height = seite
+      ctx.drawImage(
+        videoRef,
+        Math.floor((w - seite) / 2),
+        Math.floor((h - seite) / 2),
+        seite,
+        seite,
+        0,
+        0,
+        seite,
+        seite
+      )
+      const frame = ctx.getImageData(0, 0, seite, seite)
+      const result = jsQR(frame.data, frame.width, frame.height, {
+        inversionAttempts: 'dontInvert'
+      })
       if (result) handleValue(result.data)
     }, 250)
   }
@@ -110,9 +134,23 @@ const Scanner: Component<ScannerProps> = props => {
       return
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {facingMode: 'environment'}
-      })
+      // Fork: ohne Wunsch liefert Safari oft nur 640 × 480 — zu wenig für dichte Codes (Tombola-Lose).
+      // Hohe Auflösung als Wunsch; lehnt ein Gerät das ab, wie bisher
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: {ideal: 'environment'},
+            width: {ideal: 1920},
+            height: {ideal: 1080}
+          }
+        })
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'NotAllowedError')
+          throw err
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {facingMode: 'environment'}
+        })
+      }
     } catch (err) {
       // NotFoundError: hasCameraDevice's own probe (ScanToggle) missed a
       // race - the camera was unplugged/reclaimed between probing and
@@ -138,8 +176,33 @@ const Scanner: Component<ScannerProps> = props => {
     try {
       await videoRef.play()
     } catch {
+      abspielen = 'verweigert'
       setStartKnopf(true)
     }
+    // Fork: Messzeile (Gerhard, iPhone schwarz in Safari und als App, 2026-10-25) — kommt nach 3 s
+    // noch kein Bild, steht da, was die Kamera liefert; ein Bildschirmfoto davon sagt, welcher Fall es ist
+    messer = setInterval(() => {
+      if (!videoRef) return
+      if (videoRef.videoWidth > 0 && videoRef.readyState >= 2) {
+        setMessung(null)
+        return
+      }
+      if (Date.now() - start < 3000) return
+      const spur = stream?.getVideoTracks()[0]
+      const e = spur?.getSettings?.()
+      setMessung(
+        [
+          `Kamera: ${spur?.label || 'ohne Namen'}`,
+          spur
+            ? `Spur ${spur.readyState === 'live' ? 'läuft' : 'beendet'}${spur.muted ? ', liefert keine Bilder' : ''}${spur.enabled ? '' : ', abgeschaltet'}`
+            : 'keine Spur',
+          `angefordert ${e?.width ?? '?'} × ${e?.height ?? '?'}`,
+          `Bild ${videoRef.videoWidth} × ${videoRef.videoHeight}`,
+          `Video-Stand ${videoRef.readyState}`,
+          `Abspielen ${abspielen}${videoRef.paused ? ', angehalten' : ''}`
+        ].join(' · ')
+      )
+    }, 1000)
 
     if (hasBarcodeDetector) scanWithBarcodeDetector()
     else scanWithJsQr()
@@ -148,6 +211,7 @@ const Scanner: Component<ScannerProps> = props => {
   const starte = async () => {
     try {
       await videoRef?.play()
+      abspielen = 'nach Berührung ok'
       setStartKnopf(false)
     } catch {
       // bleibt sichtbar
@@ -164,6 +228,9 @@ const Scanner: Component<ScannerProps> = props => {
         // instead of forcing fullscreen playback
         <>
           <video ref={videoRef} class="scanner" playsinline muted autoplay />
+          <Show when={messung()}>
+            <p class="rz-klein rz-messzeile">{messung()}</p>
+          </Show>
           <Show when={startKnopf()}>
             <button
               type="button"
