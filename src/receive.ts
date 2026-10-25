@@ -111,6 +111,9 @@ export type ReceiveContext = {
 // spent/unknown); everything after a note is actually stored is reported
 // via notify()/logActivity() instead; a failed rotate still means "the
 // note is yours", just not yet a secret only you know.
+const empfangenText = (b: {amount: number; url: string}) =>
+  `${msatToSats(b.amount)} Sats empfangen · ${serverOf(b.url)}`
+
 export const receiveIntoWallet = async (
   noteValue: string,
   ctx: ReceiveContext
@@ -151,7 +154,9 @@ export const receiveIntoWallet = async (
       'receive',
       `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)}.`
     )
-    // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
+    // Fork: doch eine Erfolgsmeldung (Gerhard, 2026-10-25): am iPad mit einem Tombola-Los sah man das
+    // Hinaufzählen nicht — wer auf die Kamera schaut, schaut nicht aufs Zählwerk
+    notify(empfangenText(received), NotifyKind.SUCCESS)
   } catch (err) {
     if (err instanceof AmbiguousMutationError) {
       // the rotate request may have landed despite the failure - the fresh
@@ -165,7 +170,7 @@ export const receiveIntoWallet = async (
           'receive',
           `${msatToSats(received.amount)} Sats empfangen von ${serverOf(received.url)} (erneuert – nach unklarer Antwort bestätigt).`
         )
-        // Fork: keine Erfolgsmeldung — das Zählwerk zählt hinauf (Steve, 2026-10-11)
+        notify(empfangenText(received), NotifyKind.SUCCESS)
         return
       }
       if (outcome === 'unknown') {

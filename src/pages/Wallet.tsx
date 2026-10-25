@@ -52,7 +52,8 @@ import {
   isBolt11Invoice,
   isLightningAddress,
   isValidNoteInput,
-  resolveNoteInput
+  resolveNoteInput,
+  noteDeclaredAmount
 } from '../lnurlcash'
 import {
   noteK1,
@@ -348,8 +349,14 @@ const Wallet: Component<{
   // re-entrancy-guarded the same way ReceiveDialog's own receive is: a
   // scanner double-fire or Enter-key/confirm-click landing together must
   // not run two receives for the same k1
+  // Fork: Betrag, soweit er im Schein steht — „Schein über 180 Sats wird eingelöst …“ (Gerhard, 2026-10-25)
+  const [heroBetrag, setHeroBetrag] = createSignal<number | null>(null)
   const receiveHero = async (noteValue: string) => {
     if (heroReceiving()) return
+    const angegeben = noteDeclaredAmount(
+      resolveNoteInput(noteValue.trim()) ?? ''
+    )
+    setHeroBetrag(angegeben === null ? null : Math.floor(angegeben / 1000))
     setHeroReceiving(true)
     // Fork: eine Stelle, von der man einen Schein hält, trägt das Original still ein — hier wird es
     // gesagt (Gerhard, 2026-10-13: Schein von dnis Wallet ging ohne eingetragene Ausgabestelle)
@@ -1601,7 +1608,11 @@ const Wallet: Component<{
                 sah man am Pixel nicht, ob der Scan angekommen war (Gerhard, 2026-10-11) */}
                   <Show when={heroReceiving()}>
                     <p class="rz-status">
-                      <span class="rz-lampe-klein" /> Schein wird eingelöst …
+                      <span class="rz-lampe-klein" /> Schein
+                      {heroBetrag() !== null
+                        ? ` über ${heroBetrag()!.toLocaleString('de-DE')} Sats`
+                        : ''}{' '}
+                      wird eingelöst …
                     </p>
                   </Show>
                   <Show when={vorgaenge().length > 0}>
