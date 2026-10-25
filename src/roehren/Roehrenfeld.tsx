@@ -25,6 +25,9 @@ export type Antwort = 'weiter' | 'falsch' | 'offen'
 type Phase = 'zuendet' | 'bereit' | 'prueft' | 'falsch' | 'offen'
 
 // J gezeichnet (≠ I), die 0 mit Punkt (≠ O) — wie im Prototyp keyInner/keyClass
+import {haut} from './haut'
+import Klappe from './Klappe'
+
 const Zeichen: Component<{z: string}> = props => (
   <span
     classList={{ch: true, 'ch-0': props.z === '0', 'ch-J': props.z === 'J'}}
@@ -238,17 +241,42 @@ const Roehrenfeld: Component<{
               onClick={() => tippe(i())}
             >
               <span class="glow" />
-              {/* neu nach jedem Tippen, damit das Nachglimmen von vorn beginnt */}
+              {/* Fallblatt: echte Klappen — beim Erscheinen klappert die Tafel ein, beim richtigen Code
+              klappert jede Karte zu ihrem Zeichen in LN · URL · CASH, beim Tippen ein Klapp */}
               <Show
-                when={treffer()[i()] ?? 0}
-                keyed
-                fallback={<Zeichen z={zeichenAn(i())} />}
+                when={haut() === 'fallblatt'}
+                fallback={
+                  /* neu nach jedem Tippen, damit das Nachglimmen von vorn beginnt */
+                  <Show
+                    when={treffer()[i()] ?? 0}
+                    keyed
+                    fallback={<Zeichen z={zeichenAn(i())} />}
+                  >
+                    {n => (
+                      <span class="treffer" data-n={n}>
+                        <Zeichen z={zeichenAn(i())} />
+                      </span>
+                    )}
+                  </Show>
+                }
               >
-                {n => (
-                  <span class="treffer" data-n={n}>
-                    <Zeichen z={zeichenAn(i())} />
-                  </span>
-                )}
+                <Show
+                  when={treffer()[i()] ?? 0}
+                  keyed
+                  fallback={
+                    <Klappe
+                      z={zeichenAn(i())}
+                      verzug={Number(verzug[i()])}
+                      anfang={3 + (i() % 4)}
+                    />
+                  }
+                >
+                  {n => (
+                    <span class="treffer" data-n={n}>
+                      <Klappe z={zeichenAn(i())} einmal />
+                    </span>
+                  )}
+                </Show>
               </Show>
             </button>
           )}

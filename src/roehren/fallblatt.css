@@ -19,29 +19,30 @@ html[data-haut='fallblatt'] .rz-schloss-feld {
    Varianten, abwechselnd verteilt; Spalt, Scharniere und Rost sind im Bild */
 html[data-haut='fallblatt'] .rz-schloss .tube {
   border-radius: 3px;
-  background: #0c0b0a url('./fb-karte-1.webp') center / 100% 100% no-repeat;
+  --fb-bild: url('./fb-karte-1.webp');
+  background: #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
 }
 /* acht Varianten: Gerhards vier und dieselben gespiegelt — Flecken und Scharniere wiederholen sich kaum */
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 2) {
-  background-image: url('./fb-karte-2.webp');
+  --fb-bild: url('./fb-karte-2.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 3) {
-  background-image: url('./fb-karte-3.webp');
+  --fb-bild: url('./fb-karte-3.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 4) {
-  background-image: url('./fb-karte-4.webp');
+  --fb-bild: url('./fb-karte-4.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 5) {
-  background-image: url('./fb-karte-5.webp');
+  --fb-bild: url('./fb-karte-5.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 6) {
-  background-image: url('./fb-karte-6.webp');
+  --fb-bild: url('./fb-karte-6.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 7) {
-  background-image: url('./fb-karte-7.webp');
+  --fb-bild: url('./fb-karte-7.webp');
 }
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 0) {
-  background-image: url('./fb-karte-8.webp');
+  --fb-bild: url('./fb-karte-8.webp');
 }
 /* die Fuge auch durch den Buchstaben: ein dunkler Spalt (Gerhard am Pixel: „Fuge zu klein“) */
 html[data-haut='fallblatt'] .rz-schloss .tube::after {
@@ -121,24 +122,6 @@ html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .ch {
   color: #241d16;
   text-shadow: none;
 }
-/* Zünden: die Karten klappen herunter statt zu flackern */
-html[data-haut='fallblatt'] .rz-schloss-feld.zuendet .ch {
-  animation: fb-klappen 0.5s cubic-bezier(0.3, 0.8, 0.4, 1) var(--d, 0s) both;
-}
-@keyframes fb-klappen {
-  0% {
-    transform: scaleX(0.86) rotateX(90deg);
-    opacity: 0.2;
-  }
-  60% {
-    transform: scaleX(0.86) rotateX(-12deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scaleX(0.86) rotateX(0);
-    opacity: 1;
-  }
-}
 /* gedrückt: Karte leuchtet von hinten; nach dem Tippen klappt das Zeichen einmal */
 html[data-haut='fallblatt'] .rz-schloss .tube.druck {
   filter: none;
@@ -147,9 +130,6 @@ html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
 html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
   color: #3a1d05;
   text-shadow: none;
-}
-html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .treffer .ch {
-  animation: fb-klappen 0.35s cubic-bezier(0.3, 0.8, 0.4, 1) both;
 }
 /* falsch: rote Schrift, kurz flackern (wie bei den Röhren) */
 html[data-haut='fallblatt'] .rz-schloss-feld.falsch .tube .ch {
@@ -160,7 +140,6 @@ html[data-haut='fallblatt'] .rz-schloss-feld.falsch .tube .ch {
 html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch {
   color: #3a1d05;
   text-shadow: none;
-  animation: fb-klappen 0.5s cubic-bezier(0.3, 0.8, 0.4, 1) var(--d, 0s) both;
 }
 
 /* ---------- Farbwelt und Schrift (Steve, 2026-10-25): aus Gerhards Karten abgeleitet ----------
@@ -329,4 +308,91 @@ html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 6) {
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(11n + 5) {
   --fb-neig: -2deg;
   --fb-fuge: 2.2deg;
+}
+
+/* ---------- Klappen (Klappe.tsx): vier Hälften, die obere fällt um die Fuge, die untere kommt herab ---------- */
+html[data-haut='fallblatt'] .rz-schloss .tube {
+  perspective: 240px;
+}
+html[data-haut='fallblatt'] .fb-klappe {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+html[data-haut='fallblatt'] .fb-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+html[data-haut='fallblatt'] .fb-oben {
+  top: 0;
+  height: 48%;
+}
+html[data-haut='fallblatt'] .fb-unten {
+  top: 48%;
+  bottom: 0;
+}
+html[data-haut='fallblatt'] .fb-voll {
+  position: absolute;
+  left: 0;
+  width: 100cqw;
+  height: 100cqh;
+  display: grid;
+  place-items: center;
+}
+html[data-haut='fallblatt'] .fb-oben .fb-voll {
+  top: 0;
+}
+html[data-haut='fallblatt'] .fb-unten .fb-voll {
+  top: -48cqh;
+}
+/* die bewegten Hälften tragen das Kartenbild, damit sie verdecken, was dahinter steht */
+html[data-haut='fallblatt'] .fb-fall,
+html[data-haut='fallblatt'] .fb-komm {
+  z-index: 3;
+  background: #0c0b0a var(--fb-bild) no-repeat;
+  background-size: 100cqw 100cqh;
+  backface-visibility: hidden;
+}
+html[data-haut='fallblatt'] .fb-fall {
+  background-position: 0 0;
+  transform-origin: 50% 100%;
+  animation: fb-fall calc(var(--fb-flip) / 2) ease-in forwards;
+  box-shadow: inset 0 -6px 8px -6px rgba(0, 0, 0, 0.5);
+}
+html[data-haut='fallblatt'] .fb-komm {
+  background-position: 0 -48cqh;
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+  animation: fb-komm calc(var(--fb-flip) / 2) ease-out calc(var(--fb-flip) / 2)
+    forwards;
+}
+@keyframes fb-fall {
+  to {
+    transform: rotateX(-90deg);
+    filter: brightness(0.7);
+  }
+}
+@keyframes fb-komm {
+  from {
+    transform: rotateX(90deg);
+    filter: brightness(0.7);
+  }
+  to {
+    transform: rotateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-haut='fallblatt'] .fb-fall,
+  html[data-haut='fallblatt'] .fb-komm {
+    display: none;
+  }
+}
+/* kein Zünd-Flackern der Röhren: die Tafel klappert sich ein (Klappe.tsx) */
+html[data-haut='fallblatt'] .rz-schloss-feld.zuendet .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.falsch .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .treffer .ch {
+  animation: none;
 }
