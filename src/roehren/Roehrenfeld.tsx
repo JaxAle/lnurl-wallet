@@ -267,7 +267,9 @@ const Roehrenfeld: Component<{
                     <Klappe
                       z={zeichenAn(i())}
                       verzug={Number(verzug[i()])}
-                      anfang={3 + (i() % 4)}
+                      // einklappern nur beim ersten Erscheinen — nach dem Tippen neu aufgebaute Karten
+                      // klappern sonst noch einmal ein und kommen zu spät bei LN · URL · CASH an
+                      anfang={phase() === 'zuendet' ? 3 + (i() % 4) : 0}
                     />
                   }
                 >

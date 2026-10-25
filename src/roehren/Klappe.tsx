@@ -69,18 +69,25 @@ const Klappe: Component<{
   let n = 0
   onCleanup(() => uhr && clearTimeout(uhr))
 
+  let laeuft = false
   const laufe = (folge: string[], warte = 0) => {
     if (uhr) clearTimeout(uhr)
+    laeuft = true
     if (ruhig()) {
-      setOben(folge.at(-1)!)
-      setUnten(folge.at(-1)!)
+      laeuft = false
+      setOben(props.z)
+      setUnten(props.z)
       setKlapp(null)
       return
     }
     let alt = unten()
     const schritt = (k: number) => {
       if (k >= folge.length) {
+        laeuft = false
         setKlapp(null)
+        // angekommen — aber vielleicht wurde das Ziel inzwischen ein anderes (richtiger Code, während die
+        // Karte noch einklapperte): dann gleich weiter dorthin (Gerhard am Pixel: kein LN · URL · CASH)
+        if (unten() !== props.z) laufe(weg(unten(), props.z))
         return
       }
       const neu = folge[k]
@@ -106,11 +113,13 @@ const Klappe: Component<{
       laufe(vor.slice(1), warte)
     }
   })
+  // neues Ziel: steht die Karte, klappert sie los; klappert sie gerade, holt das Ende sie dorthin
   createEffect(
     on(
       () => props.z,
-      (z, vorher) =>
-        vorher !== undefined && z !== vorher && laufe(weg(unten(), z)),
+      z => {
+        if (!laeuft && z !== unten()) laufe(weg(unten(), z))
+      },
       {defer: true}
     )
   )
