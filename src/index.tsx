@@ -23,8 +23,8 @@ import Reiter from './roehren/Reiter'
 import Senden from './roehren/Senden'
 import Kassa from './roehren/Kassa'
 import Tombola from './roehren/Tombola'
+import './roehren/haut' // gewählte Haut (Röhren/Fallblatt) gleich beim Start — vor der Leuchtkraft
 import './roehren/leuchtkraft' // gewählte Leuchtkraft gleich beim Start
-import './roehren/haut' // gewählte Haut (Röhren/Fallblatt) gleich beim Start
 import Empfangen from './roehren/Empfangen'
 import Mint from './pages/Mint'
 import Activity from './pages/Activity'

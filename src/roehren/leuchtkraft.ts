@@ -32,13 +32,36 @@ const durch = (hex: string, v: number) => {
   const k = (x: number) => Math.round(x / v)
   return `${k(n >> 16)}, ${k((n >> 8) & 255)}, ${k(n & 255)}`
 }
+// Hintergrund je Haut — Röhren: styles/background.scss; Fallblatt: fallblatt.css (body)
+const HINTERGRUND = {
+  roehren: {
+    glut: '#ff9d3f',
+    flecken: [
+      ['ellipse 70% 50% at 15% -10%', 0.1, 60],
+      ['ellipse 60% 45% at 100% 15%', 0.07, 60],
+      ['ellipse 80% 60% at 50% 115%', 0.08, 65]
+    ],
+    grund: ['#08090c', '#0a0c10', '#060708']
+  },
+  fallblatt: {
+    glut: '#f6c560',
+    flecken: [['ellipse 70% 50% at 15% -10%', 0.06, 60]],
+    grund: ['#1d1f1b', '#181a16', '#121310']
+  }
+} as const
 const hintergrund = (v: number) => {
-  const glut = durch('#ff9d3f', v)
+  const h =
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.haut === 'fallblatt'
+      ? HINTERGRUND.fallblatt
+      : HINTERGRUND.roehren
+  const glut = durch(h.glut, v)
   return [
-    `radial-gradient(ellipse 70% 50% at 15% -10%, rgba(${glut}, 0.1), transparent 60%)`,
-    `radial-gradient(ellipse 60% 45% at 100% 15%, rgba(${glut}, 0.07), transparent 60%)`,
-    `radial-gradient(ellipse 80% 60% at 50% 115%, rgba(${glut}, 0.08), transparent 65%)`,
-    `linear-gradient(160deg, rgb(${durch('#08090c', v)}) 0%, rgb(${durch('#0a0c10', v)}) 55%, rgb(${durch('#060708', v)}) 100%)`
+    ...h.flecken.map(
+      ([form, a, bis]) =>
+        `radial-gradient(${form}, rgba(${glut}, ${a}), transparent ${bis}%)`
+    ),
+    `linear-gradient(160deg, rgb(${durch(h.grund[0], v)}) 0%, rgb(${durch(h.grund[1], v)}) 55%, rgb(${durch(h.grund[2], v)}) 100%)`
   ].join(', ')
 }
 
@@ -58,3 +81,6 @@ export const setLeuchtkraft = (v: Stufe): void => {
   setzeSignal(v)
   anwenden(v)
 }
+
+// nach einem Wechsel der Haut den Hintergrund neu zeichnen
+export const hintergrundNeu = (): void => anwenden(leuchtkraft())

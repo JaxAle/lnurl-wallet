@@ -72,9 +72,7 @@ html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube:has(.treffer) .glow {
 }
 /* das Zeichen: fett, schmal, dunkel — keine Glühdraht-Maske, kein Leuchten */
 html[data-haut='fallblatt'] .rz-schloss .tube .ch {
-  font-family:
-    'Roboto Condensed', 'sans-serif-condensed', 'Arial Narrow',
-    'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--rz-schrift-familie);
   font-weight: 700;
   font-size: min(62cqh, 88cqw);
   transform: scaleX(0.86);
@@ -141,4 +139,89 @@ html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch {
   color: #3a1d05;
   text-shadow: none;
   animation: fb-klappen 0.5s cubic-bezier(0.3, 0.8, 0.4, 1) var(--d, 0s) both;
+}
+
+/* ---------- Farbwelt und Schrift (Steve, 2026-10-25): aus Gerhards Karten abgeleitet ----------
+   Graphit mit Oliv-Hauch statt Schwarz mit Bernstein-Schleier; Creme-Lack statt Glut; das Gelb der
+   hinterleuchteten Karten als Licht; Signalrot statt glimmendem Rot-Orange; Barlow Condensed (Tafelschrift)
+   statt Jost. Fallblatt ist Druck, kein Glimmen: keine Leuchtschatten, kein Glühdraht-Raster. */
+html[data-haut='fallblatt'] {
+  --rz-schrift: #ece3cf;
+  --rz-schrift-2: #ddd2ba;
+  --rz-leise: #9a937f;
+  --rz-leise-2: #b2aa94;
+  --rz-linie: #34352f;
+  --rz-linie-2: #45463e;
+  --rz-linie-3: #2c2d28;
+  --rz-linie-4: #3d3e37;
+  --rz-flaeche: #23241f;
+  --rz-flaeche-tief: #1a1b17;
+  --rz-flaeche-2: #1f201b;
+  --rz-warn: #d2402f;
+  --rz-warn-2: #e0604f;
+  --rz-warn-rgb: 210, 64, 47;
+  --rz-hell: #fff1c9;
+  --rz-hell-2: #fff5dc;
+  --rz-gold: #f6c560;
+  --rz-gold-2: #f2b84c;
+  --rz-licht: #f6c560;
+  --rz-licht-rgb: 246, 197, 96;
+  --rz-glut-rgb: 222, 210, 182;
+  --rz-schrift-familie:
+    'Barlow Condensed', 'Roboto Condensed', 'Arial Narrow', sans-serif;
+}
+html[data-haut='fallblatt'] body {
+  font-family: var(--rz-schrift-familie);
+  background:
+    radial-gradient(
+      ellipse 70% 50% at 15% -10%,
+      rgba(246, 197, 96, 0.06),
+      transparent 60%
+    ),
+    linear-gradient(160deg, #1d1f1b 0%, #181a16 55%, #121310 100%);
+  background-attachment: fixed;
+  background-size: 100% 100%;
+}
+html[data-haut='fallblatt'] * {
+  text-shadow: none !important;
+}
+html[data-haut='fallblatt'] .rz-knopf .lbl,
+html[data-haut='fallblatt'] .rz-taste .w,
+html[data-haut='fallblatt'] .roehren-zaehlwerk .tube .ch {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+/* Knöpfe: dunkle Fläche mit Creme-Schrift; „an“ (Hauptweg) wie eine hinterleuchtete Karte */
+html[data-haut='fallblatt'] .rz-knopf {
+  border-radius: 6px;
+  color: var(--rz-schrift);
+}
+html[data-haut='fallblatt'] .rz-knopf .lbl {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: none;
+  font-size: 24px;
+}
+html[data-haut='fallblatt'] .rz-knopf.flach .lbl {
+  font-size: 16px;
+}
+html[data-haut='fallblatt'] .rz-knopf.an,
+html[data-haut='fallblatt'] .rz-knopf:active {
+  background: linear-gradient(180deg, #ffe29a, #f2b84c);
+  border-color: #c98f2c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 14px rgba(246, 197, 96, 0.25);
+  color: #2a1c08;
+}
+html[data-haut='fallblatt'] .rz-knopf.an svg,
+html[data-haut='fallblatt'] .rz-knopf:active svg {
+  color: #2a1c08;
+  filter: none;
+}
+html[data-haut='fallblatt'] .rz-knopf:disabled,
+html[data-haut='fallblatt'] .rz-weiter:disabled {
+  background: var(--rz-flaeche-tief);
+  color: var(--rz-leise);
 }

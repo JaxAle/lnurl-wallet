@@ -1,3 +1,30 @@
+:root {
+  /* benannte Farben (Fallblatt-Idee, 2026-10-25): die Röhren-Werte, unverändert — fallblatt.css
+     setzt unter html[data-haut='fallblatt'] eigene */
+  --rz-schrift: #f4ebdf;
+  --rz-schrift-2: #ead8bf;
+  --rz-leise: #a3907c;
+  --rz-leise-2: #bfae98;
+  --rz-linie: #2f2218;
+  --rz-linie-2: #3a2414;
+  --rz-linie-3: #2a1a10;
+  --rz-linie-4: #3a2618;
+  --rz-flaeche: #17110c;
+  --rz-flaeche-tief: #070504;
+  --rz-flaeche-2: #120c08;
+  --rz-warn: #ff6232;
+  --rz-warn-2: #ff8a5c;
+  --rz-warn-rgb: 255, 98, 50;
+  --rz-hell: #ffefc4;
+  --rz-hell-2: #fff3d6;
+  --rz-gold: #ffd59a;
+  --rz-gold-2: #ffb35c;
+  --rz-licht: #ff9a2a;
+  --rz-licht-rgb: 255, 154, 42;
+  --rz-glut-rgb: 238, 152, 90;
+  --rz-schrift-familie:
+    'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+}
 /* Röhren-Zählwerk — übernommen aus dem abgenommenen Prototyp (PROJEKTE/lnurlcash-wallet/prototyp.html,
    Version 53). Eigene Datei, damit Updates des Originals ohne Konflikt nachgezogen werden können. */
 
@@ -5,7 +32,8 @@
    Röhren, darunter die Euro-Zeile 74 px und ein fester Platz 86 px für die Hinweiszeile, dann die
    Schalter mit 18 px Abstand — „auf der Höhe der Tastatur“, wie beim Senden (Gerhard, 2026-10-11) */
 .roehren-zaehlwerk {
-  --rz-font: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  --rz-font:
+    var(--rz-schrift-familie), 'Futura', 'Century Gothic', system-ui, sans-serif;
   text-align: center;
   padding: 18px 0 8px;
 }
@@ -74,9 +102,9 @@
   font-size: min(58cqh, 92cqw);
   line-height: 1;
   transform: translateY(7%) scaleX(0.8);
-  color: #ffd59a;
+  color: var(--rz-gold);
   text-shadow:
-    0 0 1px #fff3d6,
+    0 0 1px var(--rz-hell-2),
     0 0 3px #ffb04a,
     0 0 8px #ff7a10,
     0 0 16px rgba(255, 70, 0, 0.55);
@@ -123,11 +151,11 @@
   align-self: center;
   margin-right: 4px;
   font:
-    300 30px/1 'Jost',
+    300 30px/1 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #ffd59a;
+  color: var(--rz-gold);
   text-shadow:
     0 0 3px #ffb04a,
     0 0 9px #ff7a10,
@@ -137,21 +165,21 @@
 .rz-fertig .rz-zeile-matt {
   margin: 0;
   font:
-    300 18px/1.3 'Jost',
+    300 18px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-fertig .rz-klein {
   max-width: 32ch;
   margin: 4px auto 0;
   font:
-    300 15px/1.4 'Jost',
+    300 15px/1.4 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 
 /* Eingabezeilen wählbar (Prototyp .inrow/.inrow.active, .eurrow.active .eurin) */
@@ -167,14 +195,14 @@
       rgba(255, 110, 20, 0.14),
       transparent 75%
     ),
-    #070504;
-  border: 1px solid #3a2414;
+    var(--rz-flaeche-tief);
+  border: 1px solid var(--rz-linie-2);
   box-shadow: inset 0 0 16px rgba(255, 90, 0, 0.14);
 }
 .roehren-zaehlwerk .rz-eurrow.aktiv .rz-euro {
-  color: #ffefc4;
+  color: var(--rz-hell);
   text-shadow:
-    0 0 1px #fff3d6,
+    0 0 1px var(--rz-hell-2),
     0 0 4px #ffc070,
     0 0 10px rgba(255, 110, 20, 0.55);
 }
@@ -210,11 +238,11 @@
   flex: none;
   background: #ffcf8a;
   box-shadow:
-    0 0 4px #ff9a2a,
+    0 0 4px var(--rz-licht),
     0 0 10px rgba(255, 80, 0, 0.7);
 }
 .roehren-zaehlwerk .dot.unlit {
-  background: #2a1a10;
+  background: var(--rz-linie-3);
   box-shadow: none;
 }
 
@@ -229,10 +257,10 @@
   height: 32px;
   transform: rotate(13.88deg);
   fill: none;
-  stroke: #ffd59a;
+  stroke: var(--rz-gold);
   stroke-width: 1.3;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 1px #fff3d6) drop-shadow(0 0 3px #ffb04a)
+  filter: drop-shadow(0 0 1px var(--rz-hell-2)) drop-shadow(0 0 3px #ffb04a)
     drop-shadow(0 0 7px rgba(255, 110, 16, 0.6));
 }
 
@@ -244,11 +272,11 @@
   opacity: 0;
 }
 .roehren-zaehlwerk .bal-tubes.cold .tube .ch {
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   text-shadow: 0 0 2px rgba(255, 112, 30, 0.3);
 }
 .roehren-zaehlwerk .bal-tubes.cold .satsym svg {
-  stroke: rgba(238, 152, 90, 0.5);
+  stroke: rgba(var(--rz-glut-rgb), 0.5);
   filter: none;
 }
 
@@ -277,7 +305,7 @@
 }
 @keyframes rz-chhit {
   0% {
-    color: #fff3d6;
+    color: var(--rz-hell-2);
     text-shadow:
       0 0 2px #fff,
       0 0 6px #ffc070,
@@ -304,7 +332,7 @@
   font-size: 30px;
   line-height: 1.15;
   transform: scaleX(0.86);
-  color: rgba(238, 152, 90, 0.62);
+  color: rgba(var(--rz-glut-rgb), 0.62);
   text-shadow: 0 0 2px rgba(255, 112, 30, 0.25);
 }
 
@@ -322,10 +350,11 @@
   padding: 18px 10px;
   min-height: 96px;
   border-radius: 20px;
-  border: 1px solid #2a1a10;
-  background: #070504;
-  color: rgba(238, 152, 90, 0.66);
-  font-family: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  border: 1px solid var(--rz-linie-3);
+  background: var(--rz-flaeche-tief);
+  color: rgba(var(--rz-glut-rgb), 0.66);
+  font-family:
+    var(--rz-schrift-familie), 'Futura', 'Century Gothic', system-ui, sans-serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -366,10 +395,10 @@
       rgba(255, 110, 20, 0.22),
       transparent 75%
     ),
-    #070504;
-  border-color: #3a2414;
+    var(--rz-flaeche-tief);
+  border-color: var(--rz-linie-2);
   box-shadow: inset 0 0 18px rgba(255, 90, 0, 0.18);
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-knopf.an .lbl,
 .rz-knopf:active .lbl {
@@ -382,7 +411,7 @@
 }
 .rz-knopf.an svg,
 .rz-knopf:active svg {
-  color: #ffd59a;
+  color: var(--rz-gold);
   filter: drop-shadow(0 0 3px #ff9a22) drop-shadow(0 0 8px #ff5a00);
 }
 .rz-knopf.an:active {
@@ -413,11 +442,11 @@
   margin: 0;
   padding: 10px 14px;
   border-radius: 14px;
-  border: 1px solid #3a2414;
-  background: #070504;
+  border: 1px solid var(--rz-linie-2);
+  background: var(--rz-flaeche-tief);
   color: #f2a65a;
   font:
-    300 16px/1.3 'Jost',
+    300 16px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -431,16 +460,16 @@
   min-height: 44px;
   border: 0;
   background: none;
-  color: rgba(238, 152, 90, 0.66);
+  color: rgba(var(--rz-glut-rgb), 0.66);
   font:
-    300 15px/1.3 'Jost',
+    300 15px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   cursor: pointer;
 }
 .rz-leise:active {
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-zeilenknopf {
   display: inline-block;
@@ -460,7 +489,7 @@
       transparent 70%
     ),
     #0b0806;
-  border-color: #2f2218;
+  border-color: var(--rz-linie);
 }
 .bearer-list .bearer-card:hover {
   border-color: #4a2e18;
@@ -468,10 +497,10 @@
 
 /* Kopfzeile: "Wallet" matt in Drahtschrift statt fettem Markenschriftzug (Steve) */
 .nav-brand.rz-titel {
-  font-family: 'Jost', 'Futura', system-ui, sans-serif;
+  font-family: var(--rz-schrift-familie), 'Futura', system-ui, sans-serif;
   font-weight: 300;
   letter-spacing: 0.02em;
-  color: rgba(238, 152, 90, 0.72);
+  color: rgba(var(--rz-glut-rgb), 0.72);
   /* Prototyp .topbar: padding 18px 20px 8px, min-height 58 px — ohne Menü-Knopf schrumpfte
      die Leiste sonst auf die Schrifthöhe */
   padding: 18px 20px 8px;
@@ -497,7 +526,7 @@ nav.rz-kopf {
   border: 0;
   background: none;
   padding: 0;
-  color: rgba(238, 152, 90, 0.62);
+  color: rgba(var(--rz-glut-rgb), 0.62);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -507,7 +536,7 @@ nav.rz-kopf {
   filter: drop-shadow(0 0 2px rgba(255, 112, 30, 0.3));
 }
 .rz-netzschalter:active {
-  color: #ffd59a;
+  color: var(--rz-gold);
 }
 .rz-netzschalter:active svg {
   filter: drop-shadow(0 0 3px #ff9a22) drop-shadow(0 0 8px #ff5a00);
@@ -524,7 +553,7 @@ nav.rz-kopf {
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
   background: #0c0907;
-  border-top: 1px solid #2f2218;
+  border-top: 1px solid var(--rz-linie);
   padding: 8px 6px calc(10px + env(safe-area-inset-bottom, 0px));
 }
 .rz-tab {
@@ -534,7 +563,7 @@ nav.rz-kopf {
   gap: 3px;
   padding: 6px 0;
   border-radius: 12px;
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -545,7 +574,7 @@ nav.rz-kopf {
 .rz-tab span:last-child {
   display: inline-block;
   font:
-    300 13px/1.2 'Jost',
+    300 13px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -553,7 +582,7 @@ nav.rz-kopf {
   letter-spacing: 0.02em;
 }
 .rz-tab[aria-current='page'] {
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 /* Kontrolllämpchen: ruhig orange = unterwegs */
 .rz-lampe {
@@ -563,9 +592,9 @@ nav.rz-kopf {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #ffb35c;
+  background: var(--rz-gold-2);
   box-shadow:
-    0 0 4px #ff9a2a,
+    0 0 4px var(--rz-licht),
     0 0 10px rgba(255, 90, 0, 0.55);
 }
 /* Platz für die Leiste, damit sie nichts verdeckt */
@@ -580,17 +609,17 @@ body:has(.rz-reiter) {
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  border-bottom: 1px solid #2f2218;
+  border-bottom: 1px solid var(--rz-linie);
   font:
-    300 17px/1.3 'Jost',
+    300 17px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-zeile .rz-matt {
   margin-left: auto;
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   font-size: 14px;
 }
 .rz-lampe-klein {
@@ -598,9 +627,9 @@ body:has(.rz-reiter) {
   height: 8px;
   border-radius: 50%;
   flex: none;
-  background: #ffb35c;
+  background: var(--rz-gold-2);
   box-shadow:
-    0 0 4px #ff9a2a,
+    0 0 4px var(--rz-licht),
     0 0 9px rgba(255, 90, 0, 0.5);
 }
 
@@ -614,13 +643,13 @@ body:has(.rz-reiter) {
 .rz-seitenkopf h2 {
   margin: 0;
   font:
-    300 22px/1.2 'Jost',
+    300 22px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-zurueck {
   /* auch als button (Aufladen: zurück bricht die Rechnung ab) — ohne Knopfkleid des Originals */
@@ -634,10 +663,10 @@ body:has(.rz-reiter) {
   height: 44px;
   margin-left: -12px;
   font:
-    300 32px/1 'Jost',
+    300 32px/1 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: rgba(238, 152, 90, 0.72);
+  color: rgba(var(--rz-glut-rgb), 0.72);
   text-decoration: none;
 }
 /* Tastatur: Glühdrähte, keine Röhrenkörper (Prototyp .keypad/.key) */
@@ -651,8 +680,8 @@ body:has(.rz-reiter) {
   height: 54px;
   border-radius: 16px;
   border: 0;
-  background: #17110c;
-  color: rgba(238, 152, 90, 0.72);
+  background: var(--rz-flaeche);
+  color: rgba(var(--rz-glut-rgb), 0.72);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -660,7 +689,7 @@ body:has(.rz-reiter) {
 .rz-taste .w {
   display: inline-block;
   font:
-    300 32px/1 'Jost',
+    300 32px/1 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -680,10 +709,10 @@ body:has(.rz-reiter) {
   );
 }
 .rz-taste:active {
-  background: color-mix(in srgb, #ff7a10 7%, #17110c);
+  background: color-mix(in srgb, #ff7a10 7%, var(--rz-flaeche));
 }
 .rz-taste:active .w {
-  color: #fff3d6;
+  color: var(--rz-hell-2);
   text-shadow:
     0 0 2px #fff,
     0 0 6px #ffc070,
@@ -698,7 +727,7 @@ body:has(.rz-reiter) {
 }
 .rz-weiter:disabled {
   opacity: 0.45;
-  background: #070504;
+  background: var(--rz-flaeche-tief);
   box-shadow: none;
   cursor: default;
 }
@@ -710,12 +739,12 @@ body:has(.rz-reiter) {
 .rz-ueber span {
   display: inline-block;
   font:
-    300 19px/1.2 'Jost',
+    300 19px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   transform: scaleX(0.86);
-  color: #ff6232;
+  color: var(--rz-warn);
   text-shadow:
     0 0 2px #ff9a6a,
     0 0 7px rgba(255, 60, 20, 0.45);
@@ -743,9 +772,9 @@ body:has(.rz-reiter) {
   justify-content: center;
   gap: 8px;
   margin: 0;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
   font:
-    300 17px/1.3 'Jost',
+    300 17px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -784,8 +813,8 @@ body:has(.rz-reiter) {
   text-align: left;
   padding: 14px;
   border-radius: 18px;
-  border: 1px solid #2f2218;
-  background: #17110c;
+  border: 1px solid var(--rz-linie);
+  background: var(--rz-flaeche);
   color: inherit;
   text-decoration: none;
   cursor: pointer;
@@ -795,10 +824,10 @@ body:has(.rz-reiter) {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  border: 1px solid #2a1a10;
+  border: 1px solid var(--rz-linie-3);
   display: grid;
   place-items: center;
-  color: rgba(238, 152, 90, 0.72);
+  color: rgba(var(--rz-glut-rgb), 0.72);
 }
 .rz-option .ic svg {
   width: 21px;
@@ -807,27 +836,27 @@ body:has(.rz-reiter) {
 .rz-option .t {
   display: block;
   font:
-    300 19px/1.3 'Jost',
+    300 19px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-option .s {
   display: block;
   font:
-    300 13px/1.3 'Jost',
+    300 13px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-option > svg {
   width: 18px;
   height: 18px;
-  color: rgba(238, 152, 90, 0.72);
+  color: rgba(var(--rz-glut-rgb), 0.72);
 }
 .rz-scanner,
 .rz-einfuegen {
@@ -837,11 +866,11 @@ body:has(.rz-reiter) {
   width: 100%;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid #3a2414;
-  background: #070504;
-  color: #ead8bf;
+  border: 1px solid var(--rz-linie-2);
+  background: var(--rz-flaeche-tief);
+  color: var(--rz-schrift-2);
   font:
-    300 16px/1.3 'Jost',
+    300 16px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -877,13 +906,13 @@ select {
 .rz-titel {
   margin: 0 0 4px;
   font:
-    300 22px/1.2 'Jost',
+    300 22px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   transform: scaleX(0.9);
   transform-origin: left center;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-gruppe {
   margin-top: 20px;
@@ -894,7 +923,7 @@ select {
   font-size: 11.5px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-setting {
   display: grid;
@@ -908,7 +937,7 @@ select {
   text-decoration: none;
   background: none;
   border: 0;
-  border-bottom: 1px solid #2f2218;
+  border-bottom: 1px solid var(--rz-linie);
   border-radius: 0;
   color: inherit;
   cursor: pointer;
@@ -921,13 +950,13 @@ select {
   line-height: 1.3;
   transform: scaleX(0.9);
   transform-origin: left center;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-setting .s {
   display: block;
   margin-top: 1px;
   font-size: 13px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-setting .val {
   display: flex;
@@ -935,7 +964,7 @@ select {
   gap: 4px;
   font-size: 16px;
   font-weight: 300;
-  color: rgba(238, 152, 90, 0.72);
+  color: rgba(var(--rz-glut-rgb), 0.72);
   text-align: right;
 }
 .rz-setting .val svg,
@@ -946,14 +975,14 @@ select {
 }
 .rz-setting:active .sl,
 .rz-setting:active .val {
-  color: #ffefc4;
+  color: var(--rz-hell);
   text-shadow:
     0 0 3px #ffd27a,
     0 0 8px #ff9a22;
 }
 .rz-setting.gefahr .sl,
 .rz-setting.gefahr .val {
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
 }
 .rz-setting.gefahr .sl::before {
   content: '';
@@ -963,9 +992,9 @@ select {
   margin-right: 10px;
   vertical-align: 2px;
   border-radius: 50%;
-  background: #ff6232;
+  background: var(--rz-warn);
   box-shadow:
-    0 0 4px #ff8a5c,
+    0 0 4px var(--rz-warn-2),
     0 0 9px rgba(255, 60, 20, 0.55);
 }
 .rz-switch {
@@ -974,7 +1003,7 @@ select {
   width: 46px;
   height: 28px;
   border-radius: 999px;
-  background: #2f2218;
+  background: var(--rz-linie);
   transition: background 0.2s;
 }
 .rz-switch::after {
@@ -985,15 +1014,15 @@ select {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(238, 152, 90, 0.55);
+  background: rgba(var(--rz-glut-rgb), 0.55);
   transition: transform 0.2s;
 }
 .rz-switch.on {
-  background: #2a1a10;
+  background: var(--rz-linie-3);
   box-shadow: inset 0 0 0 1px rgba(255, 239, 196, 0.4);
 }
 .rz-switch.on::after {
-  background: #ffefc4;
+  background: var(--rz-hell);
   transform: translateX(18px);
 }
 .rz-erweitert summary {
@@ -1001,7 +1030,7 @@ select {
   justify-content: space-between;
   align-items: center;
   padding: 13px 0;
-  color: #a3907c;
+  color: var(--rz-leise);
   cursor: pointer;
   list-style: none;
 }
@@ -1019,7 +1048,7 @@ select {
 }
 .rz-rueckfrage p {
   margin: 0;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-rueckfrage .rz-duo {
   margin: 14px 0 0;
@@ -1032,23 +1061,23 @@ select {
   cursor: pointer;
 }
 .rz-knopf-gefahr {
-  border: 1px solid rgba(255, 98, 50, 0.6);
+  border: 1px solid rgba(var(--rz-warn-rgb), 0.6);
   background: none;
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
 }
 .rz-rueckfrage .rz-knopf {
   display: block;
   min-height: 48px;
   padding: 0;
   font-size: 17px;
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-fuss {
   margin: 28px 0 0;
   text-align: center;
   font-size: 13px;
   line-height: 1.6;
-  color: #a3907c;
+  color: var(--rz-leise);
   font-variant-numeric: tabular-nums;
 }
 .rz-fuss-klein {
@@ -1065,19 +1094,19 @@ select {
 .rz-stelle {
   margin: 0;
   font-size: 14px;
-  color: #a3907c;
+  color: var(--rz-leise);
   text-align: center;
 }
 .rz-stelle b {
   font-weight: 400;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-aendern {
   padding: 4px 2px;
   border: 0;
   background: none;
   font: inherit;
-  color: rgba(238, 152, 90, 0.85);
+  color: rgba(var(--rz-glut-rgb), 0.85);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -1090,13 +1119,13 @@ select {
 .rz-tag {
   margin-top: 18px;
   font-size: 12px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-liste {
   display: grid;
 }
 .rz-eintrag {
-  border-bottom: 1px solid #2f2218;
+  border-bottom: 1px solid var(--rz-linie);
 }
 .rz-eintrag:last-child {
   border-bottom: 0;
@@ -1111,7 +1140,7 @@ select {
   border: 0;
   border-radius: 0;
   background: none;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -1124,17 +1153,17 @@ select {
   height: 40px;
   border-radius: 13px;
   background: #1f1710;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-eintrag-kopf .ic svg {
   width: 19px;
   height: 19px;
 }
 .rz-eintrag-kopf .ic.in {
-  color: rgba(238, 152, 90, 0.8);
+  color: rgba(var(--rz-glut-rgb), 0.8);
 }
 .rz-eintrag-kopf .ic.out {
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-eintrag-kopf .mitte {
   display: grid;
@@ -1152,7 +1181,7 @@ select {
 }
 .rz-eintrag-kopf .s {
   font-size: 12.5px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-eintrag-kopf .amt {
   display: inline-block;
@@ -1162,18 +1191,18 @@ select {
   font-variant-numeric: tabular-nums;
   transform: scaleX(0.82);
   transform-origin: right center;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-eintrag-kopf .amt.in {
-  color: rgba(238, 152, 90, 0.8);
+  color: rgba(var(--rz-glut-rgb), 0.8);
 }
 .rz-eintrag-kopf .amt.out {
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-eintrag-text {
   padding: 0 0 12px 52px;
   font-size: 14px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-eintrag-text p {
   margin: 0 0 6px;
@@ -1184,15 +1213,15 @@ select {
   display: block;
   margin: 14px 0 6px;
   font-size: 14px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-feld {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 14px;
-  background: #17110c;
-  color: #f4ebdf;
+  background: var(--rz-flaeche);
+  color: var(--rz-schrift);
   font:
     15px/1.4 'IBM Plex Mono',
     ui-monospace,
@@ -1202,15 +1231,15 @@ select {
 }
 .rz-feld:focus {
   outline: none;
-  border-color: rgba(238, 152, 90, 0.6);
+  border-color: rgba(var(--rz-glut-rgb), 0.6);
 }
 .rz-erkannt {
   margin: 12px 0 0;
   font-size: 15px;
-  color: rgba(238, 152, 90, 0.85);
+  color: rgba(var(--rz-glut-rgb), 0.85);
 }
 .rz-erkannt.fremd {
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-mitte {
   text-align: center;
@@ -1254,7 +1283,7 @@ select {
 .rz-etikett {
   padding-left: 4px;
   font-size: 13px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-auswahl {
   display: flex;
@@ -1262,10 +1291,10 @@ select {
   align-items: center;
   margin: 12px 0;
   padding: 10px 14px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 14px;
-  background: #17110c;
-  color: #f4ebdf;
+  background: var(--rz-flaeche);
+  color: var(--rz-schrift);
 }
 .rz-schein-blatt {
   display: grid;
@@ -1283,17 +1312,17 @@ select {
 .rz-stelle-zeile .einheit {
   font-size: 12px;
   transform: none;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-marke {
   padding: 3px 10px;
   border: 1px solid rgba(255, 239, 196, 0.35);
   border-radius: 999px;
   font-size: 14px;
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-eintrag-kopf + .rz-eintrag-kopf {
-  border-top: 1px solid #2f2218;
+  border-top: 1px solid var(--rz-linie);
 }
 .rz-eintrag-kopf:disabled {
   opacity: 0.5;
@@ -1311,15 +1340,15 @@ select {
 .rz-frage h3 {
   margin: 10px 0 8px;
   font:
-    300 24px/1.25 'Jost',
+    300 24px/1.25 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
   overflow-wrap: anywhere;
 }
 .rz-frage p {
   margin: 0 0 10px;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-frage .rz-duo {
   align-items: center;
@@ -1337,7 +1366,7 @@ select {
     ui-monospace,
     monospace;
   word-break: break-all;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 
 /* Erklärsätze grau, wie im Prototyp (.small.muted) — Orange heißt „antippbar“ (Steve) */
@@ -1345,7 +1374,7 @@ select {
 .rz-frage p.rz-hinweis {
   font-size: 14px;
   line-height: 1.45;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 
 /* Scheine als Kacheln: zwei je Reihe, beim Auswählen nur eine Stelle, Leiste unten fest (Steve, Pixel) */
@@ -1358,7 +1387,7 @@ select {
   width: 100%;
   padding: 10px 0;
   border: 0;
-  border-bottom: 1px solid #2f2218;
+  border-bottom: 1px solid var(--rz-linie);
   background: none;
   text-align: left;
   cursor: pointer;
@@ -1378,11 +1407,11 @@ select {
   gap: 12px;
   margin: 0;
   padding: 8px 8px 8px 16px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 18px;
-  background: #17110c;
+  background: var(--rz-flaeche);
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.45);
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-auswahl .rz-knopf {
   min-height: 48px;
@@ -1392,7 +1421,7 @@ select {
   font-size: 20px;
 }
 .rz-auswahl-leise {
-  color: #a3907c;
+  color: var(--rz-leise);
   font-size: 13px;
 }
 .rz-block {
@@ -1402,10 +1431,10 @@ select {
 .rz-frage-kurz {
   margin: 6px 0 4px;
   font:
-    300 22px/1.3 'Jost',
+    300 22px/1.3 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 
 /* Seite einer Ausgabestelle */
@@ -1418,10 +1447,10 @@ select {
 .rz-stelle-kopf h3 {
   margin: 0;
   font:
-    300 24px/1.2 'Jost',
+    300 24px/1.2 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-farbpunkt {
   flex: none;
@@ -1429,27 +1458,27 @@ select {
   height: 14px;
   border-radius: 50%;
   box-shadow:
-    0 0 0 2px #17110c,
-    0 0 0 3px #2f2218;
+    0 0 0 2px var(--rz-flaeche),
+    0 0 0 3px var(--rz-linie);
 }
 .rz-stelle-summe {
   margin: 10px 0 0;
   font-size: 17px;
-  color: rgba(238, 152, 90, 0.85);
+  color: rgba(var(--rz-glut-rgb), 0.85);
 }
 .rz-warnung {
   margin-top: 16px;
   padding: 12px 14px;
-  border: 1px solid rgba(255, 98, 50, 0.45);
+  border: 1px solid rgba(var(--rz-warn-rgb), 0.45);
   border-radius: 14px;
-  background: rgba(255, 98, 50, 0.07);
-  color: #f4ebdf;
+  background: rgba(var(--rz-warn-rgb), 0.07);
+  color: var(--rz-schrift);
 }
 .rz-warnung p {
   margin: 0 0 8px;
 }
 .rz-warnung b {
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
   font-weight: 500;
 }
 .rz-warnung .rz-duo {
@@ -1460,29 +1489,29 @@ select {
   cursor: default;
 }
 .rz-setting.rz-still .val {
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 /* Wiederfinden (Steve, 2026-10-16): wo gesucht wird, leuchtet es; Funde hell; „nichts“ ruhig, aber
    lesbar; „nicht erreichbar“ heißt „weiß ich nicht“ und sieht anders aus als „leer“ */
 .rz-setting.rz-still .val.rz-sucht {
   gap: 8px;
-  color: #ffb35c;
+  color: var(--rz-gold-2);
 }
 .rz-setting.rz-still .val.rz-sucht .rz-lampe-klein {
   animation: rz-puls 1.6s ease-in-out infinite;
 }
 .rz-setting.rz-still .val.rz-fund {
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
   font-weight: 400;
 }
 .rz-setting.rz-still .val.rz-nichts {
-  color: #bfae98;
+  color: var(--rz-leise-2);
 }
 .rz-setting.rz-still .val.rz-fehler {
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
 }
 .rz-eintrag-kopf .s.warn {
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
 }
 .rz-abstand-klein {
   margin-top: 8px;
@@ -1508,15 +1537,15 @@ select {
   margin: 4px 0 10px;
   padding-right: 36px;
   font:
-    300 22px/1.25 'Jost',
+    300 22px/1.25 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
   overflow-wrap: anywhere;
 }
 .rz-rueckfrage-text p {
   margin: 0 0 6px;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-rueckfrage-blatt .rz-duo {
   margin: 18px 0 4px;
@@ -1529,7 +1558,7 @@ select {
 .rz-knopf-flach {
   display: block;
   padding: 0;
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 
 /* Scheine unterwegs: eigene Gruppe oben, Lämpchen */
@@ -1537,7 +1566,7 @@ select {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #ffb35c;
+  color: var(--rz-gold-2);
 }
 
 /* ungeprüft: noch nicht ganz gedruckt (Steve) */
@@ -1552,21 +1581,21 @@ select {
   padding: 14px 16px;
   border: 1.5px dashed rgba(240, 131, 42, 0.6);
   border-radius: 14px;
-  background: #17110c;
+  background: var(--rz-flaeche);
 }
 .rz-klaerung .t {
   margin: 4px 0 2px;
   font-size: 18px;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-klaerung .z {
   margin: 0 0 8px;
   font:
-    300 26px/1.2 'Jost',
+    300 26px/1.2 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
   font-variant-numeric: tabular-nums;
-  color: #ffefc4;
+  color: var(--rz-hell);
 }
 .rz-klaerung .rz-status {
   justify-content: flex-start;
@@ -1586,18 +1615,18 @@ select {
 .rz-willkommen-text h2 {
   margin: 8px 0 14px;
   font:
-    300 38px/1.1 'Jost',
+    300 38px/1.1 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
   text-wrap: balance;
 }
 .rz-willkommen-text p {
   margin: 0;
   font-size: 17px;
   line-height: 1.5;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-willkommen-knoepfe {
   display: grid;
@@ -1614,10 +1643,10 @@ nav[hidden] {
 .rz-heft h3 {
   margin: 0 0 6px;
   font:
-    400 19px/1.3 'Jost',
+    400 19px/1.3 var(--rz-schrift-familie),
     system-ui,
     sans-serif;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 .rz-heft p {
   margin: 0 0 10px;
@@ -1627,10 +1656,10 @@ nav[hidden] {
 }
 .rz-heft b {
   font-weight: 500;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-fuss a {
-  color: rgba(238, 152, 90, 0.85);
+  color: rgba(var(--rz-glut-rgb), 0.85);
 }
 
 /* Einrichtung (Prototyp onb-words/onb-check, .words/.quiz/.steps) */
@@ -1643,7 +1672,7 @@ nav[hidden] {
   flex: 1;
   height: 3px;
   border-radius: 3px;
-  background: #2f2218;
+  background: var(--rz-linie);
 }
 .rz-schritte i.an {
   background: rgba(240, 131, 42, 0.8);
@@ -1652,7 +1681,7 @@ nav[hidden] {
   margin: 0 0 14px;
   font-size: 17px;
   line-height: 1.5;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-text b {
   font-weight: 500;
@@ -1669,17 +1698,17 @@ nav[hidden] {
   align-items: baseline;
   min-width: 0;
   padding: 9px 8px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 12px;
-  background: #17110c;
+  background: var(--rz-flaeche);
   font-size: 15px;
-  color: #f4ebdf;
+  color: var(--rz-schrift);
 }
 .rz-wort b {
   min-width: 15px;
   font-size: 11px;
   font-weight: 400;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 .rz-wort span {
   overflow: hidden;
@@ -1692,21 +1721,21 @@ nav[hidden] {
 }
 .rz-quiz button {
   min-height: 48px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 14px;
-  background: #17110c;
-  color: #f4ebdf;
+  background: var(--rz-flaeche);
+  color: var(--rz-schrift);
   font-size: 17px;
   cursor: pointer;
 }
 .rz-quiz button.richtig {
   border-color: rgba(255, 239, 196, 0.6);
-  color: #ffefc4;
+  color: var(--rz-hell);
   box-shadow: 0 0 8px rgba(255, 154, 34, 0.4);
 }
 .rz-quiz button.falsch {
-  border-color: rgba(255, 98, 50, 0.6);
-  color: #ff8a5c;
+  border-color: rgba(var(--rz-warn-rgb), 0.6);
+  color: var(--rz-warn-2);
 }
 
 /* ---------- Röhrenschloss (Prototyp screens.lock, Gerhard 2026-10-16) ---------- */
@@ -1775,7 +1804,8 @@ body.rz-gesperrt {
 }
 .rz-schloss .tube .ch {
   position: relative;
-  font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif;
+  font-family:
+    var(--rz-schrift-familie), 'Futura', 'Century Gothic', sans-serif;
   font-weight: 300;
   font-size: 26px;
   font-size: min(58cqh, 92cqw);
@@ -1851,7 +1881,7 @@ body.rz-gesperrt {
   }
 }
 .rz-schloss-feld.dunkel .tube .ch {
-  color: rgba(238, 152, 90, 0.48);
+  color: rgba(var(--rz-glut-rgb), 0.48);
   text-shadow:
     0 0 2px rgba(255, 112, 30, 0.22),
     0 0 6px rgba(255, 80, 0, 0.08);
@@ -1870,7 +1900,7 @@ body.rz-gesperrt {
 }
 .rz-schloss-feld .tube.druck .ch,
 .rz-schloss-feld .tube .treffer .ch {
-  color: #fff3d6;
+  color: var(--rz-hell-2);
   text-shadow:
     0 0 2px #fff,
     0 0 6px #ffc070,
@@ -1883,7 +1913,7 @@ body.rz-gesperrt {
 }
 @keyframes rz-nachglimmen {
   0% {
-    color: #fff3d6;
+    color: var(--rz-hell-2);
   }
   30% {
     color: #ffcf7a;
@@ -1894,7 +1924,7 @@ body.rz-gesperrt {
       0 0 20px rgba(255, 74, 0, 0.8);
   }
   100% {
-    color: rgba(238, 152, 90, 0.48);
+    color: rgba(var(--rz-glut-rgb), 0.48);
     text-shadow:
       0 0 2px rgba(255, 112, 30, 0.22),
       0 0 6px rgba(255, 80, 0, 0.08);
@@ -1903,7 +1933,7 @@ body.rz-gesperrt {
 /* falsch: kurz rot flackern */
 .rz-schloss-feld.falsch .tube .ch {
   animation: rz-falsch 0.55s steps(2, end);
-  color: #ff6232;
+  color: var(--rz-warn);
   text-shadow:
     0 0 2px #ff9a6a,
     0 0 8px rgba(255, 60, 20, 0.8),
@@ -1925,7 +1955,7 @@ body.rz-gesperrt {
   transition: opacity 0.3s;
 }
 .rz-schloss-feld.offen .tube.marke .ch {
-  color: #ffefc4;
+  color: var(--rz-hell);
   text-shadow:
     0 0 1px #fff,
     0 0 3px #ffd27a,
@@ -1952,16 +1982,16 @@ body.rz-gesperrt {
   padding: 0 14px;
   border: 0;
   background: none;
-  color: rgba(238, 152, 90, 0.75);
+  color: rgba(var(--rz-glut-rgb), 0.75);
   font:
-    300 20px/1 'Jost',
+    300 20px/1 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   cursor: pointer;
 }
 .rz-schloss-taste.an {
-  color: #ffb35c;
+  color: var(--rz-gold-2);
   text-shadow: 0 0 8px rgba(255, 120, 20, 0.45);
 }
 .rz-schloss-taste:disabled {
@@ -1978,31 +2008,31 @@ body.rz-gesperrt {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ffb35c;
+  background: var(--rz-gold-2);
   box-shadow:
-    0 0 4px #ff9a2a,
+    0 0 4px var(--rz-licht),
     0 0 9px rgba(255, 90, 0, 0.5);
 }
 .rz-schloss-punkte .punkt.hohl {
   background: none;
-  box-shadow: inset 0 0 0 1px rgba(238, 152, 90, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(var(--rz-glut-rgb), 0.45);
 }
 .rz-schloss-punkte .leer {
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   font-size: 15px;
 }
 .rz-schloss-warte {
   grid-column: 1 / -1;
   margin: 0;
   text-align: center;
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
   font-size: 15px;
 }
 .rz-schloss-vergessen {
   flex: none;
   align-self: center;
   padding: 6px 12px 12px;
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   font-size: 14px;
   text-decoration: none;
 }
@@ -2014,9 +2044,9 @@ body.rz-gesperrt {
   max-width: 520px;
   margin: 0 auto;
   padding: 10px 14px 4px;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
   font:
-    300 17px/1.35 'Jost',
+    300 17px/1.35 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2026,7 +2056,7 @@ body.rz-gesperrt {
 }
 .rz-schloss-kopf p {
   margin: 2px 0 0;
-  color: rgba(238, 152, 90, 0.75);
+  color: rgba(var(--rz-glut-rgb), 0.75);
   font-size: 15px;
 }
 .rz-schloss-schluessel svg {
@@ -2080,8 +2110,9 @@ body.rz-gesperrt {
    (erste Überschrift) fällt darum weg. */
 #addon-run .addon-root {
   max-width: none;
-  color: #f4ebdf;
-  font-family: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+  color: var(--rz-schrift);
+  font-family:
+    var(--rz-schrift-familie), 'Futura', 'Century Gothic', system-ui, sans-serif;
   font-weight: 300;
 }
 #addon-run .addon-root > .addon-heading:first-child,
@@ -2092,12 +2123,12 @@ body.rz-gesperrt {
   margin: 0 0 12px;
   font-size: 15px;
   line-height: 1.5;
-  color: #bfae98;
+  color: var(--rz-leise-2);
 }
 #addon-run .addon-heading {
   font-size: 19px;
   font-weight: 400;
-  color: #ead8bf;
+  color: var(--rz-schrift-2);
 }
 #addon-run .addon-subheading {
   margin: 22px 0 8px;
@@ -2105,13 +2136,13 @@ body.rz-gesperrt {
   font-weight: 400;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 #addon-run .addon-field {
   display: block;
   margin: 14px 0 0;
   font-size: 14px;
-  color: #a3907c;
+  color: var(--rz-leise);
 }
 #addon-run .addon-field input:not([type='checkbox']),
 #addon-run .addon-field select,
@@ -2119,12 +2150,12 @@ body.rz-gesperrt {
   width: 100%;
   margin-top: 6px;
   padding: 12px 14px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 14px;
-  background: #17110c;
-  color: #f4ebdf;
+  background: var(--rz-flaeche);
+  color: var(--rz-schrift);
   font:
-    300 16px/1.4 'Jost',
+    300 16px/1.4 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2133,17 +2164,17 @@ body.rz-gesperrt {
 #addon-run .addon-field input:focus,
 #addon-run .addon-field select:focus,
 #addon-run .addon-root textarea:focus {
-  border-color: rgba(255, 154, 42, 0.55);
+  border-color: rgba(var(--rz-licht-rgb), 0.55);
 }
 #addon-run .addon-root button {
   min-height: 44px;
   padding: 10px 16px;
-  border: 1px solid #3a2618;
+  border: 1px solid var(--rz-linie-4);
   border-radius: 14px;
-  background: #120c08;
+  background: var(--rz-flaeche-2);
   color: #f2a65a;
   font:
-    300 16px/1.2 'Jost',
+    300 16px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2154,8 +2185,8 @@ body.rz-gesperrt {
   cursor: default;
 }
 #addon-run .addon-root button:active:not(:disabled) {
-  border-color: rgba(255, 154, 42, 0.55);
-  color: #ffd59a;
+  border-color: rgba(var(--rz-licht-rgb), 0.55);
+  color: var(--rz-gold);
 }
 #addon-run .addon-row {
   gap: 8px;
@@ -2173,20 +2204,20 @@ body.rz-gesperrt {
   gap: 8px;
   min-height: 44px;
   padding: 8px 10px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   border-radius: 14px;
   background: #0c0806;
-  color: rgba(238, 152, 90, 0.75);
+  color: rgba(var(--rz-glut-rgb), 0.75);
   font:
-    300 15px/1.2 'Jost',
+    300 15px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
   cursor: pointer;
 }
 .rz-motiv.an {
-  border-color: rgba(255, 154, 42, 0.7);
-  color: #ffd59a;
+  border-color: rgba(var(--rz-licht-rgb), 0.7);
+  color: var(--rz-gold);
   box-shadow: 0 0 10px rgba(255, 120, 20, 0.25);
 }
 .rz-motiv-farbe {
@@ -2197,7 +2228,7 @@ body.rz-gesperrt {
   border: 2px solid;
 }
 .rz-feld-text {
-  font-family: 'Jost', 'Futura', system-ui, sans-serif;
+  font-family: var(--rz-schrift-familie), 'Futura', system-ui, sans-serif;
   font-size: 16px;
   word-break: normal;
 }
@@ -2235,10 +2266,10 @@ body.rz-gesperrt {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  border: 1px solid #3a2618;
+  border: 1px solid var(--rz-linie-4);
   border-radius: 12px;
-  background: #17110c;
-  color: #f4ebdf;
+  background: var(--rz-flaeche);
+  color: var(--rz-schrift);
 }
 /* Für Entwickler: Zeile mit eigenem Schalter rechts — Text öffnet, Schalter schaltet */
 .rz-erweiterung {
@@ -2270,7 +2301,7 @@ body.rz-gesperrt {
   display: block;
   margin-top: 2px;
   font-size: 13px;
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
 }
 /* Neue Fassung: eine leuchtende Zeile oben auf der Startseite */
 .rz-neue-fassung {
@@ -2281,12 +2312,12 @@ body.rz-gesperrt {
   min-height: 48px;
   margin: 4px 0 6px;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 154, 42, 0.45);
+  border: 1px solid rgba(var(--rz-licht-rgb), 0.45);
   border-radius: 14px;
-  background: #120c08;
-  color: #ffd59a;
+  background: var(--rz-flaeche-2);
+  color: var(--rz-gold);
   font:
-    300 16px/1.2 'Jost',
+    300 16px/1.2 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2299,7 +2330,7 @@ body.rz-gesperrt {
 }
 .rz-neue-fassung-tun {
   margin-left: auto;
-  color: #ffb35c;
+  color: var(--rz-gold-2);
 }
 
 /* ---------- Banknoten (Steve, 2026-10-19) ----------
@@ -2509,7 +2540,7 @@ body.rz-gesperrt {
   outline-width: 2px;
 }
 .rz-fehlt {
-  color: #ff8a5c;
+  color: var(--rz-warn-2);
 }
 /* Senden: zwei gleichwertige Abschnitte — Rechnung oder Adresse (flache Glasknöpfe wie Empfangen/Senden)
    und Schein übergeben (Zählwerk) — statt eines Kastens mit Formularknöpfen (Steve, 2026-10-24) */
@@ -2518,7 +2549,7 @@ body.rz-gesperrt {
   align-items: center;
   gap: 12px;
   margin: 14px 4px 4px;
-  color: rgba(238, 152, 90, 0.55);
+  color: rgba(var(--rz-glut-rgb), 0.55);
   font-size: 14px;
 }
 .rz-oder-linie::before,
@@ -2529,7 +2560,7 @@ body.rz-gesperrt {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 154, 42, 0.3),
+    rgba(var(--rz-licht-rgb), 0.3),
     transparent
   );
 }
@@ -2563,9 +2594,9 @@ body.rz-gesperrt {
   margin: 0 2px 0 0;
 }
 .rz-meldung-lampe.rot {
-  background: #ff6232;
+  background: var(--rz-warn);
   box-shadow:
-    0 0 4px #ff6232,
+    0 0 4px var(--rz-warn),
     0 0 9px rgba(255, 60, 20, 0.6);
 }
 .rz-meldung-lampe.puls {
@@ -2617,7 +2648,7 @@ body.rz-gesperrt {
   margin: 14px 0 6px;
   text-align: center;
   font:
-    300 22px/1.3 'Jost',
+    300 22px/1.3 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2625,7 +2656,7 @@ body.rz-gesperrt {
   word-break: break-all;
 }
 .rz-adresse-gross.leer {
-  color: rgba(238, 152, 90, 0.45);
+  color: rgba(var(--rz-glut-rgb), 0.45);
 }
 .rz-adresse-blatt .rz-erweitert {
   margin: 10px 0;
@@ -2634,7 +2665,7 @@ body.rz-gesperrt {
 .rz-kassa-an {
   margin: 0 0 8px;
   text-align: center;
-  color: rgba(238, 152, 90, 0.6);
+  color: rgba(var(--rz-glut-rgb), 0.6);
   font-size: 14px;
   word-break: break-all;
 }
@@ -2648,13 +2679,13 @@ body.rz-gesperrt {
 .rz-chip {
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid #2f2218;
+  border: 1px solid var(--rz-linie);
   background: #0d0906;
-  color: rgba(238, 152, 90, 0.6);
+  color: rgba(var(--rz-glut-rgb), 0.6);
   font-size: 13px;
 }
 .rz-chip.an {
-  border-color: rgba(255, 154, 42, 0.55);
+  border-color: rgba(var(--rz-licht-rgb), 0.55);
   color: #ffd9a0;
 }
 .rz-kassa .rz-tastatur {
@@ -2691,7 +2722,7 @@ body.rz-gesperrt {
   min-width: 44px;
   text-align: center;
   font:
-    300 26px/1 'Jost',
+    300 26px/1 var(--rz-schrift-familie),
     'Futura',
     system-ui,
     sans-serif;
@@ -2710,14 +2741,14 @@ body.rz-gesperrt {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1px solid rgba(238, 152, 90, 0.5);
+  border: 1px solid rgba(var(--rz-glut-rgb), 0.5);
 }
 .rz-wahl-karte.an {
-  border-color: rgba(255, 154, 42, 0.55);
+  border-color: rgba(var(--rz-licht-rgb), 0.55);
 }
 .rz-wahl-karte.an .rz-wahl-punkt {
-  background: #ff9a2a;
-  box-shadow: 0 0 8px rgba(255, 154, 42, 0.7);
+  background: var(--rz-licht);
+  box-shadow: 0 0 8px rgba(var(--rz-licht-rgb), 0.7);
 }
 .rz-los-vorschau {
   display: grid;
@@ -2747,7 +2778,7 @@ body.rz-gesperrt {
 .rz-messzeile {
   margin: 8px 4px;
   text-align: center;
-  color: rgba(238, 152, 90, 0.7);
+  color: rgba(var(--rz-glut-rgb), 0.7);
   word-break: break-word;
 }
 /* Videofeld nicht höher als gut die halbe Bildschirmhöhe — hochkant 1080 × 1920 schob am iPhone den

@@ -3,7 +3,10 @@
 // gilt. Alle Fallblatt-Regeln stehen in fallblatt.css unter html[data-haut='fallblatt']; das Röhren-Bild
 // bleibt dadurch unberührt.
 import {createSignal} from 'solid-js'
+import '@fontsource/barlow-condensed/latin-500.css'
+import '@fontsource/barlow-condensed/latin-700.css'
 import './fallblatt.css'
+import {hintergrundNeu} from './leuchtkraft'
 
 const SCHLUESSEL = 'fork_haut'
 export const HAEUTE = ['roehren', 'fallblatt'] as const
@@ -33,6 +36,7 @@ const anwenden = (h: Haut) => {
   else document.documentElement.dataset.haut = h
 }
 anwenden(haut())
+hintergrundNeu() // die Leuchtkraft wurde vor der Haut geladen und kennt sie erst jetzt
 
 export const setHaut = (h: Haut): void => {
   try {
@@ -42,4 +46,5 @@ export const setHaut = (h: Haut): void => {
   }
   setzeSignal(h)
   anwenden(h)
+  hintergrundNeu() // der Leuchtkraft-Ausgleich zeichnet den Hintergrund der jeweiligen Haut
 }
