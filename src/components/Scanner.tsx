@@ -55,6 +55,9 @@ const Scanner: Component<ScannerProps> = props => {
   const [messung, setMessung] = createSignal<string | null>(null)
   let messer: ReturnType<typeof setInterval> | null = null
   let abspielen = 'ok'
+  // ausgelesene Bilder und ihre mittlere Helligkeit (0–255): schwarz geliefert oder nur schwarz gezeichnet?
+  let bilder = 0
+  let hell: number | null = null
   // in welchem Schritt der Start gerade steht — bleibt iOS in einem hängen, zeigt die Messzeile welchen
   let schritt = 'fragt nach der Kamera'
   const start = Date.now()
@@ -123,6 +126,14 @@ const Scanner: Component<ScannerProps> = props => {
         seite
       )
       const frame = ctx.getImageData(0, 0, seite, seite)
+      bilder++
+      let summe = 0
+      let n = 0
+      for (let i = 0; i < frame.data.length; i += 4 * 97) {
+        summe += frame.data[i] + frame.data[i + 1] + frame.data[i + 2]
+        n++
+      }
+      hell = n ? Math.round(summe / n / 3) : null
       const result = jsQR(frame.data, frame.width, frame.height, {
         inversionAttempts: 'dontInvert'
       })
@@ -139,7 +150,11 @@ const Scanner: Component<ScannerProps> = props => {
     // Schritt — in der ersten Fassung erst nach dem Abspielen, und bei Gerhard kam sie nie: iOS hing also
     // davor. Kommt nach 3 s kein Bild, steht da, in welchem Schritt es hängt und was die Kamera liefert.
     messer = setInterval(() => {
-      if (videoRef && videoRef.videoWidth > 0 && videoRef.readyState >= 2) {
+      // mit Bild: am Pixel (eingebauter Erkenner) keine Zeile; ohne ihn (Apple) bleibt sie, bis erkannt
+      // ist — sonst sieht man nicht, ob die Bilder schwarz kommen oder nur schwarz gezeichnet werden
+      const bildDa =
+        !!videoRef && videoRef.videoWidth > 0 && videoRef.readyState >= 2
+      if (bildDa && hasBarcodeDetector) {
         setMessung(null)
         return
       }
@@ -149,13 +164,14 @@ const Scanner: Component<ScannerProps> = props => {
       setMessung(
         [
           `Schritt: ${schritt} (seit ${Math.round((Date.now() - start) / 1000)} s)`,
-          `Kamera: ${spur?.label || '–'}`,
+          `Kamera: ${(spur?.label || '–').slice(0, 40)}`,
           spur
             ? `Spur ${spur.readyState === 'live' ? 'läuft' : 'beendet'}${spur.muted ? ', liefert keine Bilder' : ''}${spur.enabled ? '' : ', abgeschaltet'}`
             : 'keine Spur',
           `angefordert ${e?.width ?? '?'} × ${e?.height ?? '?'}`,
           `Bild ${videoRef?.videoWidth ?? '–'} × ${videoRef?.videoHeight ?? '–'}`,
           `Video-Stand ${videoRef?.readyState ?? '–'}`,
+          `${bilder} Bilder gelesen, Helligkeit ${hell ?? '–'} von 255`,
           `Abspielen ${abspielen}${videoRef?.paused ? ', angehalten' : ''}`
         ].join(' · ')
       )
@@ -247,10 +263,10 @@ const Scanner: Component<ScannerProps> = props => {
         // playsinline/muted so iOS Safari renders the stream inline
         // instead of forcing fullscreen playback
         <>
-          <video ref={videoRef} class="scanner" playsinline muted autoplay />
           <Show when={messung()}>
             <p class="rz-klein rz-messzeile">{messung()}</p>
           </Show>
+          <video ref={videoRef} class="scanner" playsinline muted autoplay />
           <Show when={startKnopf()}>
             <button
               type="button"

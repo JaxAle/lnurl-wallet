@@ -2750,3 +2750,11 @@ body.rz-gesperrt {
   color: rgba(238, 152, 90, 0.7);
   word-break: break-word;
 }
+/* Videofeld nicht höher als gut die halbe Bildschirmhöhe — hochkant 1080 × 1920 schob am iPhone den
+   Rest der Seite unter den Rand (Gerhard, 2026-10-25) */
+video.scanner {
+  display: block;
+  max-height: 55vh;
+  margin: 0 auto;
+  object-fit: cover;
+}
