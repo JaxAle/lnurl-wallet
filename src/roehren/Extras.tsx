@@ -32,12 +32,9 @@ export const EXTRAS: {
     name: 'Kassa',
     satz: 'Am Stand kassieren — Betrag tippen, der Gast zahlt mit Lightning.',
     seite: '/extras/kassa' // eigener Bildschirm (Kassa.tsx), Tastatur wie bei Senden
-  },
-  {
-    id: 'timelocker',
-    name: 'Zeitschloss',
-    satz: 'Einen Schein bis zu einem Datum wegschließen — auch vor dir selbst.'
   }
+  // Zeitschloss steht unter Für Entwickler (Steve, 2026-10-25): die Wallet kann den geschlossenen Schein
+  // nicht selbst aufbewahren — der Link ist der einzige Beleg, verloren heißt das Geld verloren
 ]
 
 // deutsche Namen für die Kopfzeile der Erweiterung (AddonRun)
