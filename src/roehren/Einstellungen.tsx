@@ -24,6 +24,7 @@ import {vaultEnabled} from '../vaultFeature'
 import {useWallet} from '../WalletContext'
 import {isCk1, noteK1} from '../lnurlcash'
 import {Gruppe, Zeile} from './Bedienfeld'
+import {leuchtkraft, setLeuchtkraft, STUFE_TEXT, STUFEN} from './leuchtkraft'
 import Rueckfrage from './Rueckfrage'
 import {vergissWoerter} from './woerterTresor'
 import './roehren.css'
@@ -162,6 +163,16 @@ const Einstellungen: Component = () => {
       </Gruppe>
 
       <Gruppe titel="Anzeige">
+        <Zeile
+          label="Leuchtkraft"
+          unter="Die ganze Oberfläche heller — antippen wechselt"
+          wert={STUFE_TEXT[leuchtkraft()]}
+          onClick={() =>
+            setLeuchtkraft(
+              STUFEN[(STUFEN.indexOf(leuchtkraft()) + 1) % STUFEN.length]
+            )
+          }
+        />
         <Zeile
           label="Währung"
           wert={WAEHRUNG_NAME[currency()]}
