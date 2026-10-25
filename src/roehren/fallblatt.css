@@ -21,14 +21,27 @@ html[data-haut='fallblatt'] .rz-schloss .tube {
   border-radius: 3px;
   background: #0c0b0a url('./fb-karte-1.webp') center / 100% 100% no-repeat;
 }
-html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(4n + 2) {
+/* acht Varianten: Gerhards vier und dieselben gespiegelt — Flecken und Scharniere wiederholen sich kaum */
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 2) {
   background-image: url('./fb-karte-2.webp');
 }
-html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(4n + 3) {
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 3) {
   background-image: url('./fb-karte-3.webp');
 }
-html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(4n + 4) {
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 4) {
   background-image: url('./fb-karte-4.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 5) {
+  background-image: url('./fb-karte-5.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 6) {
+  background-image: url('./fb-karte-6.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 7) {
+  background-image: url('./fb-karte-7.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 0) {
+  background-image: url('./fb-karte-8.webp');
 }
 /* die Fuge auch durch den Buchstaben: ein dunkler Spalt (Gerhard am Pixel: „Fuge zu klein“) */
 html[data-haut='fallblatt'] .rz-schloss .tube::after {
@@ -52,11 +65,20 @@ html[data-haut='fallblatt'] .rz-schloss .tube .glow {
   mix-blend-mode: normal;
   background: url('./fb-hell-1.webp') center / 100% 100% no-repeat;
 }
-html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(3n + 2) .glow {
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(6n + 2) .glow {
   background-image: url('./fb-hell-2.webp');
 }
-html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(3n + 3) .glow {
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(6n + 3) .glow {
   background-image: url('./fb-hell-3.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(6n + 4) .glow {
+  background-image: url('./fb-hell-4.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(6n + 5) .glow {
+  background-image: url('./fb-hell-5.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(6n + 0) .glow {
+  background-image: url('./fb-hell-6.webp');
 }
 /* nach dem Tippen leuchtet die Karte nach, wie die Röhre nachglimmt */
 html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube:has(.treffer) .glow {
@@ -224,4 +246,87 @@ html[data-haut='fallblatt'] .rz-knopf:disabled,
 html[data-haut='fallblatt'] .rz-weiter:disabled {
   background: var(--rz-flaeche-tief);
   color: var(--rz-leise);
+}
+
+/* ---------- Abnutzung (Steve, 2026-10-25: „die Buchstaben sehen wie frisch lackiert aus“) ----------
+   Die Druckfarbe ist verblasst und ausgebrochen: eine Abriebmaske (fb-abrieb.webp) — je Karte an anderer
+   Stelle —, dazu ein blank geriebener Streifen entlang der Fuge. Jede Karte sitzt etwas schief; fest je
+   Platz, nicht bei jedem Öffnen neu. */
+html[data-haut='fallblatt'] .rz-schloss .tube .ch {
+  color: #2a221a;
+  opacity: 0.92;
+  -webkit-mask-image: url('./fb-abrieb.webp');
+  mask-image: url('./fb-abrieb.webp');
+  -webkit-mask-size: 170% 170%;
+  mask-size: 170% 170%;
+  -webkit-mask-position: var(--fb-abrieb, 30% 40%);
+  mask-position: var(--fb-abrieb, 30% 40%);
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .ch {
+  color: #2f271f;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 1) {
+  --fb-abrieb: 10% 80%;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 2) {
+  --fb-abrieb: 70% 20%;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 3) {
+  --fb-abrieb: 45% 95%;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 4) {
+  --fb-abrieb: 90% 55%;
+}
+/* blank gerieben, wo die Hälften aneinanderreiben */
+html[data-haut='fallblatt'] .rz-schloss .tube::before {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 45%;
+  height: 6%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(232, 220, 194, 0.32) 35%,
+    rgba(232, 220, 194, 0.32) 65%,
+    transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+/* Schiefe je Platz: Neigung, Versatz, die Fuge leicht verdreht (ausgeleierte Klappe) */
+html[data-haut='fallblatt'] .rz-schloss .tube {
+  transform: rotate(var(--fb-neig, 0deg))
+    translate(var(--fb-x, 0), var(--fb-y, 0));
+}
+html[data-haut='fallblatt'] .rz-schloss .tube.druck {
+  transform: rotate(var(--fb-neig, 0deg))
+    translate(var(--fb-x, 0), var(--fb-y, 0)) scale(0.965);
+}
+html[data-haut='fallblatt'] .rz-schloss .tube::after {
+  transform: rotate(var(--fb-fuge, 0deg));
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 1) {
+  --fb-neig: -1.4deg;
+  --fb-y: 1px;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 3) {
+  --fb-neig: 0.9deg;
+  --fb-x: 1px;
+  --fb-fuge: -1.5deg;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 4) {
+  --fb-neig: -0.6deg;
+  --fb-y: -1px;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 6) {
+  --fb-neig: 1.5deg;
+  --fb-x: -1px;
+  --fb-y: 1px;
+  --fb-fuge: 1.8deg;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(11n + 5) {
+  --fb-neig: -2deg;
+  --fb-fuge: 2.2deg;
 }
