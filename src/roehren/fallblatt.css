@@ -528,3 +528,69 @@ html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.idle .satsym svg {
   stroke: var(--rz-schrift);
   filter: none;
 }
+
+/* ---------- Tastatur als Karten (Betrag.tsx · Tastatur, 2026-10-25) ----------
+   Die Tasten sind breit (≈ 110 × 54), die Karte hoch (200 × 248): das Kartenbild als Rahmen geschnitten
+   (border-image) — Ecken und Scharniere behalten ihre Form, nur die Lackfläche dazwischen wird breiter.
+   Gedrückt: hinterleuchtet wie die Karten im Schloss. */
+html[data-haut='fallblatt'] .rz-taste {
+  --fb-bild: url('./fb-karte-1.webp');
+  --fb-hell: url('./fb-hell-1.webp');
+  position: relative;
+  border-radius: 4px;
+  background: none;
+  border-style: solid;
+  border-width: 11px 13px;
+  border-image: var(--fb-bild) 46 54 fill / 11px 13px stretch;
+  color: #2a221a;
+  /* Ziffer genau in die Mitte — sonst saß sie gut 20 px links (Probeaufnahme) */
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+html[data-haut='fallblatt'] .rz-taste:nth-child(3n + 2) {
+  --fb-bild: url('./fb-karte-6.webp');
+  --fb-hell: url('./fb-hell-5.webp');
+}
+html[data-haut='fallblatt'] .rz-taste:nth-child(3n) {
+  --fb-bild: url('./fb-karte-3.webp');
+  --fb-hell: url('./fb-hell-3.webp');
+}
+html[data-haut='fallblatt'] .rz-taste:nth-child(4n + 1) {
+  --fb-bild: url('./fb-karte-8.webp');
+}
+html[data-haut='fallblatt'] .rz-taste:active {
+  border-image-source: var(--fb-hell);
+  background: none;
+}
+/* Fuge quer durch die Taste */
+html[data-haut='fallblatt'] .rz-taste::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 48%;
+  height: 2px;
+  background: rgba(20, 12, 6, 0.7);
+  pointer-events: none;
+}
+html[data-haut='fallblatt'] .rz-taste .w {
+  font-family: var(--rz-schrift-familie);
+  font-weight: 700;
+  font-size: 30px;
+  transform: none;
+  color: #2a221a;
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+  -webkit-mask-image: url('./fb-abrieb.webp');
+  mask-image: url('./fb-abrieb.webp');
+  -webkit-mask-size: 200% 200%;
+  mask-size: 200% 200%;
+}
+html[data-haut='fallblatt'] .rz-taste:nth-child(odd) .w {
+  -webkit-mask-position: 80% 30%;
+  mask-position: 80% 30%;
+}
+html[data-haut='fallblatt'] .rz-taste:active .w {
+  color: #3a1d05;
+}
