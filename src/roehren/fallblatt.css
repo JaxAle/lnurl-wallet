@@ -396,3 +396,135 @@ html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
 html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .treffer .ch {
   animation: none;
 }
+
+/* ---------- Zählwerk als Klappkarten (Zaehlwerk.tsx · FallblattZeile, 2026-10-25) ----------
+   Sieben feste Klappen; Kartenbild je Stelle über fb-v1…8; hinterleuchtet, wenn Guthaben da ist. */
+html[data-haut='fallblatt'] .fb-v1 {
+  --fb-bild: url('./fb-karte-1.webp');
+  --fb-hell: url('./fb-hell-1.webp');
+}
+html[data-haut='fallblatt'] .fb-v2 {
+  --fb-bild: url('./fb-karte-2.webp');
+  --fb-hell: url('./fb-hell-2.webp');
+}
+html[data-haut='fallblatt'] .fb-v3 {
+  --fb-bild: url('./fb-karte-3.webp');
+  --fb-hell: url('./fb-hell-3.webp');
+}
+html[data-haut='fallblatt'] .fb-v4 {
+  --fb-bild: url('./fb-karte-4.webp');
+  --fb-hell: url('./fb-hell-4.webp');
+}
+html[data-haut='fallblatt'] .fb-v5 {
+  --fb-bild: url('./fb-karte-5.webp');
+  --fb-hell: url('./fb-hell-5.webp');
+}
+html[data-haut='fallblatt'] .fb-v6 {
+  --fb-bild: url('./fb-karte-6.webp');
+  --fb-hell: url('./fb-hell-6.webp');
+}
+html[data-haut='fallblatt'] .fb-v7 {
+  --fb-bild: url('./fb-karte-7.webp');
+  --fb-hell: url('./fb-hell-1.webp');
+}
+html[data-haut='fallblatt'] .fb-v8 {
+  --fb-bild: url('./fb-karte-8.webp');
+  --fb-hell: url('./fb-hell-2.webp');
+}
+html[data-haut='fallblatt'] .fb-zaehl {
+  gap: 3px;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  height: 43px; /* Seitenverhältnis der Karte (200 × 248), nicht der Röhre */
+  border-radius: 3px;
+  background: #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
+  perspective: 200px;
+  filter: none;
+}
+html[data-haut='fallblatt'] .wallet-hero .fb-zaehl .tube {
+  height: calc(var(--rz-t) * 1.24);
+}
+/* Fuge durch die Ziffer */
+html[data-haut='fallblatt'] .fb-zaehl .tube::after {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 48%;
+  height: 2px;
+  background: rgba(20, 12, 6, 0.75);
+  z-index: 2;
+  pointer-events: none;
+}
+/* Licht: Guthaben da → hinterleuchtet; kalt (0, zu viel) oder Euro-Eingabe → nicht */
+html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
+  opacity: 1;
+  mix-blend-mode: normal;
+  background: var(--fb-hell) center / 100% 100% no-repeat;
+  transition: opacity 0.4s;
+}
+html[data-haut='fallblatt'] .fb-zaehl.cold .tube .glow,
+html[data-haut='fallblatt'] .fb-zaehl.idle .tube .glow,
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit .glow {
+  opacity: 0;
+}
+/* führende Stellen: leere Karten, gedämpft */
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit {
+  opacity: 0.5;
+  filter: none;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  font-family: var(--rz-schrift-familie);
+  font-weight: 700;
+  font-size: 34px;
+  font-size: min(70cqh, 92cqw);
+  line-height: 1;
+  transform: none;
+  color: #2a221a;
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+  -webkit-mask-image: url('./fb-abrieb.webp');
+  mask-image: url('./fb-abrieb.webp');
+  -webkit-mask-size: 170% 170%;
+  mask-size: 170% 170%;
+  animation: none;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch-0::after {
+  display: none;
+}
+/* Tausenderpunkte: gedruckte Creme-Punkte statt Glimmpunkte */
+html[data-haut='fallblatt'] .fb-zaehl .dot {
+  background: var(--rz-schrift);
+  box-shadow: none;
+  margin-bottom: 8px;
+}
+html[data-haut='fallblatt'] .fb-zaehl .dot.unlit {
+  background: var(--rz-linie-2);
+}
+html[data-haut='fallblatt'] .fb-zaehl .satsym svg {
+  stroke: var(--rz-schrift);
+  stroke-width: 2;
+  filter: none;
+}
+html[data-haut='fallblatt'] .fb-zaehl.cold .satsym svg {
+  stroke: var(--rz-leise);
+}
+/* kalt und ruhend heißen in Fallblatt nur „nicht hinterleuchtet“: Karte und Ziffer bleiben normal */
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.cold .tube,
+html[data-haut='fallblatt']
+  .roehren-zaehlwerk
+  .fb-zaehl.idle
+  .tube:not(.unlit) {
+  filter: none;
+}
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.cold .tube .ch,
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.idle .tube .ch {
+  color: #2a221a;
+}
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.idle .dot:not(.unlit) {
+  background: var(--rz-schrift);
+}
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.idle .satsym svg {
+  stroke: var(--rz-schrift);
+  filter: none;
+}

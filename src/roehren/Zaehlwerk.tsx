@@ -7,12 +7,15 @@ import {
   createMemo,
   createSignal,
   For,
+  Index,
   on,
   onCleanup,
   Show
 } from 'solid-js'
 
 import {currency, kursHinweis, satsToFiat} from '../currency'
+import {haut} from './haut'
+import Klappe from './Klappe'
 // Jost, die Schrift der Röhren — im Paket, nicht von Google Fonts (die App lädt nichts nach)
 import '@fontsource/jost/300.css'
 import './roehren.css'
@@ -46,6 +49,60 @@ const zellen = (sats: number, vorher: number | null): Zelle[] => {
     }
   }
   return ergebnis
+}
+
+// Fallblatt (Gerhard, 2026-10-25): sieben feste Klappen statt der bei jedem Stand neu aufgebauten
+// Röhrenreihe — jede folgt ihrer Stelle und klappert beim Zählen über die Ziffern dazwischen. Führende
+// Stellen sind leere Karten; mit Guthaben leuchten die Karten von hinten, kalt nicht.
+const KARTEN_REIHE = ' 0123456789'
+const FallblattZeile: Component<{
+  sats: number
+  kalt: boolean
+  idle: boolean
+  vorzeichen?: string
+  label: string
+}> = props => {
+  const ziffern = () =>
+    String(Math.max(0, Math.floor(props.sats))).slice(-ROEHREN)
+  const erste = () => ROEHREN - ziffern().length
+  const ziffer = (i: number) => (i >= erste() ? ziffern()[i - erste()] : ' ')
+  return (
+    <div
+      class="bal-tubes fb-zaehl"
+      classList={{
+        cold: props.sats === 0 || props.kalt,
+        signed: !!props.vorzeichen,
+        idle: props.idle
+      }}
+      role="img"
+      aria-label={props.label}
+    >
+      <Show when={props.vorzeichen}>
+        <span class="sign">{props.vorzeichen}</span>
+      </Show>
+      <Index each={Array.from({length: ROEHREN}, (_, i) => i)}>
+        {i => (
+          <>
+            <span
+              class={`tube fb-v${((i() * 3) % 8) + 1}`}
+              classList={{unlit: ziffer(i()) === ' '}}
+            >
+              <span class="glow" />
+              <Klappe z={ziffer(i())} reihe={KARTEN_REIHE} />
+            </span>
+            <Show when={(ROEHREN - 1 - i()) % 3 === 0 && i() < ROEHREN - 1}>
+              <span class="dot" classList={{unlit: i() + 1 <= erste()}} />
+            </Show>
+          </>
+        )}
+      </Index>
+      <span class="satsym" aria-hidden="true">
+        <svg viewBox="0 0 12 24">
+          <path d="M6 1.5v21M1.5 7.5h9M1.5 12h9M1.5 16.5h9" />
+        </svg>
+      </span>
+    </div>
+  )
 }
 
 // "≈ 0,06 €" wie im Prototyp; andere Währungen in ihrer gewohnten Form
@@ -150,47 +207,60 @@ const Zaehlwerk: Component<{
         aria-pressed={props.onWahl ? props.wahl === 'sats' : undefined}
         onClick={() => props.onWahl?.('sats')}
       >
-        <Show when={stand()} keyed>
-          {s => (
-            <div
-              class="bal-tubes"
-              classList={{
-                cold: s.sats === 0 || !!props.kalt,
-                signed: !!props.vorzeichen,
-                idle: props.wahl === 'eur'
-              }}
-              role="img"
-              aria-label={`Guthaben ${anzeige()} Sats`}
-            >
-              <Show when={props.vorzeichen}>
-                <span class="sign">{props.vorzeichen}</span>
-              </Show>
-              {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
-              <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
-                {zelle =>
-                  zelle.art === 'punkt' ? (
-                    <span class="dot" classList={{unlit: !zelle.an}} />
-                  ) : zelle.ziffer === null ? (
-                    <span class="tube unlit">
-                      <span class="glow" />
-                    </span>
-                  ) : (
-                    <span class="tube" classList={{up: zelle.neu}}>
-                      <span class="glow" />
-                      <span class={`ch ch-${zelle.ziffer}`}>
-                        {zelle.ziffer}
+        <Show
+          when={haut() !== 'fallblatt'}
+          fallback={
+            <FallblattZeile
+              sats={angezeigt()}
+              kalt={!!props.kalt}
+              idle={props.wahl === 'eur'}
+              vorzeichen={props.vorzeichen}
+              label={`Guthaben ${anzeige()} Sats`}
+            />
+          }
+        >
+          <Show when={stand()} keyed>
+            {s => (
+              <div
+                class="bal-tubes"
+                classList={{
+                  cold: s.sats === 0 || !!props.kalt,
+                  signed: !!props.vorzeichen,
+                  idle: props.wahl === 'eur'
+                }}
+                role="img"
+                aria-label={`Guthaben ${anzeige()} Sats`}
+              >
+                <Show when={props.vorzeichen}>
+                  <span class="sign">{props.vorzeichen}</span>
+                </Show>
+                {/* kalt: kein Aufglühen neuer Ziffern — was nicht geht, glüht nicht (Prototyp entryTubes) */}
+                <For each={zellen(s.sats, props.kalt ? null : s.vorher)}>
+                  {zelle =>
+                    zelle.art === 'punkt' ? (
+                      <span class="dot" classList={{unlit: !zelle.an}} />
+                    ) : zelle.ziffer === null ? (
+                      <span class="tube unlit">
+                        <span class="glow" />
                       </span>
-                    </span>
-                  )
-                }
-              </For>
-              <span class="satsym" aria-hidden="true">
-                <svg viewBox="0 0 12 24">
-                  <path d="M6 1.5v21M1.5 7.5h9M1.5 12h9M1.5 16.5h9" />
-                </svg>
-              </span>
-            </div>
-          )}
+                    ) : (
+                      <span class="tube" classList={{up: zelle.neu}}>
+                        <span class="glow" />
+                        <span class={`ch ch-${zelle.ziffer}`}>
+                          {zelle.ziffer}
+                        </span>
+                      </span>
+                    )
+                  }
+                </For>
+                <span class="satsym" aria-hidden="true">
+                  <svg viewBox="0 0 12 24">
+                    <path d="M6 1.5v21M1.5 7.5h9M1.5 12h9M1.5 16.5h9" />
+                  </svg>
+                </span>
+              </div>
+            )}
+          </Show>
         </Show>
       </div>
       <div

@@ -23,24 +23,28 @@ const ruhig = () =>
   matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // die Zeichen vor dem Ziel in der Reihenfolge der Tafel; fremde Zeichen (b, y) über ein paar zufällige
-const weg = (von: string, nach: string, schritte?: number): string[] => {
-  const ziel = ZEICHEN.indexOf(nach.toUpperCase())
+const weg = (
+  von: string,
+  nach: string,
+  schritte?: number,
+  reihe: string = ZEICHEN
+): string[] => {
+  const ziel = reihe.indexOf(nach.toUpperCase())
   if (ziel < 0 || nach !== nach.toUpperCase()) {
     const zufall = Array.from(
       {length: schritte ?? 4},
-      () => ZEICHEN[Math.floor(Math.random() * ZEICHEN.length)]
+      () => reihe[Math.floor(Math.random() * reihe.length)]
     )
     return [...zufall, nach]
   }
-  const start = ZEICHEN.indexOf(von)
+  const start = reihe.indexOf(von)
   let n =
-    schritte ??
-    (start < 0 ? 4 : (ziel - start + ZEICHEN.length) % ZEICHEN.length)
+    schritte ?? (start < 0 ? 4 : (ziel - start + reihe.length) % reihe.length)
   if (n === 0) n = 1
   n = Math.min(n, HOECHSTENS)
   return Array.from(
     {length: n},
-    (_, k) => ZEICHEN[(ziel - n + 1 + k + ZEICHEN.length) % ZEICHEN.length]
+    (_, k) => reihe[(ziel - n + 1 + k + reihe.length) % reihe.length]
   )
 }
 
@@ -57,7 +61,9 @@ const Klappe: Component<{
   verzug?: number // Sekunden bis zum ersten Klapp
   anfang?: number // so viele Klapps beim Erscheinen (0: steht gleich)
   einmal?: boolean // beim Erscheinen genau ein Klapp auf dasselbe Zeichen (Tippen)
+  reihe?: string // Reihenfolge der Karten; Zählwerk: ' 0123456789' — 9 → 0 nicht über Buchstaben
 }> = props => {
+  const reihe = () => props.reihe ?? ZEICHEN
   const [oben, setOben] = createSignal(props.z) // oben fest: das neue Zeichen
   const [unten, setUnten] = createSignal(props.z) // unten fest: bis zum Ende des Klapps das alte
   const [klapp, setKlapp] = createSignal<{
@@ -87,7 +93,8 @@ const Klappe: Component<{
         setKlapp(null)
         // angekommen — aber vielleicht wurde das Ziel inzwischen ein anderes (richtiger Code, während die
         // Karte noch einklapperte): dann gleich weiter dorthin (Gerhard am Pixel: kein LN · URL · CASH)
-        if (unten() !== props.z) laufe(weg(unten(), props.z))
+        if (unten() !== props.z)
+          laufe(weg(unten(), props.z, undefined, reihe()))
         return
       }
       const neu = folge[k]
@@ -107,7 +114,7 @@ const Klappe: Component<{
     const warte = (props.verzug ?? 0) * 1000
     if (props.einmal) return laufe([props.z], 0)
     if (props.anfang) {
-      const vor = weg('', props.z, props.anfang)
+      const vor = weg('', props.z, props.anfang, reihe())
       setOben(vor[0])
       setUnten(vor[0])
       laufe(vor.slice(1), warte)
@@ -118,7 +125,7 @@ const Klappe: Component<{
     on(
       () => props.z,
       z => {
-        if (!laeuft && z !== unten()) laufe(weg(unten(), z))
+        if (!laeuft && z !== unten()) laufe(weg(unten(), z, undefined, reihe()))
       },
       {defer: true}
     )
