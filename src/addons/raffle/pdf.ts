@@ -63,11 +63,14 @@ const PAGE_SIZE_MM: Record<PaperSize, [number, number]> = {
   letter: [215.9, 279.4]
 }
 
-const MARGIN_MM = 10
-const COLUMNS = 4
-const ROWS = 4
-const GAP_MM = 4
-const CARD_PADDING_MM = 2.5
+// Fork (Gerhard am Pixel/iPad, 2026-10-25): bei 4 × 4 war der QR 39 mm breit — ein Los mit Prüfsignatur
+// (~400 Zeichen, 65 Module) hatte 0,6-mm-Punkte, das iPad tat sich schwer. 3 × 3 ergibt ~54 mm (0,84 mm
+// je Punkt); dazu mehr Ruhezone um den Code, die Scanner zum Finden brauchen
+const MARGIN_MM = 8
+const COLUMNS = 3
+const ROWS = 3
+const GAP_MM = 3
+const CARD_PADDING_MM = 4
 
 // A short summary page ahead of the ticket grid, so the printed packet is
 // self-contained and doesn't depend on whoever printed it also keeping the
@@ -164,7 +167,7 @@ export const buildTicketPdf = async (
   const pageHeight = pageHeightMm * MM
   const margin = MARGIN_MM * MM
   const gap = GAP_MM * MM
-  // both dimensions fill the page exactly - a fixed 4x4 grid per page,
+  // both dimensions fill the page exactly - a fixed grid per page,
   // rather than a fixed card size with leftover space at the bottom
   const cardWidth = (pageWidth - 2 * margin - (COLUMNS - 1) * gap) / COLUMNS
   const cardHeight = (pageHeight - 2 * margin - (ROWS - 1) * gap) / ROWS
@@ -233,41 +236,41 @@ export const buildTicketPdf = async (
 
     const textX = left + padding
     const textWidth = cardWidth - 2 * padding
-    let cursorY = qrY - 3 * MM
+    let cursorY = qrY - 5 * MM
 
     p.drawText(config.title, {
       x: textX,
       y: cursorY,
-      size: 7.5,
+      size: 10,
       font: boldFont,
       maxWidth: textWidth
     })
-    cursorY -= 3.3 * MM
+    cursorY -= 4.6 * MM
     p.drawText(config.texte.los(String(ticket.index + 1).padStart(3, '0')), {
       x: textX,
       y: cursorY,
-      size: 6.5,
+      size: 9,
       font
     })
 
     if (config.showAmount) {
-      cursorY -= 3 * MM
+      cursorY -= 4 * MM
       p.drawText(
         `${ticket.amountSat.toLocaleString()} ${config.texte.einheit}`,
         {
           x: textX,
           y: cursorY,
-          size: 6.5,
+          size: 9,
           font
         }
       )
     }
     if (ticket.label) {
-      cursorY -= 3 * MM
+      cursorY -= 4 * MM
       p.drawText(ticket.label, {
         x: textX,
         y: cursorY,
-        size: 6.5,
+        size: 9,
         font,
         maxWidth: textWidth
       })
