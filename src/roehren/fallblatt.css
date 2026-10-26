@@ -1191,3 +1191,58 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
 html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='3']:not(.fb-komm) {
   --fb-unten: none;
 }
+
+/* ---------- Knöpfe als Schilder (Gerhards Material, 2026-10-26) ----------
+   Geschwärztes Eisen für die ruhigen Wege, hinterleuchtetes Messing für den Hauptweg (.an), gedrückt die
+   eingelassenen Fassungen. Als Rahmen geschnitten (border-image, Fläche mitgezogen). Breite Knöpfe nehmen das
+   lange Schild (≈ 3,8 : 1), die fast quadratischen der Startseite (.rz-duo) eine kurze Fassung (2 : 1, Hälften
+   mit Ecken und Rändern, Mitte übergeblendet) — so wird nichts sichtbar gestreckt. Schrift und Pfeil
+   zeichnet die Wallet. */
+html[data-haut='fallblatt'] .rz-knopf {
+  --schild: url('./fb-schild-eisen.webp');
+  --schild-druck: url('./fb-schild-eisen-druck.webp');
+  border-style: solid;
+  border-color: transparent;
+  border-width: 11px;
+  border-radius: 0;
+  border-image: var(--schild) 28 fill / 11px stretch;
+  background: none;
+  box-shadow: none;
+  color: var(--rz-schrift);
+}
+html[data-haut='fallblatt'] .rz-knopf.an {
+  --schild: url('./fb-schild-messing.webp');
+  --schild-druck: url('./fb-schild-messing-druck.webp');
+  background: none;
+  box-shadow: none;
+  color: #2a1c08;
+  filter: drop-shadow(0 0 6px rgba(246, 170, 70, 0.25));
+}
+html[data-haut='fallblatt'] .rz-duo .rz-knopf {
+  --schild: url('./fb-schild-eisen-kurz.webp');
+  --schild-druck: url('./fb-schild-eisen-druck-kurz.webp');
+}
+html[data-haut='fallblatt'] .rz-duo .rz-knopf.an {
+  --schild: url('./fb-schild-messing-kurz.webp');
+  --schild-druck: url('./fb-schild-messing-druck-kurz.webp');
+}
+html[data-haut='fallblatt'] .rz-knopf:active {
+  border-image-source: var(--schild-druck);
+  background: none;
+  box-shadow: none;
+}
+html[data-haut='fallblatt'] .rz-knopf.an:active {
+  filter: none;
+}
+html[data-haut='fallblatt'] .rz-knopf.an svg,
+html[data-haut='fallblatt'] .rz-knopf.an:active svg {
+  color: #2a1c08;
+}
+html[data-haut='fallblatt'] .rz-knopf:disabled,
+html[data-haut='fallblatt'] .rz-weiter:disabled {
+  --schild: url('./fb-schild-eisen.webp');
+  background: none;
+  color: var(--rz-leise);
+  filter: brightness(0.7);
+  opacity: 1;
+}
