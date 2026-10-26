@@ -1135,3 +1135,59 @@ html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='6']:not(.fb-komm) {
 html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='3']:not(.fb-komm) {
   --fb-unten: translateX(-1px);
 }
+
+/* ---------- Feinschliff (zweiter Blick, 2026-10-26) ----------
+   Die 6: Drehung um das linke Scharnier statt um die Mitte — die rechte Seite sackt ab, der Spalt öffnet
+   sich zum Keil (um die Mitte blieb der Spalt fast gleich, die Schiefe war kaum zu sehen). Dezimalpunkt
+   15 % dunkler. Ein schmaler Kontaktschatten unter jeder Karte, damit sie nicht schweben. */
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='6']:not(.fb-komm) {
+  --fb-unten: rotate(2deg);
+  transform-origin: 0 0;
+}
+html[data-haut='fallblatt'] .fb-zaehl .dot:not(.unlit) {
+  filter: brightness(0.85);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit {
+  filter: brightness(0.43) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v4 {
+  filter: brightness(0.37) saturate(0.6)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v2 {
+  filter: brightness(0.5) saturate(0.8)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  filter: brightness(1.1) saturate(0.92)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
+}
+/* hinter den Plättchen das dunkle Gehäuse statt noch einmal das Kartenbild — sonst sah man durch einen sich
+   öffnenden Spalt nur dieselbe Karte, die Schiefe der 6 blieb unsichtbar */
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  background:
+    radial-gradient(
+      ellipse 13% 17% at 4% 50%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 13% 17% at 96% 50%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    linear-gradient(#120a04, #120a04) center / 72% 92% no-repeat,
+    transparent var(--fb-bild) center bottom / 100% 96.5% no-repeat;
+}
+/* die 3 wieder gerade: ihr Versatz zeigte vor dem dunklen Gehäuse einen senkrechten Strich, der wie ein
+   Bildfehler wirkte — die 6 trägt die Unregelmäßigkeit allein */
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='3']:not(.fb-komm) {
+  --fb-unten: none;
+}
