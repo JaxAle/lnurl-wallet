@@ -1062,3 +1062,7 @@ html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
     text-box: trim-both cap alphabetic;
   }
 }
+/* Ziffer etwas kleiner, mit Luft oben und unten wie im Vorbild (Gerhard, 2026-10-26): ~66 % der Kartenhöhe */
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  font-size: min(96cqh, 116cqw);
+}
