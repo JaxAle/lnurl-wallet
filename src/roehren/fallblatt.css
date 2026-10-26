@@ -151,13 +151,13 @@ html[data-haut='fallblatt'] {
   --rz-schrift-2: #ddd2ba;
   --rz-leise: #9a937f;
   --rz-leise-2: #b2aa94;
-  --rz-linie: #34352f;
-  --rz-linie-2: #45463e;
-  --rz-linie-3: #2c2d28;
-  --rz-linie-4: #3d3e37;
-  --rz-flaeche: #23241f;
-  --rz-flaeche-tief: #1a1b17;
-  --rz-flaeche-2: #1f201b;
+  --rz-linie: #2a2a26;
+  --rz-linie-2: #383833;
+  --rz-linie-3: #232320;
+  --rz-linie-4: #31312c;
+  --rz-flaeche: #181816;
+  --rz-flaeche-tief: #111110;
+  --rz-flaeche-2: #151513;
   --rz-warn: #d2402f;
   --rz-warn-2: #e0604f;
   --rz-warn-rgb: 210, 64, 47;
@@ -173,13 +173,15 @@ html[data-haut='fallblatt'] {
 }
 html[data-haut='fallblatt'] body {
   font-family: var(--rz-schrift-familie);
+  /* fast schwarzes Graphit, oben ein schwacher warmer Schein wie von der Tafel (Steve, 2026-10-26) —
+     Werte gleich in leuchtkraft.ts (HINTERGRUND.fallblatt) */
   background:
     radial-gradient(
-      ellipse 70% 50% at 15% -10%,
-      rgba(246, 197, 96, 0.06),
-      transparent 60%
+      ellipse 80% 45% at 50% 8%,
+      rgba(246, 180, 80, 0.07),
+      transparent 70%
     ),
-    linear-gradient(160deg, #1d1f1b 0%, #181a16 55%, #121310 100%);
+    linear-gradient(160deg, #0f100e 0%, #0b0c0a 55%, #070807 100%);
   background-attachment: fixed;
   background-size: 100% 100%;
 }
@@ -510,7 +512,7 @@ html[data-haut='fallblatt'] .fb-zaehl.cold .satsym svg {
   stroke: var(--rz-leise);
 }
 /* kalt und ruhend heißen in Fallblatt nur „nicht hinterleuchtet“: Karte und Ziffer bleiben normal */
-html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.cold .tube,
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.cold .tube:not(.unlit),
 html[data-haut='fallblatt']
   .roehren-zaehlwerk
   .fb-zaehl.idle
@@ -593,4 +595,123 @@ html[data-haut='fallblatt'] .rz-taste:nth-child(odd) .w {
 }
 html[data-haut='fallblatt'] .rz-taste:active .w {
   color: #3a1d05;
+}
+
+/* ---------- Zählwerk: Licht aus den Spalten (Steve + zweiter Blick, 2026-10-26) ----------
+   Die Karten bleiben cremefarben mit dunkler Zahl; das Bernsteinlicht sitzt dahinter und tritt durch die
+   Fuge und an den Kanten aus, mit Schein auf den Grund. Leere Karten stehen im Schatten. Die Zahl ist das
+   Wichtigste: nur leichter Abrieb, kräftige Farbe. */
+html[data-haut='fallblatt'] .fb-zaehl {
+  position: relative;
+}
+/* Lichtfleck auf dem Grund unter der Reihe */
+html[data-haut='fallblatt'] .fb-zaehl::before {
+  content: '';
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 30%;
+  bottom: -40%;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(246, 170, 70, 0.22),
+    transparent 70%
+  );
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+html[data-haut='fallblatt'] .fb-zaehl.cold::before,
+html[data-haut='fallblatt'] .fb-zaehl.idle::before {
+  opacity: 0;
+}
+/* statt der orangen Karte: nur ein Hauch Wärme auf dem Lack */
+html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
+  opacity: 0.22;
+}
+/* Licht an den Kanten */
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 90, 0.35),
+    0 0 12px 1px rgba(246, 165, 60, 0.45),
+    0 0 26px rgba(246, 150, 40, 0.2);
+}
+/* die Fuge: breit, dunkel, mit Tiefe — die untere Hälfte liegt im Schatten der oberen */
+html[data-haut='fallblatt'] .fb-zaehl .tube::after {
+  height: 3px;
+  left: 6%;
+  right: 6%;
+  background: #120b05;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.22),
+    rgba(0, 0, 0, 0.05) 40%,
+    transparent
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+/* aktiv: Licht tritt durch die Fuge aus */
+html[data-haut='fallblatt']
+  .fb-zaehl:not(.cold):not(.idle)
+  .tube:not(.unlit)::after {
+  /* der Spalt bleibt dunkel, das Licht quillt an seinen Rändern heraus */
+  background: #1a0e04;
+  box-shadow:
+    0 -1px 3px rgba(255, 196, 100, 0.75),
+    0 1px 3px rgba(255, 196, 100, 0.75),
+    0 0 9px rgba(246, 150, 40, 0.35);
+}
+/* leere Karten: voll deckend, im Schatten */
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit {
+  opacity: 1;
+  filter: brightness(0.38) saturate(0.7);
+  box-shadow: none;
+}
+/* lesbare Zahl: leichter Abrieb, kräftige Farbe */
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  color: #17110b;
+  opacity: 1;
+  -webkit-mask-image: url('./fb-abrieb-leicht.webp');
+  mask-image: url('./fb-abrieb-leicht.webp');
+}
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.cold .tube .ch,
+html[data-haut='fallblatt'] .roehren-zaehlwerk .fb-zaehl.idle .tube .ch {
+  color: #17110b;
+}
+/* die alte Maschine: die untere Hälfte schwingt beim Einrasten kurz nach, das Licht flackert */
+@keyframes fb-komm {
+  0% {
+    transform: rotateX(90deg);
+    filter: brightness(0.7);
+  }
+  70% {
+    transform: rotateX(-9deg);
+  }
+  100% {
+    transform: rotateX(0);
+  }
+}
+html[data-haut='fallblatt']
+  .fb-zaehl:not(.cold):not(.idle)
+  .tube:has(.fb-fall)::after {
+  animation: fb-flackern 0.12s steps(2, end);
+}
+@keyframes fb-flackern {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-haut='fallblatt'] .fb-zaehl .tube::after {
+    animation: none !important;
+  }
 }

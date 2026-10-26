@@ -44,9 +44,9 @@ const HINTERGRUND = {
     grund: ['#08090c', '#0a0c10', '#060708']
   },
   fallblatt: {
-    glut: '#f6c560',
-    flecken: [['ellipse 70% 50% at 15% -10%', 0.06, 60]],
-    grund: ['#1d1f1b', '#181a16', '#121310']
+    glut: '#f6b450',
+    flecken: [['ellipse 80% 45% at 50% 8%', 0.07, 70]],
+    grund: ['#0f100e', '#0b0c0a', '#070807']
   }
 } as const
 const hintergrund = (v: number) => {
