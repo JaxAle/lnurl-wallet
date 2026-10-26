@@ -1261,3 +1261,21 @@ html[data-haut='fallblatt'] .fb-zaehl .satsym::after {
 html[data-haut='fallblatt'] .rz-knopf.an {
   filter: drop-shadow(0 0 5px rgba(217, 163, 74, 0.3));
 }
+/* Knöpfe als ausgebaute Klappkarten (zweiter Blick, 2026-10-26): ruhig = unbeleuchtete Karte (Graubeige,
+   Creme-Schrift), Hauptweg = beleuchtete Karte (Creme, Schrift fast schwarz wie die Ziffern) mit genau dem
+   Licht der Karten dahinter. Keine Fuge, keine Schrauben. */
+html[data-haut='fallblatt'] .rz-knopf.an {
+  --fb-licht: 0.45;
+  color: #17110b;
+  filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
+}
+html[data-haut='fallblatt'] .rz-knopf.an svg,
+html[data-haut='fallblatt'] .rz-knopf.an:active svg {
+  color: #17110b;
+}
+html[data-haut='fallblatt'] .rz-knopf:not(.an) {
+  filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
