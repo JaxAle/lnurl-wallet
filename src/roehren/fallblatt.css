@@ -1246,3 +1246,8 @@ html[data-haut='fallblatt'] .rz-weiter:disabled {
   filter: brightness(0.7);
   opacity: 1;
 }
+/* Sats-Zeichen als lackiertes Blech (2026-10-26): kaum Lichtschein — es gehört zur Mechanik, nicht zum Licht */
+html[data-haut='fallblatt'] .fb-zaehl .satsym::after {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 3px rgba(217, 163, 74, 0.15));
+}
