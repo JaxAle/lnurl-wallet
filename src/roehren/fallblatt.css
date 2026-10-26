@@ -1439,3 +1439,39 @@ html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(11n + 5) {
   --fb-neig: -1.1deg;
   --fb-fuge: 1.2deg;
 }
+/* Buchstaben als gealterte Druckfarbe (Gerhard, 2026-10-26): dunkles Sepia statt Grau, ins Material
+   gedruckt (multiply — Rost und Flecken der Karte scheinen durch, die Farbe ist dort mit abgerieben);
+   unbeleuchtet verblasst, beleuchtet fast schwarz — der Unterschied entsteht vor allem durch das Licht */
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .ch {
+  color: #493a29;
+  opacity: 0.7;
+  mix-blend-mode: multiply;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
+  color: #21180f;
+  opacity: 0.97;
+  mix-blend-mode: multiply;
+}
+/* unregelmäßiger Farbauftrag wie bei altem Buchdruck: Deckkraft je Karte 62–78 %, unbeleuchtet mit dem
+   kräftigeren Abrieb (an beschädigten Stellen ist die Farbe mit abgegangen) */
+html[data-haut='fallblatt'] .rz-schloss-feld .tube:not(.marke):not(.druck) .ch {
+  -webkit-mask-image: url('./fb-abrieb.webp');
+  mask-image: url('./fb-abrieb.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss-feld .tube:nth-child(3n + 1) .ch {
+  opacity: 0.62;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld .tube:nth-child(4n + 2) .ch {
+  opacity: 0.78;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld .tube:nth-child(7n + 4) .ch {
+  opacity: 0.66;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
+  opacity: 0.97;
+}
