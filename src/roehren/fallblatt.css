@@ -893,3 +893,59 @@ html[data-haut='fallblatt']
   .tube:has(.fb-unten[data-z='7']:not(.fb-komm)) {
   --fb-fuge: 0.7deg;
 }
+
+/* ---------- Plättchen statt Balken (Gerhards mechanische Korrektur, 2026-10-26) ----------
+   Kein aufgelegter Balken mehr. Je Karte: hinten das ganze Kartenbild (Rand, Scharniere — bleiben stehen),
+   davor ein Lichtstreifen, davor zwei Plättchen zwischen den Scharnieren (14 % … 86 %), jedes mit seinem
+   Ausschnitt des Kartenbilds und seiner Ziffernhälfte. Zwischen ihnen ein echter Spalt (0,8 cqh), durch den
+   das Licht fällt. Neigt sich eine Hälfte, neigt sich Plättchen samt Ziffer. Bildlage wie oben: am unteren
+   Rand, 96,5 % Höhe → Achse auf 50 %. */
+html[data-haut='fallblatt'] .fb-zaehl .tube::after,
+html[data-haut='fallblatt'] .fb-zaehl .tube::before {
+  content: none;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h {
+  left: 14%;
+  right: 14%;
+  background: var(--fb-bild) no-repeat;
+  background-size: 100cqw 96.5cqh;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h.fb-oben {
+  top: 0;
+  height: calc(50% - 0.4cqh);
+  background-position: -14cqw 3.5cqh;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h.fb-unten {
+  top: calc(50% + 0.4cqh);
+  bottom: 0;
+  height: auto;
+  /* die untere Hälfte liegt im Schatten der oberen */
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 45%) 0 0 / 100% 100%
+      no-repeat,
+    var(--fb-bild) -14cqw calc(3.5cqh - 50.4cqh) / 100cqw 96.5cqh no-repeat;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h .fb-voll {
+  left: -14cqw;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h.fb-oben .fb-voll {
+  top: 0;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-h.fb-unten .fb-voll {
+  top: -50.4cqh;
+}
+/* Licht hinter dem Spalt (aktive Karten); kalt, Euro-Eingabe und leere Karten: dunkel */
+html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
+  opacity: 1;
+  background: radial-gradient(
+    ellipse 42% 7% at 50% 50%,
+    rgba(255, 206, 120, 0.95),
+    rgba(246, 150, 40, 0.55) 55%,
+    transparent 100%
+  );
+}
+html[data-haut='fallblatt'] .fb-zaehl.cold .tube .glow,
+html[data-haut='fallblatt'] .fb-zaehl.idle .tube .glow,
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit .glow {
+  opacity: 0;
+}
