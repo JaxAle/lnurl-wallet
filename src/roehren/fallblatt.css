@@ -1299,3 +1299,14 @@ html[data-haut='fallblatt'] .rz-knopf.an svg,
 html[data-haut='fallblatt'] .rz-knopf.an:active svg {
   color: #2e2622;
 }
+/* letzte Feinabstimmung der Knöpfe (zweiter Blick, 2026-10-26): Schrift der ruhigen Karte warmes Creme wie
+   das Zählwerk; Pfeile kräftiger (+20 %) und mit kompakterer Spitze, Position unverändert */
+html[data-haut='fallblatt'] .rz-knopf:not(.an) {
+  color: #e5d8be;
+}
+html[data-haut='fallblatt'] .rz-knopf svg {
+  stroke-width: 2.2;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  transform: scaleX(0.85);
+}
