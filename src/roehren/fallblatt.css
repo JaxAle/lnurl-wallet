@@ -1475,3 +1475,18 @@ html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
 html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
   opacity: 0.97;
 }
+/* eine Druckfarbe für alle Buchstaben (Gerhard, 2026-10-26): Schwarzbraun #2B2118, 95 % auf jeder Karte —
+   eine Lampe hinter der Karte macht die Farbe nicht dunkler; der Unterschied ist nur das Licht. Abnutzung
+   nur dezent (leichter Abrieb), keine Fehlstellen mehr in den Buchstaben. */
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube:nth-child(n) .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
+  color: #2b2118;
+  opacity: 0.95;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: url('./fb-abrieb-leicht.webp');
+  mask-image: url('./fb-abrieb-leicht.webp');
+}
