@@ -1310,3 +1310,61 @@ html[data-haut='fallblatt'] .rz-knopf svg {
   stroke-linejoin: miter;
   transform: scaleX(0.85);
 }
+
+/* ---------- Hinweiszeile als Leiste im Gehäuse (Gerhards Entwurf, 2026-10-26) ----------
+   „1 Schein unterwegs · 260 Sats ›“: eingelassene, fast schwarze Eisenleiste mit Rahmen und zwei Nieten,
+   Lampe links, Schrift Creme, Betrag Bernstein. */
+html[data-haut='fallblatt'] .rz-hinweiszeile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  min-height: 52px;
+  padding: 6px 34px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 10px;
+  border-radius: 0;
+  border-image: url('./fb-leiste.webp') 26 fill / 10px stretch;
+  background: none;
+  color: var(--rz-schrift);
+  font: 500 20px/1.2 var(--rz-schrift-familie);
+  filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .rz-hinweiszeile .rz-betrag {
+  color: #e8b55e;
+}
+html[data-haut='fallblatt'] .rz-hinweiszeile > .rz-lampe-klein {
+  display: block;
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  background: radial-gradient(circle at 40% 35%, #fff2c8, #f2c060 55%, #b9822e);
+  box-shadow:
+    0 0 5px rgba(255, 200, 110, 0.8),
+    0 0 12px rgba(246, 160, 50, 0.45);
+}
+/* zwei Nieten an den Enden */
+html[data-haut='fallblatt'] .rz-hinweiszeile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 8px 50%,
+      #5a4c3c 0 1.6px,
+      #1a140e 2.4px,
+      transparent 3.2px
+    ),
+    radial-gradient(
+      circle at calc(100% - 8px) 50%,
+      #5a4c3c 0 1.6px,
+      #1a140e 2.4px,
+      transparent 3.2px
+    );
+}

@@ -2789,3 +2789,7 @@ video.scanner {
   margin: 0 auto;
   object-fit: cover;
 }
+/* Lampe in der Hinweiszeile nur in Fallblatt (fallblatt.css) — die Röhren bleiben, wie sie sind */
+.rz-hinweiszeile > .rz-lampe-klein {
+  display: none;
+}

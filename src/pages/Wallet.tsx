@@ -1690,12 +1690,15 @@ const Wallet: Component<{
                         class="rz-hinweiszeile"
                         onClick={() => navigate('/activity')}
                       >
+                        <span class="rz-lampe-klein" />
                         {z.liste.length === 1 ? z.eins : z.mehr(z.liste.length)}
                         {' · '}
-                        {Math.floor(
-                          z.liste.reduce((a, b) => a + b.amount, 0) / 1000
-                        ).toLocaleString('de-DE')}{' '}
-                        Sats ›
+                        <span class="rz-betrag">
+                          {Math.floor(
+                            z.liste.reduce((a, b) => a + b.amount, 0) / 1000
+                          ).toLocaleString('de-DE')}{' '}
+                          Sats ›
+                        </span>
                       </button>
                     )}
                   </For>
