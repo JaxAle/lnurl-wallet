@@ -1560,3 +1560,15 @@ html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke:nth-child(40) {
     animation: none;
   }
 }
+/* Schloss-Buchstaben +18 % (zweiter Blick, 2026-10-26), alle Karten gleich; auf die Trennlinie zentriert
+   (sie liegt im Schloss bei 48 %): text-box schneidet auf Großbuchstabenhöhe, dann 2 % nach oben */
+html[data-haut='fallblatt'] .rz-schloss .tube .ch {
+  font-size: min(73cqh, 104cqw);
+  font-weight: 700;
+}
+@supports (text-box: trim-both cap alphabetic) {
+  html[data-haut='fallblatt'] .rz-schloss .fb-voll .ch {
+    text-box: trim-both cap alphabetic;
+    transform: translateY(-2cqh) scaleX(0.86);
+  }
+}
