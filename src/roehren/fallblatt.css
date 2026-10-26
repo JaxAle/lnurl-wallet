@@ -1047,3 +1047,18 @@ html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
     drop-shadow(0 3px 5px rgba(255, 200, 110, calc(var(--fb-licht) * 1.2)))
     drop-shadow(0 0 10px rgba(246, 150, 40, calc(var(--fb-licht) * 0.5)));
 }
+
+/* ---------- Ziffer mittig in jedem Browser (Gerhard am iPad, 2026-10-26) ----------
+   Die feste Korrektur (−0,05 em, in Chrome gemessen) traf am iPad nicht: Safari liest die Höhenangaben
+   der Schrift anders. text-box schneidet die Zeile auf Großbuchstabenhöhe und Grundlinie zu — dann wird
+   die sichtbare Ziffer selbst zentriert, unabhängig von den Schriftmetriken. Rückfall für ältere Browser.
+   Größe zurück auf 108 % der Kartenhöhe (118 % war zu groß). */
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  font-size: min(108cqh, 130cqw);
+}
+@supports (text-box: trim-both cap alphabetic) {
+  html[data-haut='fallblatt'] .fb-zaehl .fb-voll .ch {
+    transform: none;
+    text-box: trim-both cap alphabetic;
+  }
+}
