@@ -949,3 +949,21 @@ html[data-haut='fallblatt'] .fb-zaehl.idle .tube .glow,
 html[data-haut='fallblatt'] .fb-zaehl .tube.unlit .glow {
   opacity: 0;
 }
+
+/* ---------- kein heller Streifen (Gerhard am iPad, 2026-10-26) ----------
+   Der Spalt bleibt dunkel, das Licht dahinter gedämpft und breiter — ein Schein, kein Strich durch die
+   Ziffer. Kein Goldumriss um die Karten; der Schein enger, damit die Lücken zwischen den Karten dunkel
+   bleiben. */
+html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
+  background: radial-gradient(
+    ellipse 48% 14% at 50% 50%,
+    rgba(214, 140, 50, 0.55),
+    rgba(160, 90, 25, 0.25) 55%,
+    transparent 100%
+  );
+}
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  box-shadow:
+    0 0 8px rgba(246, 165, 60, calc(var(--fb-licht) * 0.8)),
+    0 6px 18px rgba(246, 150, 40, calc(var(--fb-licht) * 0.35));
+}
