@@ -1506,3 +1506,57 @@ html[data-haut='fallblatt'] .rz-schloss .tube {
       drop-shadow(0 0 4px rgba(255, 200, 110, 0));
   }
 }
+/* Licht der aktiven Karten leicht unregelmäßig (±6 %), und beim Öffnen flackern D N I kurz — wie eine alte
+   elektrische Anzeigetafel (Gerhard, 2026-10-26) */
+html[data-haut='fallblatt'] .rz-schloss .tube {
+  --fb-b: 1.1;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(3n + 1) {
+  --fb-b: 1.04;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(4n + 2) {
+  --fb-b: 1.17;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 3) {
+  --fb-b: 1.06;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke {
+  filter: brightness(var(--fb-b)) saturate(0.92)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
+}
+html[data-haut='fallblatt']
+  .rz-schloss-feld.offen
+  .tube.marke:nth-child(n + 38) {
+  animation: fb-flackern-dni 0.9s steps(1, end) both;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke:nth-child(39) {
+  animation-delay: 0.12s;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke:nth-child(40) {
+  animation-delay: 0.05s;
+}
+@keyframes fb-flackern-dni {
+  0%,
+  18%,
+  34%,
+  100% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  26% {
+    opacity: 0.8;
+  }
+  42% {
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke {
+    animation: none;
+  }
+}
