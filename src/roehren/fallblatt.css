@@ -1115,3 +1115,23 @@ html[data-haut='fallblatt'] .fb-zaehl.idle .satsym::after {
   background-image: url('./fb-sats-kalt.webp');
   filter: none;
 }
+
+/* ---------- Lichtinseln statt Nebel; die 6 ausgeschlagen (zweiter Blick, 2026-10-26) ----------
+   Kein breiter Lichtfleck mehr auf dem Grund; der Schein je Karte ~30 % schwächer und eng am Rand — jede
+   Karte eine eigene kleine Lichtinsel wie bei den Röhren. Die 6: untere Hälfte (Plättchen samt Ziffern-
+   hälfte und Spaltkante) 1,5° im Uhrzeigersinn; die 3 unten 1 px nach links. */
+html[data-haut='fallblatt'] .fb-zaehl::before {
+  opacity: 0.25;
+}
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  filter: brightness(1.1) saturate(0.92)
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='6']:not(.fb-komm) {
+  --fb-unten: rotate(1.5deg);
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='3']:not(.fb-komm) {
+  --fb-unten: translateX(-1px);
+}
