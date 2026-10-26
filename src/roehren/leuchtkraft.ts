@@ -3,6 +3,8 @@
 // Bezugsrahmen für feste Elemente (Blätter, Meldungen, Kopf bleiben, wo sie sind). Schwarz bleibt schwarz.
 import {createSignal} from 'solid-js'
 
+import grundBild from './fb-grund.webp'
+
 const SCHLUESSEL = 'fork_leuchtkraft'
 export const STUFEN = [1, 1.2, 1.4] as const
 export type Stufe = (typeof STUFEN)[number]
@@ -46,7 +48,7 @@ const HINTERGRUND = {
   fallblatt: {
     glut: '#f6b450',
     flecken: [['ellipse 80% 45% at 50% 8%', 0.07, 70]],
-    grund: ['#0f100e', '#0b0c0a', '#070807']
+    grund: ['#0f100e', '#0b0c0a', '#070807'] // Bild: fallblattGrund
   }
 } as const
 const hintergrund = (v: number) => {
@@ -65,10 +67,40 @@ const hintergrund = (v: number) => {
   ].join(', ')
 }
 
+// Fallblatt hat ein Bild als Grund (fb-grund.webp): eine schwarze Schicht mit Deckkraft 1 − 1/v darüber
+// macht das Bild um 1/v dunkler — mal v (Filter) ergibt es unverändert
+const fallblattGrund = (v: number) => {
+  const a = (1 - 1 / v).toFixed(3)
+  const h = HINTERGRUND.fallblatt
+  const glut = durch(h.glut, v)
+  return {
+    bild: [
+      ...h.flecken.map(
+        ([form, al, bis]) =>
+          `radial-gradient(${form}, rgba(${glut}, ${al}), transparent ${bis}%)`
+      ),
+      `linear-gradient(rgba(0, 0, 0, ${a}), rgba(0, 0, 0, ${a}))`,
+      `url(${grundBild})`
+    ].join(', '),
+    groesse: '100% 100%, 100% 100%, cover',
+    farbe: `rgb(${durch(h.grund[1], v)})`
+  }
+}
+
 const anwenden = (v: Stufe) => {
   if (typeof document === 'undefined') return
   document.documentElement.style.filter = v === 1 ? '' : `brightness(${v})`
-  document.body.style.backgroundImage = v === 1 ? '' : hintergrund(v)
+  const b = document.body.style
+  if (v !== 1 && document.documentElement.dataset.haut === 'fallblatt') {
+    const g = fallblattGrund(v)
+    b.backgroundImage = g.bild
+    b.backgroundSize = g.groesse
+    b.backgroundColor = g.farbe
+    return
+  }
+  b.backgroundImage = v === 1 ? '' : hintergrund(v)
+  b.backgroundSize = ''
+  b.backgroundColor = ''
 }
 anwenden(leuchtkraft())
 

@@ -1066,3 +1066,28 @@ html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
 html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
   font-size: min(96cqh, 116cqw);
 }
+
+/* ---------- Rost als Grund auf allen Seiten (Steve, 2026-10-26) ----------
+   Dieselbe Machart wie die Platte unter dem Zählwerk, aber dunkler und ruhiger (fb-grund.webp, 5 KB) —
+   die ganze App wird ein Gerät, die Platte bleibt das Bedienfeld darauf. Werte für die Leuchtkraft in
+   leuchtkraft.ts (fallblattGrund). Gruppen und Listen bekommen eine halbdurchsichtige dunkle Fläche, damit
+   die Schrift ruhig bleibt. */
+html[data-haut='fallblatt'] body {
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% 8%,
+      rgba(246, 180, 80, 0.07),
+      transparent 70%
+    ),
+    url('./fb-grund.webp') center / cover no-repeat,
+    #0b0c0a;
+  background-attachment: fixed;
+}
+html[data-haut='fallblatt'] .rz-gruppe,
+html[data-haut='fallblatt'] .rz-liste {
+  margin-left: -10px;
+  margin-right: -10px;
+  padding: 2px 10px 6px;
+  border-radius: 6px;
+  background: rgba(8, 8, 6, 0.55);
+}
