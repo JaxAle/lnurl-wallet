@@ -1368,3 +1368,74 @@ html[data-haut='fallblatt'] .rz-hinweiszeile::after {
       transparent 3.2px
     );
 }
+
+/* ---------- Schloss an das Zählwerk angeglichen (zweiter Blick, 2026-10-26) ----------
+   Eine große mechanische Codetafel in derselben Sprache: Licht wie im Zählwerk (Karte bleibt Creme,
+   Bernstein an den Kanten, je Karte leicht verschieden) statt der orangen Leuchtbilder; Buchstaben klarer
+   (leichter Abrieb), auf unbeleuchteten Karten gedämpft, damit LN · URL · CASH herausspringt; Schiefe
+   zurückhaltender, weil 40 Karten sichtbar sind. */
+html[data-haut='fallblatt'] .rz-schloss .tube {
+  --fb-licht: 0.45;
+  filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(4n + 1) {
+  --fb-licht: 0.38;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(5n + 3) {
+  --fb-licht: 0.52;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube .glow {
+  display: none;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke,
+html[data-haut='fallblatt'] .rz-schloss .tube.druck {
+  filter: brightness(1.1) saturate(0.92)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
+    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
+}
+html[data-haut='fallblatt']
+  .rz-schloss-feld.dunkel
+  .tube:has(.treffer):not(.druck) {
+  animation: fb-nachlicht 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes fb-nachlicht {
+  0% {
+    filter: brightness(1.1) saturate(0.92)
+      drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+      drop-shadow(0 0 4px rgba(255, 200, 110, 0.4));
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+      drop-shadow(0 0 4px rgba(255, 200, 110, 0));
+  }
+}
+/* Buchstaben: klarer, leichter Abrieb; unbeleuchtet gedämpft, beleuchtet kräftig */
+html[data-haut='fallblatt'] .rz-schloss .tube .ch {
+  -webkit-mask-image: url('./fb-abrieb-leicht.webp');
+  mask-image: url('./fb-abrieb-leicht.webp');
+}
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld.dunkel .tube .ch {
+  color: #2a221a;
+  opacity: 0.55;
+}
+html[data-haut='fallblatt'] .rz-schloss-feld.offen .tube.marke .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube.druck .ch,
+html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
+  color: #17110b;
+  opacity: 1;
+}
+/* Schiefe zurückhaltender als im Zählwerk */
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 1) {
+  --fb-neig: -0.8deg;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(7n + 6) {
+  --fb-neig: 0.9deg;
+  --fb-fuge: 1deg;
+}
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(11n + 5) {
+  --fb-neig: -1.1deg;
+  --fb-fuge: 1.2deg;
+}
