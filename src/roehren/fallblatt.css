@@ -673,7 +673,7 @@ html[data-haut='fallblatt']
 /* leere Karten: voll deckend, im Schatten */
 html[data-haut='fallblatt'] .fb-zaehl .tube.unlit {
   opacity: 1;
-  filter: brightness(0.38) saturate(0.7);
+  filter: brightness(0.43) saturate(0.7);
   box-shadow: none;
 }
 /* lesbare Zahl: leichter Abrieb, kräftige Farbe */
@@ -736,19 +736,13 @@ html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v1 {
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v2 {
   --fb-abrieb: 70% 15%;
-  --fb-unten: rotate(-1.2deg) translateY(1px);
-  --fb-fuge: -1.2deg;
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v3 {
   --fb-abrieb: 45% 90%;
-  --fb-unten: rotate(-1deg) translateY(1px);
-  --fb-fuge: -1deg;
   --fb-licht: 0.55;
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v4 {
   --fb-abrieb: 85% 60%;
-  --fb-unten: rotate(1.4deg);
-  --fb-fuge: 1.4deg;
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v5 {
   --fb-abrieb: 25% 25%;
@@ -756,12 +750,9 @@ html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v5 {
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v7 {
   --fb-abrieb: 60% 70%;
-  --fb-unten: translateY(1px);
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v8 {
   --fb-abrieb: 15% 50%;
-  --fb-unten: rotate(1.5deg);
-  --fb-fuge: 1.5deg;
   --fb-licht: 0.38;
 }
 /* die untere Hälfte (samt Ziffernhälfte) hängt, wie die Mechanik es will — nicht die fallende/kommende */
@@ -783,8 +774,55 @@ html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
 }
 /* leere Karten unterschiedlich gealtert */
 html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v4 {
-  filter: brightness(0.32) saturate(0.6);
+  filter: brightness(0.37) saturate(0.6);
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v2 {
-  filter: brightness(0.44) saturate(0.8);
+  filter: brightness(0.5) saturate(0.8);
+}
+
+/* ---------- letzte Anpassungen (zweiter Blick, 2026-10-26) ----------
+   Ziffern 3 % höher; das Spiel hängt an der Ziffer, nicht an der Stelle — jede Ziffer ist ein eigenes
+   Blatt, eine ausgeschlagene 5 hängt überall gleich (9, 5, 4); die Fuge dreht mit; Achsen abgedunkelt,
+   damit ihre Glanzstellen nicht mit den Ziffern konkurrieren. */
+html[data-haut='fallblatt'] .fb-zaehl .fb-voll .ch {
+  transform: translateY(-3cqh);
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='9']:not(.fb-komm) {
+  --fb-unten: rotate(1.6deg);
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='5']:not(.fb-komm) {
+  --fb-unten: rotate(-1.2deg) translateY(1.5px);
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='4']:not(.fb-komm) {
+  --fb-unten: translateY(2px) rotate(0.8deg);
+}
+html[data-haut='fallblatt']
+  .fb-zaehl
+  .tube:has(.fb-unten[data-z='9']:not(.fb-komm)) {
+  --fb-fuge: 1.6deg;
+}
+html[data-haut='fallblatt']
+  .fb-zaehl
+  .tube:has(.fb-unten[data-z='5']:not(.fb-komm)) {
+  --fb-fuge: -1.2deg;
+}
+html[data-haut='fallblatt']
+  .fb-zaehl
+  .tube:has(.fb-unten[data-z='4']:not(.fb-komm)) {
+  --fb-fuge: 0.8deg;
+}
+/* Achsen dunkler: Schatten über den Scharnieren links und rechts auf Fugenhöhe */
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  background:
+    radial-gradient(
+      ellipse 13% 17% at 4% 49%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 13% 17% at 96% 49%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
 }

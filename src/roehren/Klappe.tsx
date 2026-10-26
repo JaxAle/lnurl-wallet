@@ -49,7 +49,7 @@ const weg = (
 }
 
 const Haelfte: Component<{z: string; teil: string}> = props => (
-  <span class={`fb-h ${props.teil}`}>
+  <span class={`fb-h ${props.teil}`} data-z={props.z}>
     <span class="fb-voll">
       <span class="ch">{props.z}</span>
     </span>
