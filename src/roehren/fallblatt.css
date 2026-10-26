@@ -1091,3 +1091,27 @@ html[data-haut='fallblatt'] .rz-liste {
   border-radius: 6px;
   background: rgba(8, 8, 6, 0.55);
 }
+
+/* ---------- Sats-Zeichen aus gealtertem Messing (Gerhards Bild, 2026-10-26) ----------
+   Statt des gezeichneten Strichs: freigestellte Messing-Bilder — hell, wenn das Zählwerk leuchtet,
+   dunkel angelaufen bei kalter Anzeige oder Euro-Eingabe. Die gezeichnete Form bleibt als Platzhalter
+   (unsichtbar), damit Größe und Lage wie bisher sind; die Neigung von 13,88° trägt jetzt das Bild. */
+html[data-haut='fallblatt'] .fb-zaehl .satsym {
+  position: relative;
+}
+html[data-haut='fallblatt'] .fb-zaehl .satsym svg {
+  opacity: 0;
+}
+html[data-haut='fallblatt'] .fb-zaehl .satsym::after {
+  content: '';
+  position: absolute;
+  inset: -6% -20%;
+  background: url('./fb-sats-hell.webp') center / contain no-repeat;
+  transform: rotate(13.88deg);
+  filter: drop-shadow(0 0 4px rgba(246, 160, 60, 0.35));
+}
+html[data-haut='fallblatt'] .fb-zaehl.cold .satsym::after,
+html[data-haut='fallblatt'] .fb-zaehl.idle .satsym::after {
+  background-image: url('./fb-sats-kalt.webp');
+  filter: none;
+}
