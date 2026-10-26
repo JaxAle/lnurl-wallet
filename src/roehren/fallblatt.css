@@ -1251,18 +1251,9 @@ html[data-haut='fallblatt'] .fb-zaehl .satsym::after {
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7))
     drop-shadow(0 0 3px rgba(217, 163, 74, 0.15));
 }
-/* Sats-Zeichen von hinten beleuchtet, sobald Guthaben da ist — dasselbe Licht wie hinter den Karten (gleiche
-   Farbe, Form, Stärke; Gerhard, 2026-10-26); kalt (0 Sats) und Euro-Eingabe: dunkel wie die Karten */
-html[data-haut='fallblatt'] .fb-zaehl .satsym {
-  --fb-licht: 0.45;
-}
-html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .satsym::after {
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7))
-    drop-shadow(0 -2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
-    drop-shadow(0 2px 3px rgba(255, 200, 110, calc(var(--fb-licht) * 0.85)))
-    drop-shadow(0 0 5px rgba(246, 150, 40, calc(var(--fb-licht) * 0.3)));
-}
-html[data-haut='fallblatt'] .fb-zaehl.cold .satsym::after,
-html[data-haut='fallblatt'] .fb-zaehl.idle .satsym::after {
+/* Sats-Zeichen leuchtet nie: fest montierte Einheit, die Zahlen sind das Licht (Gerhard, 2026-10-26) —
+   immer die dunkle Fassung */
+html[data-haut='fallblatt'] .fb-zaehl .satsym::after {
+  background-image: url('./fb-sats-kalt.webp');
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
 }
