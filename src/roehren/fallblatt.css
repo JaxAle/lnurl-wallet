@@ -20,7 +20,7 @@ html[data-haut='fallblatt'] .rz-schloss-feld {
 html[data-haut='fallblatt'] .rz-schloss .tube {
   border-radius: 3px;
   --fb-bild: url('./fb-karte-1.webp');
-  background: #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
+  background: transparent var(--fb-bild) center / 100% 100% no-repeat;
 }
 /* acht Varianten: Gerhards vier und dieselben gespiegelt — Flecken und Scharniere wiederholen sich kaum */
 html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(8n + 2) {
@@ -353,7 +353,7 @@ html[data-haut='fallblatt'] .fb-unten .fb-voll {
 html[data-haut='fallblatt'] .fb-fall,
 html[data-haut='fallblatt'] .fb-komm {
   z-index: 3;
-  background: #0c0b0a var(--fb-bild) no-repeat;
+  background: transparent var(--fb-bild) no-repeat;
   background-size: 100cqw 100cqh;
   backface-visibility: hidden;
 }
@@ -439,7 +439,7 @@ html[data-haut='fallblatt'] .fb-zaehl {
 html[data-haut='fallblatt'] .fb-zaehl .tube {
   height: 43px; /* Seitenverhältnis der Karte (200 × 248), nicht der Röhre */
   border-radius: 3px;
-  background: #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
+  background: transparent var(--fb-bild) center / 100% 100% no-repeat;
   perspective: 200px;
   filter: none;
 }
@@ -721,7 +721,7 @@ html[data-haut='fallblatt']
    schief (die Klappe hat getrennte Hälften); Abrieb und Licht je Karte verschieden; aktive Karten mit
    hellerem Lack. Die Verteilung hängt an fb-v1…8 (Zaehlwerk.tsx: Stelle i → fb-v((3i mod 8) + 1)). */
 html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
-  font-weight: 800;
+  font-weight: 700;
   font-size: 40px;
   font-size: min(104cqh, 128cqw);
   -webkit-mask-position: var(--fb-abrieb, 30% 40%);
@@ -816,7 +816,7 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
       rgba(10, 6, 2, 0.55),
       transparent 100%
     ),
-    #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
+    transparent var(--fb-bild) center / 100% 100% no-repeat;
 }
 
 /* ---------- Mechanik stimmig (Gerhards Vergrößerung, 2026-10-26) ----------
@@ -835,7 +835,7 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
       rgba(10, 6, 2, 0.55),
       transparent 100%
     ),
-    #0c0b0a var(--fb-bild) center bottom / 100% 96.5% no-repeat;
+    transparent var(--fb-bild) center bottom / 100% 96.5% no-repeat;
 }
 html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
   background: var(--fb-hell) center bottom / 100% 96.5% no-repeat;
@@ -1024,4 +1024,26 @@ html[data-haut='fallblatt'] .fb-zaehl .satsym svg {
   stroke-linecap: square;
   filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.9))
     drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+}
+
+/* ---------- Gerhard am iPad, 2026-10-26: schwarzer Rahmen, Ziffer zu tief, Schrift zu fett ----------
+   Die Kartenbilder sind freigestellt (durchsichtig um die Karte; vorher schwarzer Bogen-Hintergrund) —
+   kein Grundton mehr hinter den Karten. Die Ziffer sitzt mit translateY(−0,05 em) genau auf der Achse:
+   gemessen liegt die Ziffernmitte bei Zeilenhöhe 1 um 5 % der Schriftgröße unter der Zeilenmitte; als em
+   wächst die Korrektur mit der Schrift (vorher fest −3 cqh, nach dem Vergrößern zu wenig). Bold statt
+   ExtraBold — Tafelschrift statt Plakat. */
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  font-weight: 700;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-voll .ch {
+  transform: translateY(-0.05em);
+}
+/* Schein aus dem Umriss der Karte (drop-shadow folgt dem freigestellten Bild), nicht aus ihrem
+   rechteckigen Kasten — sonst blieb zwischen Kartenrand und Kastenkante ein dunkler, eckiger Rahmen */
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  box-shadow: none;
+  filter: brightness(1.1) saturate(0.92)
+    drop-shadow(0 -3px 5px rgba(255, 200, 110, calc(var(--fb-licht) * 1.2)))
+    drop-shadow(0 3px 5px rgba(255, 200, 110, calc(var(--fb-licht) * 1.2)))
+    drop-shadow(0 0 10px rgba(246, 150, 40, calc(var(--fb-licht) * 0.5)));
 }
