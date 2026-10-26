@@ -1279,3 +1279,23 @@ html[data-haut='fallblatt'] .rz-knopf.an:active svg {
 html[data-haut='fallblatt'] .rz-knopf:not(.an) {
   filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
+/* Knopfschrift (Gerhard, 2026-10-26): DIN-artige Engschrift fett, Großbuchstaben, Abstand leicht erhöht;
+   ruhige Karte Cremeweiß, beleuchtete Karte Anthrazitbraun; keine Verschmutzung der Buchstaben */
+html[data-haut='fallblatt'] .rz-knopf .lbl {
+  font-family: var(--rz-schrift-familie);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+  -webkit-mask-image: none;
+  mask-image: none;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+html[data-haut='fallblatt'] .rz-knopf:not(.an) {
+  color: #e4d9c1;
+}
+html[data-haut='fallblatt'] .rz-knopf.an,
+html[data-haut='fallblatt'] .rz-knopf.an svg,
+html[data-haut='fallblatt'] .rz-knopf.an:active svg {
+  color: #2e2622;
+}
