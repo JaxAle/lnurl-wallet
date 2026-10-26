@@ -790,9 +790,6 @@ html[data-haut='fallblatt'] .fb-zaehl .fb-voll .ch {
 html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='9']:not(.fb-komm) {
   --fb-unten: rotate(1.6deg);
 }
-html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='5']:not(.fb-komm) {
-  --fb-unten: rotate(-1.2deg) translateY(1.5px);
-}
 html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='4']:not(.fb-komm) {
   --fb-unten: translateY(2px) rotate(0.8deg);
 }
@@ -800,11 +797,6 @@ html[data-haut='fallblatt']
   .fb-zaehl
   .tube:has(.fb-unten[data-z='9']:not(.fb-komm)) {
   --fb-fuge: 1.6deg;
-}
-html[data-haut='fallblatt']
-  .fb-zaehl
-  .tube:has(.fb-unten[data-z='5']:not(.fb-komm)) {
-  --fb-fuge: -1.2deg;
 }
 html[data-haut='fallblatt']
   .fb-zaehl
@@ -825,4 +817,79 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
       transparent 100%
     ),
     #0c0b0a var(--fb-bild) center / 100% 100% no-repeat;
+}
+
+/* ---------- Mechanik stimmig (Gerhards Vergrößerung, 2026-10-26) ----------
+   Die Achse liegt im Kartenbild bei ~48 % der Höhe (gemessen 47,3–48,8 %): das Bild am unteren Rand,
+   auf 96,5 % Höhe — so fällt die Achse auf 50 %. Fuge, Klapphälften und Ziffernhälften auf dieselbe
+   Achse; die Fuge wächst mit der Karte, ist halb so stark und läuft nur zwischen den Scharnieren. */
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  background:
+    radial-gradient(
+      ellipse 13% 17% at 4% 50%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 13% 17% at 96% 50%,
+      rgba(10, 6, 2, 0.55),
+      transparent 100%
+    ),
+    #0c0b0a var(--fb-bild) center bottom / 100% 96.5% no-repeat;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube .glow {
+  background: var(--fb-hell) center bottom / 100% 96.5% no-repeat;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube::after {
+  left: 16%;
+  right: 16%;
+  top: calc(50% - 0.6cqh);
+  height: max(1px, 1.2cqh);
+  background: #140c05;
+  box-shadow: 0 0.5cqh 0.8cqh rgba(0, 0, 0, 0.4);
+}
+html[data-haut='fallblatt']
+  .fb-zaehl:not(.cold):not(.idle)
+  .tube:not(.unlit)::after {
+  background: #1a0e04;
+  box-shadow:
+    0 -0.5cqh 1.2cqh rgba(255, 196, 100, 0.6),
+    0 0.5cqh 1.2cqh rgba(255, 196, 100, 0.6);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube::before {
+  top: 50%;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-oben {
+  height: 50%;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten {
+  top: 50%;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten .fb-voll {
+  top: -50cqh;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-fall {
+  background-size: 100cqw 96.5cqh;
+  background-position: 0 3.5cqh;
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-komm {
+  background-size: 100cqw 96.5cqh;
+  background-position: 0 -46.5cqh;
+}
+/* Spiel je Ziffer, neue Liste: 5 sauber; 3 unten einen Punkt nach rechts; 6 unten schräg; 7 Fuge schräg */
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='3']:not(.fb-komm) {
+  --fb-unten: translateX(1px);
+}
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten[data-z='6']:not(.fb-komm) {
+  --fb-unten: rotate(1deg);
+}
+html[data-haut='fallblatt']
+  .fb-zaehl
+  .tube:has(.fb-unten[data-z='6']:not(.fb-komm)) {
+  --fb-fuge: 1deg;
+}
+html[data-haut='fallblatt']
+  .fb-zaehl
+  .tube:has(.fb-unten[data-z='7']:not(.fb-komm)) {
+  --fb-fuge: 0.7deg;
 }
