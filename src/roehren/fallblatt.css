@@ -715,3 +715,76 @@ html[data-haut='fallblatt']
     animation: none !important;
   }
 }
+
+/* ---------- Zählwerk, charaktervoll gealtert statt kaputt (zweiter Blick, 2026-10-26) ----------
+   Größere, kräftigere Ziffern; bei einzelnen Karten hängt die untere Hälfte samt Ziffernhälfte etwas
+   schief (die Klappe hat getrennte Hälften); Abrieb und Licht je Karte verschieden; aktive Karten mit
+   hellerem Lack. Die Verteilung hängt an fb-v1…8 (Zaehlwerk.tsx: Stelle i → fb-v((3i mod 8) + 1)). */
+html[data-haut='fallblatt'] .fb-zaehl .tube .ch {
+  font-weight: 800;
+  font-size: 40px;
+  font-size: min(104cqh, 128cqw);
+  -webkit-mask-position: var(--fb-abrieb, 30% 40%);
+  mask-position: var(--fb-abrieb, 30% 40%);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube {
+  --fb-licht: 0.45;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v1 {
+  --fb-abrieb: 10% 80%;
+  --fb-licht: 0.4;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v2 {
+  --fb-abrieb: 70% 15%;
+  --fb-unten: rotate(-1.2deg) translateY(1px);
+  --fb-fuge: -1.2deg;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v3 {
+  --fb-abrieb: 45% 90%;
+  --fb-unten: rotate(-1deg) translateY(1px);
+  --fb-fuge: -1deg;
+  --fb-licht: 0.55;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v4 {
+  --fb-abrieb: 85% 60%;
+  --fb-unten: rotate(1.4deg);
+  --fb-fuge: 1.4deg;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v5 {
+  --fb-abrieb: 25% 25%;
+  --fb-licht: 0.5;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v7 {
+  --fb-abrieb: 60% 70%;
+  --fb-unten: translateY(1px);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.fb-v8 {
+  --fb-abrieb: 15% 50%;
+  --fb-unten: rotate(1.5deg);
+  --fb-fuge: 1.5deg;
+  --fb-licht: 0.38;
+}
+/* die untere Hälfte (samt Ziffernhälfte) hängt, wie die Mechanik es will — nicht die fallende/kommende */
+html[data-haut='fallblatt'] .fb-zaehl .fb-unten:not(.fb-komm) {
+  transform: var(--fb-unten, none);
+  transform-origin: 50% 0;
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube::after {
+  transform: rotate(var(--fb-fuge, 0deg));
+}
+/* Licht je Karte etwas anders stark */
+html[data-haut='fallblatt'] .fb-zaehl:not(.cold):not(.idle) .tube:not(.unlit) {
+  box-shadow:
+    0 0 0 1px rgba(255, 190, 90, calc(var(--fb-licht) * 0.8)),
+    0 0 12px 1px rgba(246, 165, 60, var(--fb-licht)),
+    0 0 26px rgba(246, 150, 40, calc(var(--fb-licht) * 0.45));
+  /* hellerer Lack: die schwarze Ziffer steht deutlicher */
+  filter: brightness(1.1) saturate(0.92);
+}
+/* leere Karten unterschiedlich gealtert */
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v4 {
+  filter: brightness(0.32) saturate(0.6);
+}
+html[data-haut='fallblatt'] .fb-zaehl .tube.unlit.fb-v2 {
+  filter: brightness(0.44) saturate(0.8);
+}

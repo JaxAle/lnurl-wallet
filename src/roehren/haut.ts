@@ -5,6 +5,7 @@
 import {createSignal} from 'solid-js'
 import '@fontsource/barlow-condensed/latin-500.css'
 import '@fontsource/barlow-condensed/latin-700.css'
+import '@fontsource/barlow-condensed/latin-800.css' // Zählwerk-Ziffern
 import './fallblatt.css'
 import {hintergrundNeu} from './leuchtkraft'
 
