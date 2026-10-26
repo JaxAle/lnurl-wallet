@@ -1490,3 +1490,19 @@ html[data-haut='fallblatt'] .rz-schloss-feld .tube .treffer .ch {
   -webkit-mask-image: url('./fb-abrieb-leicht.webp');
   mask-image: url('./fb-abrieb-leicht.webp');
 }
+/* inaktive Karten des Schlosses ~28 % dunkler — ganze Karte samt Buchstaben; die beleuchteten (LN · URL ·
+   CASH, gedrückt, nachleuchtend) bleiben unverändert (Gerhard, 2026-10-26) */
+html[data-haut='fallblatt'] .rz-schloss .tube {
+  filter: brightness(0.72) drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+@keyframes fb-nachlicht {
+  0% {
+    filter: brightness(1.1) saturate(0.92)
+      drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+      drop-shadow(0 0 4px rgba(255, 200, 110, 0.4));
+  }
+  100% {
+    filter: brightness(0.72) drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+      drop-shadow(0 0 4px rgba(255, 200, 110, 0));
+  }
+}
