@@ -1610,3 +1610,26 @@ html[data-haut='fallblatt']
 html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste:nth-child(3n) {
   justify-self: end;
 }
+
+/* ---------- Aufladen: querformatige Klapptaste (Gerhard, 2026-10-27) ----------
+   fb-taste.webp (400 × 200, aus den Schloss-Karten gebaut, nichts gestreckt — taste_bau.py) im Neun-Teile-
+   Schnitt: Ecken und Scharniere in Originalproportion (Maßstab 1:4 wie die Höhe), die Mitte wiederholt sich
+   bei breiteren Tasten nahtlos. Trennlinie ist im Bild. Größen und Abstände unverändert. */
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste {
+  --fb-bild: url('./fb-taste.webp');
+  border-width: 10px;
+  border-image: url('./fb-taste.webp') 40 fill / 10px round;
+  background: none;
+}
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste::after {
+  content: none;
+}
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste:active {
+  border-image-source: url('./fb-taste.webp');
+  filter: brightness(1.1) saturate(0.92)
+    drop-shadow(0 -2px 3px rgba(255, 200, 110, 0.38))
+    drop-shadow(0 2px 3px rgba(255, 200, 110, 0.38));
+}
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+  color: #2e2a26;
+}
