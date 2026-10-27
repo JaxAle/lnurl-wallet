@@ -4,6 +4,7 @@
 // bleibt dadurch unberührt.
 import {createSignal} from 'solid-js'
 import '@fontsource/barlow-condensed/latin-500.css'
+import '@fontsource/barlow-condensed/latin-600.css' // Trennbeschriftung Senden
 import '@fontsource/barlow-condensed/latin-700.css'
 import './fallblatt.css'
 import {hintergrundNeu} from './leuchtkraft'

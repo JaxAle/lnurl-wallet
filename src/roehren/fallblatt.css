@@ -1666,3 +1666,44 @@ html[data-haut='fallblatt']
   .w {
   margin-block: calc(15px - 0.5em);
 }
+
+/* ---------- Senden: Trennbeschriftung und Rechnungstasten (Gerhard, 2026-10-27) ----------
+   Bedienbar = helleres, graubeiges Metall mit dunkler Druckschrift; kein Licht in Ruhe, beim Drücken ein
+   sehr dezenter Bernsteinschein. Trennlinie: Altelfenbein, SemiBold, Messing-Linien, mehr Luft. */
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+  margin: 22px 4px 12px;
+  font: 600 16.5px/1.2 var(--rz-schrift-familie);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #cfc2a6;
+  text-shadow: none;
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::before,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(120, 92, 52, 0.75) 30%,
+    rgba(120, 92, 52, 0.75) 70%,
+    transparent
+  );
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+  filter: brightness(1.6) saturate(0.85)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+  color: #2e2622;
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf svg {
+  color: #2e2622;
+  font-family: var(--rz-schrift-familie);
+  font-weight: 700;
+  /* der Helligkeitsfilter der Taste hellt auch die Schrift auf — hier ausgleichen */
+  filter: brightness(0.62);
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf:active {
+  filter: brightness(1.6) saturate(0.85)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 0 4px rgba(217, 163, 74, 0.3));
+}

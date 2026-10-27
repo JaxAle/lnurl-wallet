@@ -252,7 +252,7 @@ const Senden: Component = () => {
                 {/* Rechnung einfügen/scannen unter Weiter, wie Aufladen aufgebaut (Gerhard, 2026-10-27); beide
                 gehen unabhängig vom Betrag */}
                 <div class="rz-oder-linie">
-                  <span>oder eine Rechnung bezahlen</span>
+                  <span>oder Rechnung bezahlen</span>
                 </div>
                 <div class="rz-duo rz-duo-flach">
                   <button
