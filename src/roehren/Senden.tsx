@@ -177,7 +177,10 @@ const Senden: Component = () => {
 
   return (
     <RequireWallet>
-      <div class="page rz-senden">
+      <div
+        class="page rz-senden"
+        classList={{'rz-senden-eingabe': !aktuell() && guthaben() > 0}}
+      >
         <Show
           when={aktuell()}
           fallback={
@@ -212,8 +215,45 @@ const Senden: Component = () => {
                   </>
                 }
               >
-                {/* wie bei Phoenix: zuerst „wohin?“ — Rechnung oder Adresse einfügen oder scannen
-                (Gerhard am Pixel, Steve 2026-10-24); darunter Bargeld übergeben */}
+                <Zaehlwerk
+                  sats={betrag()}
+                  sofort
+                  kalt={!betrag() || zuViel()}
+                  wahl={ein.wahl()}
+                  onWahl={ein.kurs() ? ein.waehle : undefined}
+                  euroAnzeige={ein.euroAnzeige()}
+                >
+                  <Show when={betrag() > 0 && zuViel()}>
+                    <div class="rz-ueber">
+                      <span>{grund()}</span>
+                    </div>
+                    <Show when={groesster() > 0 && betrag() <= guthaben()}>
+                      <button
+                        type="button"
+                        class="rz-leise"
+                        onClick={() => ein.setzeSats(groesster())}
+                      >
+                        {groesster().toLocaleString('de-DE')} senden
+                      </button>
+                    </Show>
+                  </Show>
+                </Zaehlwerk>
+                <Tastatur betrag={ein} />
+                <button
+                  type="button"
+                  class="rz-knopf an rz-weiter"
+                  disabled={!betrag() || zuViel() || arbeitet()}
+                  onClick={() => void weiter()}
+                >
+                  <span class="lbl">
+                    {arbeitet() ? 'Einen Moment …' : 'Weiter'}
+                  </span>
+                </button>
+                {/* Rechnung einfügen/scannen unter Weiter, wie Aufladen aufgebaut (Gerhard, 2026-10-27); beide
+                gehen unabhängig vom Betrag */}
+                <div class="rz-oder-linie">
+                  <span>oder eine Rechnung bezahlen</span>
+                </div>
                 <div class="rz-duo rz-duo-flach">
                   <button
                     type="button"
@@ -256,44 +296,6 @@ const Senden: Component = () => {
                     <span class="lbl">Rechnung scannen</span>
                   </button>
                 </div>
-                {/* zwei Wege, ohne Überschriften: die Knöpfe sagen, was sie tun; dazwischen „oder als Schein senden“ (Steve, Gerhard) */}
-                <div class="rz-oder-linie">
-                  <span>oder als Schein senden</span>
-                </div>
-                <Zaehlwerk
-                  sats={betrag()}
-                  sofort
-                  kalt={!betrag() || zuViel()}
-                  wahl={ein.wahl()}
-                  onWahl={ein.kurs() ? ein.waehle : undefined}
-                  euroAnzeige={ein.euroAnzeige()}
-                >
-                  <Show when={betrag() > 0 && zuViel()}>
-                    <div class="rz-ueber">
-                      <span>{grund()}</span>
-                    </div>
-                    <Show when={groesster() > 0 && betrag() <= guthaben()}>
-                      <button
-                        type="button"
-                        class="rz-leise"
-                        onClick={() => ein.setzeSats(groesster())}
-                      >
-                        {groesster().toLocaleString('de-DE')} senden
-                      </button>
-                    </Show>
-                  </Show>
-                </Zaehlwerk>
-                <Tastatur betrag={ein} />
-                <button
-                  type="button"
-                  class="rz-knopf an rz-weiter"
-                  disabled={!betrag() || zuViel() || arbeitet()}
-                  onClick={() => void weiter()}
-                >
-                  <span class="lbl">
-                    {arbeitet() ? 'Einen Moment …' : 'Weiter'}
-                  </span>
-                </button>
               </Show>
             </>
           }

@@ -2086,7 +2086,7 @@ body.rz-gesperrt {
    Die Röhren wachsen mit der Breite: 7 Röhren + 2 Punkte (je 8 px) + Sats-Zeichen (16/35 der Röhre,
    4 px Abstand) + 9 Lücken à 3 px = 100 % → Röhre = (100cqw − 47px) / 7,457. Seitenverhältnis 35:56. */
 .wallet-hero .roehren-zaehlwerk .rz-inrow,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .roehren-zaehlwerk
   .rz-inrow {
   padding-left: 0;
@@ -2096,13 +2096,13 @@ body.rz-gesperrt {
   container-type: inline-size;
 }
 .wallet-hero .roehren-zaehlwerk .bal-tubes,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .roehren-zaehlwerk
   .bal-tubes {
   --rz-t: min(64px, calc((100cqw - 47px) / 7.457));
 }
 .wallet-hero .roehren-zaehlwerk .bal-tubes .tube,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .roehren-zaehlwerk
   .bal-tubes
   .tube {
@@ -2110,7 +2110,7 @@ body.rz-gesperrt {
   height: calc(var(--rz-t) * 1.6);
 }
 .wallet-hero .roehren-zaehlwerk .satsym svg,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .roehren-zaehlwerk
   .satsym
   svg {
@@ -2809,14 +2809,16 @@ video.scanner {
 }
 
 /* Aufladen (und Geschenkkarte, Kassa, Tombola — seit 2026-10-27 gleich, Gerhard): Zählwerk an exakt derselben Stelle und in derselben Größe wie auf der Startseite (Gerhard,
-   2026-10-27) — Größe über die gemeinsamen Regeln oben (.wallet-hero, :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)), Lage: gleicher
+   2026-10-27) — Größe über die gemeinsamen Regeln oben (.wallet-hero, :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)), Lage: gleicher
    Innenabstand wie auf der Startseite, die Kopfzeile „‹ Aufladen“ sitzt in der oberen Leiste statt über dem
    Zählwerk. Der Rahmen der Betragswahl liegt innen (outline), damit er die Breite nicht verändert. */
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola) .roehren-zaehlwerk {
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
+  .roehren-zaehlwerk {
   padding: 18px 0 8px;
 }
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola) > .rz-seitenkopf,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
+  > .rz-seitenkopf,
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .rz-seitenkopf:first-child {
   position: fixed;
   top: env(safe-area-inset-top, 0px);
@@ -2828,7 +2830,7 @@ video.scanner {
   display: flex;
   align-items: center;
 }
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .roehren-zaehlwerk
   .waehlbar.aktiv {
   border-color: transparent;
@@ -2837,15 +2839,17 @@ video.scanner {
 }
 /* Aufladen: Ziffern auf den Tasten +25 %, Knopf „Rechnung erstellen“ 20 px weiter unten (Gerhard,
    2026-10-27) — zwei gemeinsame Parameter für beide Designs; Tasten selbst unverändert */
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola) {
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe) {
   --taste-schrift: 1.25;
   --knopf-abstand: 20px;
 }
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola) .rz-taste .w {
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
+  .rz-taste
+  .w {
   font-size: calc(32px * var(--taste-schrift));
 }
 /* der untere Rand der Tastatur (8 px) fällt mit dem oberen des Knopfs zusammen — darum 8 px + Abstand */
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .rz-tastatur
   + .rz-weiter {
   margin-top: calc(8px + var(--knopf-abstand));
@@ -2859,7 +2863,7 @@ video.scanner {
 /* Neon, Aufladen: Beschriftung „Rechnung erstellen“ ~30 % weniger Glow (Gerhard, 2026-10-27) — gleiche
    Lagen wie .rz-knopf.an .lbl, Radien und Deckkraft auf 70 % */
 html:not([data-haut='fallblatt'])
-  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
   .rz-tastatur
   + .rz-weiter.an
   .lbl {
