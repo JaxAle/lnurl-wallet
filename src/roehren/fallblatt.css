@@ -1572,3 +1572,14 @@ html[data-haut='fallblatt'] .rz-schloss .tube .ch {
     transform: translateY(-2cqh) scaleX(0.86);
   }
 }
+/* „y“ war ein „v“: die Abriebmaske gilt nur im Buchstabenkasten, und der endet nach dem Zuschnitt
+   (text-box) an der Grundlinie — Unterlängen fielen heraus. Kasten nach unten verlängert, Lage gleich. */
+html[data-haut='fallblatt'] .rz-schloss .fb-voll .ch {
+  padding-bottom: 0.3em;
+  margin-bottom: -0.3em;
+}
+/* „by DNI“ leiser beleuchtet (~60 %), gleiche Lichtfarbe — die Kennung tritt hinter LN · URL · CASH zurück */
+html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(n + 36) {
+  --fb-b: 0.95;
+  --fb-licht: 0.27;
+}
