@@ -2841,3 +2841,17 @@ video.scanner {
   justify-content: center;
   align-items: center;
 }
+/* Neon, Aufladen: Beschriftung „Rechnung erstellen“ ~30 % weniger Glow (Gerhard, 2026-10-27) — gleiche
+   Lagen wie .rz-knopf.an .lbl, Radien und Deckkraft auf 70 % */
+html:not([data-haut='fallblatt'])
+  .rz-aufladen
+  .rz-tastatur
+  + .rz-weiter.an
+  .lbl {
+  text-shadow:
+    0 0 0.7px rgba(255, 255, 255, 0.7),
+    0 0 2.1px rgba(255, 210, 122, 0.7),
+    0 0 4.9px rgba(255, 154, 34, 0.7),
+    0 0 9.1px rgba(255, 90, 0, 0.7),
+    0 0 16.8px rgba(255, 60, 0, 0.7);
+}
