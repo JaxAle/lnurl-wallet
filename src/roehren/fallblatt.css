@@ -443,7 +443,8 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
   perspective: 200px;
   filter: none;
 }
-html[data-haut='fallblatt'] .wallet-hero .fb-zaehl .tube {
+html[data-haut='fallblatt'] .wallet-hero .fb-zaehl .tube,
+html[data-haut='fallblatt'] .rz-aufladen .fb-zaehl .tube {
   height: calc(var(--rz-t) * 1.24);
 }
 /* Fuge durch die Ziffer */
@@ -991,6 +992,10 @@ html[data-haut='fallblatt'] .roehren-zaehlwerk .rz-inrow:has(.fb-zaehl) {
 }
 html[data-haut='fallblatt']
   .wallet-hero
+  .roehren-zaehlwerk
+  .rz-inrow:has(.fb-zaehl),
+html[data-haut='fallblatt']
+  .rz-aufladen
   .roehren-zaehlwerk
   .rz-inrow:has(.fb-zaehl) {
   padding: 22px 26px;

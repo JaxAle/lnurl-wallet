@@ -2085,21 +2085,25 @@ body.rz-gesperrt {
 /* Startseite: das Zählwerk genau so breit wie Empfangen/Senden darunter (Gerhard am Pixel, 2026-10-17).
    Die Röhren wachsen mit der Breite: 7 Röhren + 2 Punkte (je 8 px) + Sats-Zeichen (16/35 der Röhre,
    4 px Abstand) + 9 Lücken à 3 px = 100 % → Röhre = (100cqw − 47px) / 7,457. Seitenverhältnis 35:56. */
-.wallet-hero .roehren-zaehlwerk .rz-inrow {
+.wallet-hero .roehren-zaehlwerk .rz-inrow,
+.rz-aufladen .roehren-zaehlwerk .rz-inrow {
   padding-left: 0;
   padding-right: 0;
   border-left-width: 0;
   border-right-width: 0;
   container-type: inline-size;
 }
-.wallet-hero .roehren-zaehlwerk .bal-tubes {
+.wallet-hero .roehren-zaehlwerk .bal-tubes,
+.rz-aufladen .roehren-zaehlwerk .bal-tubes {
   --rz-t: min(64px, calc((100cqw - 47px) / 7.457));
 }
-.wallet-hero .roehren-zaehlwerk .bal-tubes .tube {
+.wallet-hero .roehren-zaehlwerk .bal-tubes .tube,
+.rz-aufladen .roehren-zaehlwerk .bal-tubes .tube {
   width: var(--rz-t);
   height: calc(var(--rz-t) * 1.6);
 }
-.wallet-hero .roehren-zaehlwerk .satsym svg {
+.wallet-hero .roehren-zaehlwerk .satsym svg,
+.rz-aufladen .roehren-zaehlwerk .satsym svg {
   width: calc(var(--rz-t) * 0.457);
   height: calc(var(--rz-t) * 0.914);
 }
@@ -2792,4 +2796,29 @@ video.scanner {
 /* Lampe in der Hinweiszeile nur in Fallblatt (fallblatt.css) — die Röhren bleiben, wie sie sind */
 .rz-hinweiszeile > .rz-lampe-klein {
   display: none;
+}
+
+/* Aufladen: Zählwerk an exakt derselben Stelle und in derselben Größe wie auf der Startseite (Gerhard,
+   2026-10-27) — Größe über die gemeinsamen Regeln oben (.wallet-hero, .rz-aufladen), Lage: gleicher
+   Innenabstand wie auf der Startseite, die Kopfzeile „‹ Aufladen“ sitzt in der oberen Leiste statt über dem
+   Zählwerk. Der Rahmen der Betragswahl liegt innen (outline), damit er die Breite nicht verändert. */
+.rz-aufladen .roehren-zaehlwerk {
+  padding: 18px 0 8px;
+}
+.rz-aufladen > .rz-seitenkopf,
+.rz-aufladen .rz-seitenkopf:first-child {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  z-index: 3;
+  height: 58px;
+  margin: 0;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+.rz-aufladen .roehren-zaehlwerk .waehlbar.aktiv {
+  border-color: transparent;
+  outline: 1px solid var(--rz-linie-2);
+  outline-offset: -1px;
 }
