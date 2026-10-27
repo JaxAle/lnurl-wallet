@@ -444,7 +444,10 @@ html[data-haut='fallblatt'] .fb-zaehl .tube {
   filter: none;
 }
 html[data-haut='fallblatt'] .wallet-hero .fb-zaehl .tube,
-html[data-haut='fallblatt'] .rz-aufladen .fb-zaehl .tube {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .fb-zaehl
+  .tube {
   height: calc(var(--rz-t) * 1.24);
 }
 /* Fuge durch die Ziffer */
@@ -995,7 +998,7 @@ html[data-haut='fallblatt']
   .roehren-zaehlwerk
   .rz-inrow:has(.fb-zaehl),
 html[data-haut='fallblatt']
-  .rz-aufladen
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .roehren-zaehlwerk
   .rz-inrow:has(.fb-zaehl) {
   padding: 22px 26px;
@@ -1591,23 +1594,29 @@ html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(n + 36) {
 /* Aufladen, Fallblatt: Zifferntasten 12 % schmäler, Höhe gleich (Gerhard, 2026-10-27). Spalten bleiben;
    linke Taste bündig links, mittlere mittig, rechte bündig rechts — die Abstände dazwischen werden gleich
    größer, die Tastatur bleibt so breit und mittig wie bisher. Neon unverändert. */
-html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-tastatur
+  .rz-taste {
   /* 88 % der bisherigen Taste — die war 9 px schmäler als ihre Spalte (gemessen bei 375/412/820 px) */
   width: calc(0.88 * (100% - 9px));
 }
 html[data-haut='fallblatt']
-  .rz-aufladen
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
   .rz-taste:nth-child(3n + 1) {
   justify-self: start;
 }
 html[data-haut='fallblatt']
-  .rz-aufladen
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
   .rz-taste:nth-child(3n + 2) {
   justify-self: center;
 }
-html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste:nth-child(3n) {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-tastatur
+  .rz-taste:nth-child(3n) {
   justify-self: end;
 }
 
@@ -1615,30 +1624,45 @@ html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste:nth-child(3n) {
    fb-taste.webp (400 × 200, aus den Schloss-Karten gebaut, nichts gestreckt — taste_bau.py) im Neun-Teile-
    Schnitt: Ecken und Scharniere in Originalproportion (Maßstab 1:4 wie die Höhe), die Mitte wiederholt sich
    bei breiteren Tasten nahtlos. Trennlinie ist im Bild. Größen und Abstände unverändert. */
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste {
   --fb-bild: url('./fb-taste.webp');
   border-width: 10px;
   border-image: url('./fb-taste.webp') 40 fill / 10px round;
   background: none;
 }
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste::after {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste::after {
   content: none;
 }
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste:active {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste:active {
   border-image-source: url('./fb-taste.webp');
   filter: brightness(1.1) saturate(0.92)
     drop-shadow(0 -2px 3px rgba(255, 200, 110, 0.38))
     drop-shadow(0 2px 3px rgba(255, 200, 110, 0.38));
 }
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste
+  .w {
   color: #2e2a26;
 }
 /* Aufladen: dieselbe Vergrößerung auf die Fallblatt-Ziffern (Grundgröße 30 px) */
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste
+  .w {
   font-size: calc(30px * var(--taste-schrift));
 }
 /* die größere Ziffer ist höher als die Innenfläche (50 px − 2 × 10 px Rand) — Überstand gleich oben und
    unten verteilen, sonst saß sie 3,8 px zu tief */
-html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+html[data-haut='fallblatt']
+  :is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste
+  .w {
   margin-block: calc(15px - 0.5em);
 }
