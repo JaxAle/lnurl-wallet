@@ -1588,3 +1588,25 @@ html[data-haut='fallblatt'] .rz-schloss .tube:nth-child(n + 36) {
   --fb-b: 0.95;
   --fb-licht: 0.27;
 }
+/* Aufladen, Fallblatt: Zifferntasten 12 % schmäler, Höhe gleich (Gerhard, 2026-10-27). Spalten bleiben;
+   linke Taste bündig links, mittlere mittig, rechte bündig rechts — die Abstände dazwischen werden gleich
+   größer, die Tastatur bleibt so breit und mittig wie bisher. Neon unverändert. */
+html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste {
+  /* 88 % der bisherigen Taste — die war 9 px schmäler als ihre Spalte (gemessen bei 375/412/820 px) */
+  width: calc(0.88 * (100% - 9px));
+}
+html[data-haut='fallblatt']
+  .rz-aufladen
+  .rz-tastatur
+  .rz-taste:nth-child(3n + 1) {
+  justify-self: start;
+}
+html[data-haut='fallblatt']
+  .rz-aufladen
+  .rz-tastatur
+  .rz-taste:nth-child(3n + 2) {
+  justify-self: center;
+}
+html[data-haut='fallblatt'] .rz-aufladen .rz-tastatur .rz-taste:nth-child(3n) {
+  justify-self: end;
+}
