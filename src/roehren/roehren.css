@@ -2822,3 +2822,13 @@ video.scanner {
   outline: 1px solid var(--rz-linie-2);
   outline-offset: -1px;
 }
+/* Neon, Aufladen: keine Wahl-Markierung um die Röhren — sie stehen frei wie auf der Startseite (Gerhard,
+   2026-10-27). Welche Zeile gewählt ist, zeigen weiter die Röhren selbst (in Euro glimmen sie nur). */
+html:not([data-haut='fallblatt'])
+  .rz-aufladen
+  .roehren-zaehlwerk
+  .rz-inrow.waehlbar.aktiv {
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
