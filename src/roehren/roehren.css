@@ -2835,8 +2835,9 @@ video.scanner {
 .rz-aufladen .rz-tastatur + .rz-weiter {
   margin-top: calc(8px + var(--knopf-abstand));
 }
-/* Neon: die Tasten sind ein Flex-Kasten ohne waagrechte Zentrierung — die Ziffer stand 34 px links der Mitte */
-.rz-aufladen .rz-taste {
+/* Neon: die Tasten sind ein Flex-Kasten ohne waagrechte Zentrierung — die Ziffer stand 34 px links der Mitte;
+   gilt für alle Tastaturen (Senden, Bezahlen, Aufladen, Kassa, Tombola, Geschenkkarte) */
+.rz-taste {
   justify-content: center;
   align-items: center;
 }
