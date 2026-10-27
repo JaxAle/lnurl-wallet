@@ -2822,3 +2822,21 @@ video.scanner {
   outline: 1px solid var(--rz-linie-2);
   outline-offset: -1px;
 }
+/* Aufladen: Ziffern auf den Tasten +25 %, Knopf „Rechnung erstellen“ 20 px weiter unten (Gerhard,
+   2026-10-27) — zwei gemeinsame Parameter für beide Designs; Tasten selbst unverändert */
+.rz-aufladen {
+  --taste-schrift: 1.25;
+  --knopf-abstand: 20px;
+}
+.rz-aufladen .rz-taste .w {
+  font-size: calc(32px * var(--taste-schrift));
+}
+/* der untere Rand der Tastatur (8 px) fällt mit dem oberen des Knopfs zusammen — darum 8 px + Abstand */
+.rz-aufladen .rz-tastatur + .rz-weiter {
+  margin-top: calc(8px + var(--knopf-abstand));
+}
+/* Neon: die Tasten sind ein Flex-Kasten ohne waagrechte Zentrierung — die Ziffer stand 34 px links der Mitte */
+.rz-aufladen .rz-taste {
+  justify-content: center;
+  align-items: center;
+}

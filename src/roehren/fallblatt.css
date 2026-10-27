@@ -1633,3 +1633,12 @@ html[data-haut='fallblatt'] .rz-aufladen .rz-taste:active {
 html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
   color: #2e2a26;
 }
+/* Aufladen: dieselbe Vergrößerung auf die Fallblatt-Ziffern (Grundgröße 30 px) */
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+  font-size: calc(30px * var(--taste-schrift));
+}
+/* die größere Ziffer ist höher als die Innenfläche (50 px − 2 × 10 px Rand) — Überstand gleich oben und
+   unten verteilen, sonst saß sie 3,8 px zu tief */
+html[data-haut='fallblatt'] .rz-aufladen .rz-taste .w {
+  margin-block: calc(15px - 0.5em);
+}
