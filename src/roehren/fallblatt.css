@@ -1886,3 +1886,148 @@ html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
     transparent
   );
 }
+/* ---------- Senden, Aktionstasten (Gerhard, 2026-10-29) ----------
+   Verbindliche Farben; die bisherigen deutschen Namen verweisen darauf. Das Metallschild liegt auf einer eigenen
+   Ebene (::before) — Helligkeit und Licht wirken nur auf das Metall, die Schrift bleibt exakt in ihrer Farbe,
+   deckend, ohne Filter und Schatten. Rechnungstasten nur Text, mittig. */
+html[data-haut='fallblatt'] {
+  --beara-background: #17130b;
+  --beara-metal-dark: #62594b;
+  --beara-ivory: #e6d1aa;
+  --beara-text-dark: #292117;
+  --beara-amber-light: #dca64b;
+  --beara-button-text-dark-surface: var(--beara-ivory);
+  --beara-button-text-light-surface: var(--beara-text-dark);
+  --beara-hintergrund: var(--beara-background);
+  --beara-metall: var(--beara-metal-dark);
+  --beara-elfenbein: var(--beara-ivory);
+  --beara-schrift: var(--beara-text-dark);
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf) {
+  position: relative;
+  isolation: isolate;
+  border-image: none;
+  border-color: transparent;
+  filter: none;
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf)::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+  z-index: -1;
+  border: 11px solid transparent;
+  border-image: var(--schild) 28 fill / 11px stretch;
+  pointer-events: none;
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf):active::before {
+  border-image-source: var(--schild-druck);
+}
+/* Metall je Zustand (nur die Ebene) */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled::before {
+  filter: brightness(1.22) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled)::before {
+  filter: brightness(1.2) saturate(0.78)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(var(--beara-licht), 0.34))
+    drop-shadow(0 2px 3px rgba(var(--beara-licht), 0.34))
+    drop-shadow(0 0 5px rgba(var(--beara-licht), 0.12));
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf::before {
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-duo-flach
+  .rz-knopf:active::before {
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 0 4px rgba(var(--beara-licht), 0.35));
+}
+/* Schrift: dunkle Oberfläche Elfenbein, helle Oberfläche Schwarzbraun — deckend, ohne Filter/Schatten */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf)
+  .lbl {
+  opacity: 1;
+  filter: none;
+  text-shadow: none;
+  mix-blend-mode: normal;
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled,
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled
+  .lbl,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+  color: var(--beara-button-text-dark-surface);
+  opacity: 1;
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled),
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled)
+  .lbl {
+  color: var(--beara-button-text-light-surface);
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+  justify-content: center;
+  align-content: center;
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+  font-size: 19px;
+  padding: 0 8px;
+}
+@media (max-width: 389px) {
+  html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+    font-size: 17px;
+  }
+}
+/* ältere Regeln für das gesperrte Weiter sind spezifischer — hier ausdrücklich überschreiben */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled,
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled) {
+  filter: none;
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled
+  .lbl,
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled)
+  .lbl {
+  filter: none;
+  text-shadow: none;
+  opacity: 1;
+}
