@@ -1670,7 +1670,9 @@ html[data-haut='fallblatt']
 /* ---------- Senden: Trennbeschriftung und Rechnungstasten (Gerhard, 2026-10-27) ----------
    Bedienbar = helleres, graubeiges Metall mit dunkler Druckschrift; kein Licht in Ruhe, beim Drücken ein
    sehr dezenter Bernsteinschein. Trennlinie: Altelfenbein, SemiBold, Messing-Linien, mehr Luft. */
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie {
   margin: 22px 4px 12px;
   font: 600 16.5px/1.2 var(--rz-schrift-familie);
   text-transform: uppercase;
@@ -1678,8 +1680,12 @@ html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
   color: #cfc2a6;
   text-shadow: none;
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::before,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie::before,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie::after {
   height: 1px;
   background: linear-gradient(
     90deg,
@@ -1689,49 +1695,83 @@ html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
     transparent
   );
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf {
   filter: brightness(1.6) saturate(0.85)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
   color: #2e2622;
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf svg {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  svg {
   color: #2e2622;
   font-family: var(--rz-schrift-familie);
   font-weight: 700;
   /* der Helligkeitsfilter der Taste hellt auch die Schrift auf — hier ausgleichen */
   filter: brightness(0.62);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf:active {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf:active {
   filter: brightness(1.6) saturate(0.85)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
     drop-shadow(0 0 4px rgba(217, 163, 74, 0.3));
 }
 /* Senden, Goldener Schnitt (2026-10-29): Trennbeschriftung mit Fibonacci-Abständen; Rechnungstasten ~10 %
    heller, Schrift etwas größer; Weiter-Licht −10 % */
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie {
   margin: var(--beara-space-md) 4px var(--beara-space-xs);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf {
   filter: brightness(1.76) saturate(0.85)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf:active {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf:active {
   filter: brightness(1.76) saturate(0.85)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
     drop-shadow(0 0 4px rgba(217, 163, 74, 0.3));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf svg {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  svg {
   filter: brightness(0.565);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl {
   font-size: 17px;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled) {
+  ~ .rz-weiter.an:not(:disabled) {
   filter: drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
     drop-shadow(0 -2px 3px rgba(255, 200, 110, 0.34))
     drop-shadow(0 2px 3px rgba(255, 200, 110, 0.34))
@@ -1739,20 +1779,24 @@ html[data-haut='fallblatt']
 }
 /* gesperrtes Weiter ohne Licht; schmale Bildschirme: Rechnungstasten-Schrift kleiner, damit nichts anstößt */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled {
+  ~ .rz-weiter:disabled {
   filter: brightness(0.7) drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
 @media (max-width: 389px) {
-  html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+  html[data-haut='fallblatt']
+    :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+    .rz-duo-flach
+    .rz-knopf
+    .lbl {
     font-size: 15px;
     letter-spacing: 0.03em;
   }
 }
 
 /* ---------- Material- und Lichtwelt (Gerhard, 2026-10-29) ----------
-   Fünf Referenzfarben, zentral — gelten vorerst für Senden (.rz-senden-eingabe), später Aufladen/Kassa/Tombola
+   Fünf Referenzfarben, zentral — gelten vorerst für Senden (:is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)), später Aufladen/Kassa/Tombola
    durch Aufnahme in diese Selektoren. Drei Zustände: dunkles Metall, gealtertes Elfenbein, Bernsteinlicht. */
 html[data-haut='fallblatt'] {
   --beara-hintergrund: #17130b;
@@ -1763,7 +1807,7 @@ html[data-haut='fallblatt'] {
 }
 /* Zählwerk: beleuchtete Karten Elfenbein statt Kupfer, Licht in Bernstein */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .fb-zaehl:not(.cold):not(.idle)
   .tube:not(.unlit) {
   filter: brightness(1.27) saturate(0.72)
@@ -1776,14 +1820,20 @@ html[data-haut='fallblatt']
     )
     drop-shadow(0 0 5px rgba(var(--beara-licht), calc(var(--fb-licht) * 0.3)));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl::before {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .fb-zaehl::before {
   background: radial-gradient(
     ellipse at 50% 40%,
     rgba(var(--beara-licht), 0.22),
     transparent 70%
   );
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl .tube .glow {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .fb-zaehl
+  .tube
+  .glow {
   background: radial-gradient(
     ellipse 48% 14% at 50% 50%,
     rgba(var(--beara-licht), 0.55),
@@ -1791,15 +1841,19 @@ html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl .tube .glow {
     transparent 100%
   );
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl .tube .ch,
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .fb-zaehl
+  .tube
+  .ch,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .roehren-zaehlwerk
   .fb-zaehl.cold
   .tube
   .ch,
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .roehren-zaehlwerk
   .fb-zaehl.idle
   .tube
@@ -1807,27 +1861,37 @@ html[data-haut='fallblatt']
   color: var(--beara-schrift);
 }
 /* Euro-Betrag Elfenbein, ohne Licht */
-html[data-haut='fallblatt'] .rz-senden-eingabe .roehren-zaehlwerk .rz-euro {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .roehren-zaehlwerk
+  .rz-euro {
   color: var(--beara-elfenbein);
   text-shadow: none;
 }
 /* Tastatur: dasselbe Elfenbein wie die beleuchteten Karten, Ziffern Schwarzbraun */
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste {
   filter: brightness(1.2) saturate(0.78);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste .w {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste
+  .w {
   color: var(--beara-schrift);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste:active {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-taste:active {
   filter: brightness(1.14) saturate(0.78)
     drop-shadow(0 -2px 3px rgba(var(--beara-licht), 0.38))
     drop-shadow(0 2px 3px rgba(var(--beara-licht), 0.38));
 }
 /* Weiter: aktiv Elfenbein mit Bernstein, gesperrt Graubraun mit gedämpftem Elfenbein */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled) {
+  ~ .rz-weiter.an:not(:disabled) {
   color: var(--beara-schrift);
   filter: brightness(1.12) saturate(0.78)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
@@ -1836,48 +1900,68 @@ html[data-haut='fallblatt']
     drop-shadow(0 0 5px rgba(var(--beara-licht), 0.12));
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled)
+  ~ .rz-weiter.an:not(:disabled)
   .lbl {
   color: var(--beara-schrift);
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled {
+  ~ .rz-weiter:disabled {
   filter: brightness(1.22) saturate(0.7)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled
+  ~ .rz-weiter:disabled
   .lbl {
   color: rgba(230, 209, 170, 0.72);
   filter: brightness(0.82);
 }
 /* Rechnungstasten: unbeleuchtete Karte (Graubraun), Schrift und Symbol Elfenbein; Drücken: Bernstein */
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf {
   filter: brightness(1.25) saturate(0.7)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf:active {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf:active {
   filter: brightness(1.25) saturate(0.7)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
     drop-shadow(0 0 4px rgba(var(--beara-licht), 0.35));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf svg {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  svg {
   color: var(--beara-elfenbein);
   filter: brightness(0.8);
 }
 /* Trennbeschriftung: Elfenbein gedämpft, Linien im selben Ton */
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie {
   color: rgba(230, 209, 170, 0.78);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::before,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie::before,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-oder-linie::after {
   background: linear-gradient(
     90deg,
     transparent,
@@ -1904,8 +1988,8 @@ html[data-haut='fallblatt'] {
   --beara-schrift: var(--beara-text-dark);
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
-  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf) {
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  :is(.rz-tastatur ~ .rz-weiter, .rz-duo-flach .rz-knopf) {
   position: relative;
   isolation: isolate;
   border-image: none;
@@ -1913,8 +1997,8 @@ html[data-haut='fallblatt']
   filter: none;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
-  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf)::before {
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  :is(.rz-tastatur ~ .rz-weiter, .rz-duo-flach .rz-knopf)::before {
   content: '';
   position: absolute;
   inset: -11px;
@@ -1924,34 +2008,37 @@ html[data-haut='fallblatt']
   pointer-events: none;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
-  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf):active::before {
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  :is(.rz-tastatur ~ .rz-weiter, .rz-duo-flach .rz-knopf):active::before {
   border-image-source: var(--schild-druck);
 }
 /* Metall je Zustand (nur die Ebene) */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled::before {
+  ~ .rz-weiter:disabled::before {
   filter: brightness(1.22) saturate(0.7)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled)::before {
+  ~ .rz-weiter.an:not(:disabled)::before {
   filter: brightness(1.2) saturate(0.78)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
     drop-shadow(0 -2px 3px rgba(var(--beara-licht), 0.34))
     drop-shadow(0 2px 3px rgba(var(--beara-licht), 0.34))
     drop-shadow(0 0 5px rgba(var(--beara-licht), 0.12));
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf::before {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf::before {
   filter: brightness(1.25) saturate(0.7)
     drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-duo-flach
   .rz-knopf:active::before {
   filter: brightness(1.25) saturate(0.7)
@@ -1960,8 +2047,8 @@ html[data-haut='fallblatt']
 }
 /* Schrift: dunkle Oberfläche Elfenbein, helle Oberfläche Schwarzbraun — deckend, ohne Filter/Schatten */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
-  :is(.rz-tastatur + .rz-weiter, .rz-duo-flach .rz-knopf)
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  :is(.rz-tastatur ~ .rz-weiter, .rz-duo-flach .rz-knopf)
   .lbl {
   opacity: 1;
   filter: none;
@@ -1969,63 +2056,81 @@ html[data-haut='fallblatt']
   mix-blend-mode: normal;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled,
+  ~ .rz-weiter:disabled,
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled
+  ~ .rz-weiter:disabled
   .lbl,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf,
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf,
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl {
   color: var(--beara-button-text-dark-surface);
   opacity: 1;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled),
+  ~ .rz-weiter.an:not(:disabled),
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled)
+  ~ .rz-weiter.an:not(:disabled)
   .lbl {
   color: var(--beara-button-text-light-surface);
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf {
   justify-content: center;
   align-content: center;
 }
-html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+html[data-haut='fallblatt']
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+  .rz-duo-flach
+  .rz-knopf
+  .lbl {
   font-size: 19px;
   padding: 0 8px;
 }
 @media (max-width: 389px) {
-  html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl {
+  html[data-haut='fallblatt']
+    :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
+    .rz-duo-flach
+    .rz-knopf
+    .lbl {
     font-size: 17px;
   }
 }
 /* ältere Regeln für das gesperrte Weiter sind spezifischer — hier ausdrücklich überschreiben */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled,
+  ~ .rz-weiter:disabled,
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled) {
+  ~ .rz-weiter.an:not(:disabled) {
   filter: none;
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter:disabled
+  ~ .rz-weiter:disabled
   .lbl,
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-tastatur
-  + .rz-weiter.an:not(:disabled)
+  ~ .rz-weiter.an:not(:disabled)
   .lbl {
   filter: none;
   text-shadow: none;
@@ -2033,14 +2138,14 @@ html[data-haut='fallblatt']
 }
 /* Rechnungstasten mit eigenen Gebrauchsspuren (Gerhard, 2026-10-29; schild_rechnung.py) — Weiter unverändert */
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-duo-flach
   .rz-knopf:nth-child(1) {
   --schild: url('./fb-schild-einfuegen-kurz.webp');
   --schild-druck: url('./fb-schild-einfuegen-druck-kurz.webp');
 }
 html[data-haut='fallblatt']
-  .rz-senden-eingabe
+  :is(.rz-senden-eingabe, .rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola)
   .rz-duo-flach
   .rz-knopf:nth-child(2) {
   --schild: url('./fb-schild-scannen-kurz.webp');
