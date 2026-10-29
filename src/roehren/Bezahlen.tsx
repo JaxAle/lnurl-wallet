@@ -45,9 +45,10 @@ import {
 } from '../lnurlcash'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
-import {scheinUeber, waehleSchein} from './abspalten'
+import {scheinUeber, scheineJeStelle} from './abspalten'
 import {createBetrag, Tastatur} from './Betrag'
 import {teilGebuehr} from './gebuehren'
+import {Zeile} from './Bedienfeld'
 import {pruefeZahlung} from './bezahlwache'
 import {gebunden} from './klaerung'
 import {
@@ -289,7 +290,22 @@ const Bezahlen: Component = () => {
       b => !b.spent && !b.deviceId && b.verified && !g.has(b.id)
     )
   })
-  const quelle = createMemo(() => waehleSchein(verfuegbar(), msat()))
+  // Ausgabestelle wählen (Gerhard, 2026-10-29: Gegenprobe mit einer anderen Stelle): je Stelle, die den
+  // Betrag decken kann, ihr bester Schein (waehleSchein); die von selbst gewählte steht vorn, Antippen
+  // von „Bezahlt aus“ wechselt der Reihe nach
+  const [wahlStelle, setWahlStelle] = createSignal<string | null>(null)
+  const kandidaten = createMemo(() => scheineJeStelle(verfuegbar(), msat()))
+  const quelle = createMemo(
+    () =>
+      kandidaten().find(b => serverOf(b.url) === wahlStelle()) ??
+      kandidaten()[0] ??
+      null
+  )
+  const naechsteStelle = () => {
+    const k = kandidaten()
+    const i = k.findIndex(b => b.id === quelle()?.id)
+    setWahlStelle(serverOf(k[(i + 1) % k.length]!.url))
+  }
   const zweck = () => {
     const r = rechnung()
     return (r && rechnungsZweck(r)) || (info() && adressText(info()!.metadata))
@@ -552,14 +568,26 @@ const Bezahlen: Component = () => {
                 <span class="sl">Gebühr</span>
                 <span class="val">{gebuehrText()}</span>
               </div>
-              <div class="rz-setting rz-still">
-                <span class="sl">Bezahlt aus</span>
-                <span class="val" classList={{'rz-fehlt': !quelle()}}>
-                  {quelle()
-                    ? serverOf(quelle()!.url)
-                    : 'kein Schein reicht allein'}
-                </span>
-              </div>
+              <Show
+                when={kandidaten().length > 1}
+                fallback={
+                  <div class="rz-setting rz-still">
+                    <span class="sl">Bezahlt aus</span>
+                    <span class="val" classList={{'rz-fehlt': !quelle()}}>
+                      {quelle()
+                        ? serverOf(quelle()!.url)
+                        : 'kein Schein reicht allein'}
+                    </span>
+                  </div>
+                }
+              >
+                <Zeile
+                  label="Bezahlt aus"
+                  unter="Antippen wechselt die Ausgabestelle"
+                  wert={serverOf(quelle()!.url)}
+                  onClick={naechsteStelle}
+                />
+              </Show>
             </div>
             <Show when={!quelle()}>
               <p class="rz-hinweis">

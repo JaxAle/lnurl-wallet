@@ -26,6 +26,27 @@ export const waehleSchein = (
   return groessere[0] ?? null
 }
 
+// je Ausgabestelle, die msat decken kann, ihr Schein nach waehleSchein — die insgesamt gewählte vorn, dann
+// die übrigen nach Namen (Bezahlen: „Bezahlt aus“ antippen wechselt, Gerhard 2026-10-29)
+export const scheineJeStelle = (
+  verfuegbar: Bearer[],
+  msat: number
+): Bearer[] => {
+  const auto = waehleSchein(verfuegbar, msat)
+  if (!auto) return []
+  const andere = [...new Set(verfuegbar.map(b => serverOf(b.url)))]
+    .filter(h => h !== serverOf(auto.url))
+    .sort()
+    .map(h =>
+      waehleSchein(
+        verfuegbar.filter(b => serverOf(b.url) === h),
+        msat
+      )
+    )
+    .filter((b): b is Bearer => !!b)
+  return [auto, ...andere]
+}
+
 // den Schein über msat liefern; null = nicht entstanden (unklar → als Vorgang festgehalten)
 export const scheinUeber = async (
   quelle: Bearer,
