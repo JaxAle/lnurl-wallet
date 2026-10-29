@@ -7,6 +7,7 @@ import {createMemo, createSignal, For, Show} from 'solid-js'
 import {notify, NotifyKind} from '../helpers'
 import {useWallet} from '../WalletContext'
 import {zurueckholenAuftrag, zurueckzuholen} from './zurueckholen'
+import {istZahlung} from './bezahlwache'
 import {unterwegs} from './einloesen'
 
 const host = (url: string): string => {
@@ -47,14 +48,27 @@ const UnterwegsListe: Component = () => {
     const ids = new Set(unterwegs())
     return bearers().filter(b => ids.has(b.id) && !b.spent)
   })
+  // angestoßene Zahlungen (Bezahlen, bezahlwache.ts) — ohne „zurückholen“, das entscheidet die Wache
+  const zahlungen = createMemo(() => bearers().filter(istZahlung))
   return (
-    <Show when={liste().length > 0}>
+    <Show when={liste().length > 0 || zahlungen().length > 0}>
       <section class="rz-unterwegs">
         <div class="rz-tag">Unterwegs</div>
-        <p class="rz-hinweis">
-          Übergeben, aber noch nicht eingelöst — die Wallet fragt nach, solange
-          sie offen ist.
-        </p>
+        <For each={zahlungen()}>
+          {b => (
+            <div class="rz-zeile">
+              <span class="rz-lampe-klein" />
+              <span>{b.zahlung?.text}</span>
+              <span class="rz-matt">wird bestätigt …</span>
+            </div>
+          )}
+        </For>
+        <Show when={liste().length > 0}>
+          <p class="rz-hinweis">
+            Übergeben, aber noch nicht eingelöst — die Wallet fragt nach,
+            solange sie offen ist.
+          </p>
+        </Show>
         <For each={liste()}>
           {bearer => (
             <div class="rz-zeile">

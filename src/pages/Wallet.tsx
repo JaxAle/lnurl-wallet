@@ -659,7 +659,8 @@ const Wallet: Component<{
   }
 
   const clearAllSpent = () => {
-    const spent = spentBearers()
+    // Fork: laufende Zahlungen bleiben — die Bezahl-Wache entscheidet noch (roehren/bezahlwache.ts)
+    const spent = spentBearers().filter(b => b.spentGrund !== 'zahlung')
     for (const bearer of spent) removeBearer(bearer.id)
     setConfirmClearSpent(false)
     notify(

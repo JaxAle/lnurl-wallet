@@ -47,7 +47,10 @@ export type Bearer = {
   spent?: boolean
   // Fork: warum ausgegeben — 'markiert' = vom Nutzer von Hand (bleibt in „Zu prüfen“, aufhebbar);
   // fehlt es bei spent, meldete die Ausgabestelle den Schein unerwartet als eingelöst (roehren/Scheine.tsx)
-  spentGrund?: 'markiert' | 'unbekannt'
+  // 'zahlung' = Bezahlen hat die Zahlung angestoßen, bestätigt ist sie noch nicht (roehren/bezahlwache.ts)
+  spentGrund?: 'markiert' | 'unbekannt' | 'zahlung'
+  // Fork: zur angestoßenen Zahlung — seit wann, Verlaufstext, LUD-21-Nachweis der Stelle (falls angeboten)
+  zahlung?: {seit: number; text: string; verify?: string; pr: string}
   // a free-text note the holder can attach for their own reference (e.g.
   // "rent", "gift for Alex") - purely local, never sent anywhere, no
   // protocol meaning at all

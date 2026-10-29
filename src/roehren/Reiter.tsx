@@ -7,6 +7,7 @@ import {createMemo, For, Show} from 'solid-js'
 import {A, useLocation} from '@solidjs/router'
 
 import {useWallet} from '../WalletContext'
+import Bezahlwache from './Bezahlwache'
 import EinloeseWache from './EinloeseWache'
 import Pruefwache from './Pruefwache'
 import {unterwegs} from './einloesen'
@@ -56,6 +57,7 @@ const Reiter: Component = () => {
   return (
     <Show when={state() === 'unlocked'}>
       <EinloeseWache />
+      <Bezahlwache />
       <Pruefwache />
       {/* beim Eintippen eines Betrags keine Leiste — wie im Prototyp (keypadScreen: tabs: false) */}
       <Show

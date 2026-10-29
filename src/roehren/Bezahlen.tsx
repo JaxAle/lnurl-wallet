@@ -33,7 +33,6 @@ import {notify, NotifyKind} from '../helpers'
 import type {PayRequestInfo} from '../lnurlcash'
 import {
   decodeBolt11AmountMsat,
-  fetchInvoiceVerification,
   fetchPayRequest,
   isBolt11Invoice,
   isLightningAddress,
@@ -42,7 +41,6 @@ import {
   requestInvoice,
   requireNoteK1,
   resolveMintInput,
-  sameInvoice,
   serverOf
 } from '../lnurlcash'
 import type {Bearer} from '../storage'
@@ -50,6 +48,7 @@ import {useWallet} from '../WalletContext'
 import {scheinUeber, waehleSchein} from './abspalten'
 import {createBetrag, Tastatur} from './Betrag'
 import {teilGebuehr} from './gebuehren'
+import {pruefeZahlung} from './bezahlwache'
 import {gebunden} from './klaerung'
 import {
   adressText,
@@ -334,47 +333,44 @@ const Bezahlen: Component = () => {
         }
         throw err
       }
-      await updateBearer(schein.id, {spent: true})
-      setBezahlt(schein)
-      const fuer = zweck()
-        ? ` (${zweck()})`
-        : adresse()
-          ? ` an ${adresse()}`
-          : ''
-      if (ergebnis.verify) {
-        // die Stelle bestätigt erst, wenn die Zahlung angekommen ist — nachfragen wie beim Aufladen
-        setSchritt('unterwegs')
-        const url = ergebnis.verify
-        uhr = setInterval(async () => {
-          try {
-            const v = await fetchInvoiceVerification(url)
-            if (!v.settled) return
-            clearInterval(uhr)
-            if (!sameInvoice(v.pr, r)) {
-              notify(
-                'Die Bestätigung der Stelle gehört zu einer anderen Rechnung — der Schein bleibt als ausgegeben gesperrt; bitte prüfen.',
-                NotifyKind.ERROR
-              )
-              return
-            }
-            logActivity(
-              'melt',
-              `${zahl(sats())} Sats bezahlt${fuer} — aus ${serverOf(schein.url)}.`,
-              schein.label
-            )
-            setSchritt('fertig')
-          } catch {
-            // nächster Versuch
-          }
-        }, 3000)
-      } else {
-        logActivity(
-          'melt',
-          `${zahl(sats())} Sats bezahlt${fuer} — aus ${serverOf(schein.url)} (ohne Bestätigung der Stelle).`,
-          schein.label
-        )
-        setSchritt('fertig')
+      // angestoßen, nicht bezahlt: die Stelle stellt den Schein wieder her, wenn die Zahlung scheitert
+      // (lib/request.ts meltNote). Darum nur als 'zahlung' sperren — entschieden wird in bezahlwache.ts,
+      // hier auf der Seite und von der Bezahl-Wache, auch wenn man die Seite verlässt (Pixel, 2026-10-29)
+      const an = adresse() ? ` an ${adresse()}` : ''
+      const fuer = zweck() ? ` (${zweck()})` : ''
+      const gesperrt: Bearer = {
+        ...schein,
+        spent: true,
+        spentGrund: 'zahlung',
+        zahlung: {
+          seit: Date.now(),
+          text: `${zahl(sats())} Sats bezahlt${an}${fuer}`,
+          verify: ergebnis.verify,
+          pr: r
+        }
       }
+      await updateBearer(schein.id, {
+        spent: true,
+        spentGrund: 'zahlung',
+        zahlung: gesperrt.zahlung
+      })
+      setBezahlt(gesperrt)
+      setSchritt('unterwegs')
+      const ctx = {updateBearer, removeBearer, logActivity}
+      const frage = async () => {
+        const e = await pruefeZahlung(gesperrt, ctx)
+        if (e === 'offen') return
+        clearInterval(uhr)
+        if (e === 'bezahlt') setSchritt('fertig')
+        else {
+          notify(
+            'Die Zahlung ist nicht durchgegangen — der Schein ist wieder in der Wallet.',
+            NotifyKind.ERROR
+          )
+          setSchritt('bestaetigen')
+        }
+      }
+      uhr = setInterval(() => void frage(), 3000)
     } catch (err) {
       notify(`Bezahlen ging nicht: ${(err as Error).message}`, NotifyKind.ERROR)
     } finally {
@@ -594,8 +590,9 @@ const Bezahlen: Component = () => {
                 </p>
               </Zaehlwerk>
               <p class="rz-hinweis">
-                Der Schein ist schon als ausgegeben gesperrt. Du kannst die
-                Seite schließen; im Verlauf steht es, sobald es bestätigt ist.
+                Du kannst die Seite schließen — die Wallet fragt weiter nach.
+                Bestätigt, steht es im Verlauf; kommt die Zahlung nicht durch,
+                ist der Schein nach spätestens fünf Minuten wieder da.
               </p>
               <button
                 type="button"

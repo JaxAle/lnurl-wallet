@@ -33,7 +33,7 @@ import {merkeUnterwegs} from './einloesen'
 import {schickeLink, WARNUNG} from './weitergabe'
 import Zaehlwerk from './Zaehlwerk'
 import {anSchluesselAn} from './anSchluessel'
-import {probeBurnedNote} from '../lib/request'
+import {pruefeZahlung} from './bezahlwache'
 import './roehren.css'
 
 export type ScheineMotor = {
@@ -332,33 +332,28 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const [holt, setHolt] = createSignal(false)
   const gezeigterSchein = () => draussen().find(b => b.id === gezeigt()) ?? null
 
-  // Ausgegebener Schein: bei der Stelle nachfragen, nur lesend (probeBurnedNote, wie die Einlöse-Wache).
-  // Noch gültig → zurück in die Wallet. Anlass: Bezahlen markierte Scheine schon beim Anstoßen der Zahlung
-  // als ausgegeben, auch wenn sie scheiterte und die Stelle den Schein wiederherstellte (Pixel, 2026-10-29)
+  // Zahlung unterwegs: jetzt nachfragen statt auf die Bezahl-Wache zu warten — dieselbe Entscheidung
+  // (bezahlwache.ts, nur lesend). Anlass: Bezahlen hielt gescheiterte Zahlungen für bezahlt (Pixel, 2026-10-29)
   const [nachfrage, setNachfrage] = createSignal<{
     id: string
-    stand: 'fragt' | 'gone' | 'unknown'
+    stand: 'fragt' | 'unknown'
   } | null>(null)
   const nachfragen = async (b: Bearer) => {
     setNachfrage({id: b.id, stand: 'fragt'})
-    const antwort = await probeBurnedNote(b.url)
-    if (antwort === 'live') {
-      await updateBearer(b.id, {spent: false, spentGrund: undefined})
-      const sats = Math.floor(b.amount / 1000).toLocaleString('de-DE')
-      logActivity(
-        'unspent',
-        `Bei ${serverOf(b.url)} noch gültig: ${sats} Sats wieder in der Wallet.`,
-        b.label
-      )
-      notify(
-        `Noch gültig — ${sats} Sats sind wieder in der Wallet.`,
-        NotifyKind.SUCCESS
-      )
-      setNachfrage(null)
-      setAusBlatt(null)
-      return
-    }
-    setNachfrage({id: b.id, stand: antwort})
+    const ergebnis = await pruefeZahlung(b, {
+      updateBearer,
+      removeBearer,
+      logActivity
+    })
+    if (ergebnis === 'offen') return setNachfrage({id: b.id, stand: 'unknown'})
+    setNachfrage(null)
+    setAusBlatt(null)
+    notify(
+      ergebnis === 'bezahlt'
+        ? 'Zahlung bestätigt.'
+        : 'Nicht durchgegangen — der Schein ist wieder in der Wallet.',
+      ergebnis === 'bezahlt' ? NotifyKind.SUCCESS : NotifyKind.ERROR
+    )
   }
   const nachfrageStand = (id: string) =>
     nachfrage()?.id === id ? nachfrage()!.stand : null
@@ -679,11 +674,13 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                         <Schein schein={b} klein />
                       </button>
                       <div class="rz-etikett">
-                        {b.spentGrund === 'markiert'
-                          ? 'Von dir markiert'
-                          : b.spentGrund === 'unbekannt'
-                            ? 'Der Stelle unbekannt'
-                            : 'Als eingelöst gemeldet'}
+                        {b.spentGrund === 'zahlung'
+                          ? 'Zahlung unterwegs'
+                          : b.spentGrund === 'markiert'
+                            ? 'Von dir markiert'
+                            : b.spentGrund === 'unbekannt'
+                              ? 'Der Stelle unbekannt'
+                              : 'Als eingelöst gemeldet'}
                       </div>
                     </div>
                   )}
@@ -786,6 +783,13 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
           <Dialog onClose={() => setAusBlatt(null)}>
             <div class="rz-blatt rz-schein-blatt">
               <Schein schein={s()} />
+              <Show when={s().spentGrund === 'zahlung'}>
+                <p class="rz-hinweis">
+                  {s().zahlung?.text} — angestoßen, noch nicht bestätigt. Die
+                  Wallet fragt selbst nach: Kommt die Zahlung nicht durch, ist
+                  der Schein nach spätestens fünf Minuten wieder da.
+                </p>
+              </Show>
               <Show when={s().spentGrund === 'unbekannt'}>
                 <p class="rz-hinweis">
                   Die Ausgabestelle kennt diesen Schein nicht (mehr). Meist ist
@@ -797,7 +801,13 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               <Show
                 when={s().spentGrund === 'markiert'}
                 fallback={
-                  <p class="rz-hinweis" hidden={s().spentGrund === 'unbekannt'}>
+                  <p
+                    class="rz-hinweis"
+                    hidden={
+                      s().spentGrund === 'unbekannt' ||
+                      s().spentGrund === 'zahlung'
+                    }
+                  >
                     Die Ausgabestelle meldet diesen Schein als eingelöst. Hast
                     du ihn gesendet oder gezeigt, ist alles in Ordnung — dann
                     kannst du ihn entfernen. Wenn nicht, hatte jemand anderes
@@ -824,16 +834,13 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   <span class="lbl">Markierung aufheben</span>
                 </button>
               </Show>
-              <Show when={!s().deviceId}>
-                <Show when={nachfrageStand(s().id) === 'gone'}>
-                  <p class="rz-hinweis">
-                    Die Ausgabestelle bestätigt: Dieser Schein ist eingelöst.
-                  </p>
-                </Show>
+              {/* nur für angestoßene Zahlungen — ein weitergegebener Schein meldet „gültig“, solange der
+              Empfänger ihn nicht eingelöst hat, und käme so zurück, obwohl ihn jemand hat (Gerhard, 500er) */}
+              <Show when={!s().deviceId && s().spentGrund === 'zahlung'}>
                 <Show when={nachfrageStand(s().id) === 'unknown'}>
                   <p class="rz-hinweis">
-                    Keine klare Antwort der Ausgabestelle — später noch einmal
-                    nachfragen.
+                    Noch nicht entschieden — die Ausgabestelle hat die Zahlung
+                    noch nicht abgeschlossen. Die Wallet fragt weiter nach.
                   </p>
                 </Show>
                 <button
