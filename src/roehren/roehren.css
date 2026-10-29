@@ -2879,3 +2879,96 @@ html:not([data-haut='fallblatt'])
 .rz-kassa .rz-tastatur + .rz-kassa-wahl {
   margin-top: calc(8px + var(--knopf-abstand));
 }
+
+/* ---------- Abstandsskala (Fibonacci) und Senden nach dem Goldenen Schnitt (Gerhard, 2026-10-29) ----------
+   Wiederverwendbar (später Aufladen): fünf Stufen, auf niedrigen Bildschirmen enger. Senden: Anzeige (A) –
+   Tastatur (B) – Aktionen (C) mit einheitlichen Abständen; der freie Platz geht zu 38,2 % zwischen A und B
+   (höchstens --beara-space-lg) und zu 61,8 % unter C — die Bedienung bleibt kompakt und daumennah. */
+:root {
+  --beara-space-xs: clamp(5px, 0.9dvh, 8px);
+  --beara-space-sm: clamp(8px, 1.45dvh, 13px);
+  --beara-space-md: clamp(13px, 2.35dvh, 21px);
+  --beara-space-lg: clamp(21px, 3.8dvh, 34px);
+  --beara-space-xl: clamp(34px, 6.1dvh, 55px);
+}
+/* A: Reserve für „zu viel“ knapp (eine Zeile + „… senden“) statt 52 px Leerraum */
+.rz-senden-eingabe .roehren-zaehlwerk .rz-fuss {
+  height: 38px;
+  margin-top: 0;
+}
+.rz-senden-eingabe .roehren-zaehlwerk .rz-fuss .rz-leise {
+  min-height: 0;
+  line-height: 18px;
+}
+/* B: freier Platz bis --beara-space-lg nach oben (Bauhöhe A–C ≈ 690 px) */
+.rz-senden-eingabe .rz-tastatur {
+  margin: clamp(
+      var(--beara-space-xs),
+      calc((100dvh - 690px) * 0.382),
+      var(--beara-space-lg)
+    )
+    0 0;
+}
+/* C: gleiche Abstände Tastatur → Weiter → Rechnungsgruppe; die Gruppe hält enger zusammen */
+.rz-senden-eingabe .rz-tastatur + .rz-weiter {
+  margin-top: var(--beara-space-md);
+}
+.rz-senden-eingabe .rz-oder-linie {
+  margin: var(--beara-space-md) 4px var(--beara-space-xs);
+}
+.rz-senden-eingabe .rz-duo.rz-duo-flach {
+  margin: 0 0 var(--beara-space-md);
+}
+/* niedrige Bildschirme: Tasten etwas flacher (Touchfläche ≥ 44 px), damit nichts scrollt */
+@media (max-height: 760px) {
+  .rz-senden-eingabe .rz-tastatur .rz-taste {
+    height: 44px;
+  }
+  .rz-senden-eingabe .rz-knopf.flach {
+    min-height: 52px;
+  }
+}
+/* nach Gerhards Vergleichsbild (2026-10-29): Aktionsgruppe luftiger, Tastatur beginnt etwa am 38,2-%-Punkt
+   des Inhaltsbereichs; auf niedrigen Bildschirmen enger, damit nichts scrollt */
+.rz-senden-eingabe .rz-tastatur {
+  margin-top: clamp(
+    var(--beara-space-xs),
+    calc((100dvh - 640px) * 0.382),
+    55px
+  );
+}
+.rz-senden-eingabe .rz-tastatur + .rz-weiter {
+  margin-top: var(--beara-space-lg);
+}
+.rz-senden-eingabe .rz-oder-linie,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+  margin: var(--beara-space-lg) 4px var(--beara-space-sm);
+}
+@media (max-height: 760px) {
+  .rz-senden-eingabe .roehren-zaehlwerk .rz-eurrow {
+    height: 54px;
+  }
+  .rz-senden-eingabe .roehren-zaehlwerk .rz-fuss {
+    height: 26px;
+  }
+  .rz-senden-eingabe .rz-tastatur {
+    gap: 6px;
+  }
+  .rz-senden-eingabe .rz-weiter {
+    min-height: 50px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .rz-senden-eingabe .rz-tastatur + .rz-weiter,
+  .rz-senden-eingabe .rz-oder-linie,
+  html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+    margin-top: var(--beara-space-sm);
+  }
+  .rz-senden-eingabe .rz-oder-linie,
+  html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+    margin-bottom: var(--beara-space-xs);
+  }
+  .rz-senden-eingabe .rz-duo.rz-duo-flach {
+    margin-bottom: var(--beara-space-xs);
+  }
+}
