@@ -2816,9 +2816,23 @@ video.scanner {
   .roehren-zaehlwerk {
   padding: 18px 0 8px;
 }
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
+:is(
+    .rz-aufladen,
+    .rz-geschenk,
+    .rz-kassa,
+    .rz-tombola,
+    .rz-senden-eingabe,
+    .rz-scan
+  )
   > .rz-seitenkopf,
-:is(.rz-aufladen, .rz-geschenk, .rz-kassa, .rz-tombola, .rz-senden-eingabe)
+:is(
+    .rz-aufladen,
+    .rz-geschenk,
+    .rz-kassa,
+    .rz-tombola,
+    .rz-senden-eingabe,
+    .rz-scan
+  )
   .rz-seitenkopf:first-child {
   position: fixed;
   top: env(safe-area-inset-top, 0px);
@@ -3010,4 +3024,102 @@ html[data-haut='fallblatt']
 .rz-kassa .rz-tastatur + :is(.rz-kassa-an, .rz-kassa-wahl) {
   margin-top: var(--beara-space-lg);
   margin-bottom: var(--beara-space-xs);
+}
+
+/* Rechnung scannen (Gerhard, 2026-10-29): nur Kopf, Kamera, eine Taste. Das Feld ist so groß, wie zwischen
+   Kopfzeile und Reiterleiste Platz ist (3 : 4, nie breiter als die Seite); das Bild selbst bleibt
+   ungefiltert — Rahmen und Ecken liegen außen bzw. nur an den Ecken darüber */
+.rz-scan {
+  --scan-rest: calc(
+    58px + env(safe-area-inset-top, 0px) + 84px +
+      env(safe-area-inset-bottom, 0px) + 150px
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.rz-scanfeld {
+  position: relative;
+  width: min(100%, calc((100dvh - var(--scan-rest)) * 0.75));
+  aspect-ratio: 3 / 4;
+  margin: var(--beara-space-sm) auto 0;
+  border: 1px solid var(--rz-linie-2);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0b0906;
+}
+.rz-scanfeld video.scanner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+.rz-scanfeld .rz-messzeile {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+}
+.rz-scanfeld .rz-weiter {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 45%;
+  z-index: 2;
+}
+.rz-scan-aus {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--rz-leise);
+  font-size: 15px;
+}
+.rz-ecke {
+  position: absolute;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  border: 0 solid rgba(var(--rz-glut-rgb), 0.75);
+  filter: drop-shadow(0 0 3px rgba(var(--rz-glut-rgb), 0.6));
+  pointer-events: none;
+}
+.rz-ecke.lo {
+  top: 14px;
+  left: 14px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+.rz-ecke.ro {
+  top: 14px;
+  right: 14px;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+.rz-ecke.lu {
+  bottom: 14px;
+  left: 14px;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+.rz-ecke.ru {
+  bottom: 14px;
+  right: 14px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+.rz-scan-zeile {
+  min-height: 2.6em;
+  margin: var(--beara-space-xs) 0 0;
+  text-align: center;
+}
+.rz-scan .rz-kamera {
+  align-self: stretch;
+  margin-top: var(--beara-space-xs);
 }

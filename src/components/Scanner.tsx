@@ -6,6 +6,9 @@ export type ScannerProps = {
   // called once with the first QR payload that `accept` (if given) lets through
   onScan: (value: string) => void
   accept?: (value: string) => boolean
+  // Fork: Fehler (keine Freigabe, keine Kamera) an die Seite melden statt selbst anzuzeigen — „Rechnung
+  // scannen“ zeigt dann die ruhige Fläche und „Kamera ein“ zum erneuten Versuch (Gerhard, 2026-10-29)
+  onFehler?: (art: 'verweigert' | 'keine') => void
 }
 
 // whether this browser even exposes the camera API at all - a cheap,
@@ -144,6 +147,7 @@ const Scanner: Component<ScannerProps> = props => {
 
   onMount(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
+      if (props.onFehler) return props.onFehler('keine')
       setError('Dieser Browser gibt die Kamera nicht frei.')
       return
     }
@@ -213,8 +217,10 @@ const Scanner: Component<ScannerProps> = props => {
       // opening. Distinct message from an actual permission denial, which
       // is the far more common real-world case.
       stop()
+      const keine = err instanceof DOMException && err.name === 'NotFoundError'
+      if (props.onFehler) return props.onFehler(keine ? 'keine' : 'verweigert')
       setError(
-        err instanceof DOMException && err.name === 'NotFoundError'
+        keine
           ? 'Keine Kamera gefunden.'
           : 'Der Zugriff auf die Kamera wurde verweigert.'
       )

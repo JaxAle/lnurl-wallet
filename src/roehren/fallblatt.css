@@ -2151,3 +2151,62 @@ html[data-haut='fallblatt']
   --schild: url('./fb-schild-scannen-kurz.webp');
   --schild-druck: url('./fb-schild-scannen-druck-kurz.webp');
 }
+
+/* Rechnung scannen (Gerhard, 2026-10-29): Rahmen aus dunklem, gealtertem Eisen (nur außen, das Bild bleibt
+   unberührt); Taste „Kamera aus/ein“ mit eigenem Langschild (schild_rechnung.py, fb-schild-kamera) —
+   Metall auf ::before wie bei den Aktionstasten, Schrift Elfenbein deckend */
+html[data-haut='fallblatt'] .rz-scanfeld {
+  border: 9px solid transparent;
+  border-image: url('./fb-schild-eisen.webp') 28 / 9px stretch;
+  border-radius: 0;
+  filter: none;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+html[data-haut='fallblatt'] .rz-ecke {
+  border-color: rgba(230, 209, 170, 0.55);
+  filter: none;
+}
+html[data-haut='fallblatt'] .rz-scan-aus {
+  color: rgba(230, 209, 170, 0.45);
+  font-family: 'Barlow Condensed', var(--rz-schrift-familie), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+html[data-haut='fallblatt'] .rz-scan .rz-kamera {
+  --schild: url('./fb-schild-kamera.webp');
+  --schild-druck: url('./fb-schild-kamera-druck.webp');
+  position: relative;
+  isolation: isolate;
+  border-image: none;
+  border-color: transparent;
+  filter: none;
+  justify-content: center;
+  align-items: center;
+}
+html[data-haut='fallblatt'] .rz-scan .rz-kamera::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+  z-index: -1;
+  border: 11px solid transparent;
+  border-image: var(--schild) 28 fill / 11px stretch;
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+  pointer-events: none;
+}
+html[data-haut='fallblatt'] .rz-scan .rz-kamera:active::before {
+  border-image-source: var(--schild-druck);
+}
+html[data-haut='fallblatt'] .rz-scan .rz-kamera,
+html[data-haut='fallblatt'] .rz-scan .rz-kamera .lbl {
+  color: var(--beara-button-text-dark-surface);
+  font-family: 'Barlow Condensed', var(--rz-schrift-familie), sans-serif;
+  font-weight: 700;
+  opacity: 1;
+  filter: none;
+  text-shadow: none;
+}
+html[data-haut='fallblatt'] .rz-scan .rz-erkannt.fremd {
+  color: var(--beara-amber-light);
+}

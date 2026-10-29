@@ -2,6 +2,9 @@
 // Dialogs mit zwei Symbolknöpfen. Wer bezahlt, will vorher sicher wissen: wem, wie viel, was es kostet.
 //   1. Eingeben: Rechnung oder Lightning-Adresse einfügen oder scannen; eine Zeile sagt, was erkannt wurde.
 //      Bei einer Adresse ohne Betrag folgt die Röhren-Tastatur wie beim Senden.
+//      Kommt man über „Rechnung scannen“ (Senden), ist Schritt 1 nur die Kamera: kein Feld, kein Weiter —
+//      ein gültiger Code führt von selbst zu Schritt 2 (Betrag oder Bestätigen), bezahlt wird nie ohne
+//      Tippen auf „N Sats bezahlen“ (Gerhard, 2026-10-29).
 //   2. Bestätigen: Betrag im Zählwerk, darunter An, Zweck, Gebühr, Bezahlt aus; dann „N Sats bezahlen“.
 //   3. Fertig: das Zählwerk zählt herunter, „Bezahlt“.
 // Bezahlen heißt hier: ein Schein über genau den Betrag wird bei seiner Ausgabestelle eingeschmolzen
@@ -72,6 +75,9 @@ const Bezahlen: Component = () => {
   const [schritt, setSchritt] = createSignal<Schritt>('eingabe')
   const [text, setText] = createSignal('')
   const [scannen, setScannen] = createSignal(false)
+  // über „Rechnung scannen“ gekommen: Schritt 1 ist nur die Kamera
+  const [nurScan, setNurScan] = createSignal(false)
+  const [scanFehler, setScanFehler] = createSignal<string | null>(null)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [adresse, setAdresse] = createSignal<string | null>(null)
   const [info, setInfo] = createSignal<PayRequestInfo | null>(null)
@@ -80,9 +86,9 @@ const Bezahlen: Component = () => {
   let uhr: ReturnType<typeof setInterval> | undefined
   onCleanup(() => uhr && clearInterval(uhr))
 
-  // was im Feld steht, erkannt
-  const erkannt = createMemo(() => {
-    const t = saeubere(text())
+  // was im Feld steht (oder die Kamera sieht), erkannt
+  const erkenne = (roh: string) => {
+    const t = saeubere(roh)
     if (!t) return null
     if (isBolt11Invoice(t)) {
       const msat = decodeBolt11AmountMsat(t)
@@ -109,13 +115,56 @@ const Bezahlen: Component = () => {
       satz: 'Keine Rechnung und keine Lightning-Adresse',
       geht: false
     }
-  })
+  }
+  const erkannt = createMemo(() => erkenne(text()))
+
+  // Kamera: nur ein gültiges Ziel geht durch; alles andere bleibt im Bild stehen, mit einer Zeile darunter
+  const nimmt = (w: string) => {
+    const e = erkenne(w)
+    if (e?.geht) return true
+    setScanFehler(
+      e?.art === 'rechnung'
+        ? e.satz
+        : 'Dieser Code ist keine Lightning-Rechnung und keine Lightning-Adresse.'
+    )
+    return false
+  }
+  const gescannt = (w: string) => {
+    setScannen(false) // Scanner hat die Kamera schon freigegeben; ein zweiter Treffer kommt nicht mehr
+    setScanFehler(null)
+    setText(saeubere(w))
+    void weiter()
+  }
+  const kameraFehler = (art: 'verweigert' | 'keine') => {
+    setScannen(false)
+    setScanFehler(
+      art === 'keine'
+        ? 'Keine Kamera gefunden.'
+        : 'Die Kamera ist nicht freigegeben. Erlaube sie in den Website-Einstellungen des Browsers und tippe dann auf „Kamera ein“.'
+    )
+  }
+  const kamera = () => {
+    setScanFehler(null)
+    setScannen(s => !s)
+  }
+  // zurück zu Schritt 1: beim Scannen wieder mit laufender Kamera und leerem Ziel
+  const zurEingabe = () => {
+    setSchritt('eingabe')
+    if (!nurScan()) return
+    setText('')
+    setAdresse(null)
+    setInfo(null)
+    setRechnung(null)
+    if (canScan()) setScannen(true)
+  }
 
   // von der Startseite oder aus Empfangen übergeben
   onMount(() => {
     if (bezahlenScannen()) {
       setBezahlenScannen(false)
-      setScannen(true)
+      setNurScan(true)
+      if (canScan()) setScannen(true)
+      else setScanFehler('Dieser Browser gibt die Kamera nicht frei.')
     }
     const t = zuBezahlen()
     if (t) {
@@ -284,7 +333,7 @@ const Bezahlen: Component = () => {
     }
   }
 
-  const kopf = (zurueck: () => void) => (
+  const kopf = (zurueck: () => void, titel = 'Bezahlen') => (
     <div class="rz-seitenkopf">
       <button
         type="button"
@@ -294,14 +343,53 @@ const Bezahlen: Component = () => {
       >
         ‹
       </button>
-      <h2>Bezahlen</h2>
+      <h2>{titel}</h2>
     </div>
   )
 
   return (
     <RequireWallet>
-      <div class="page rz-senden rz-bezahlen">
+      <div
+        class="page rz-senden rz-bezahlen"
+        classList={{'rz-scan': nurScan() && schritt() === 'eingabe'}}
+      >
         <Switch>
+          <Match when={nurScan() && schritt() === 'eingabe'}>
+            {kopf(() => navigate(-1), 'Rechnung scannen')}
+            {/* nur die Kamera: Bild ungefiltert, Rahmen und Ecken liegen darüber, nicht darauf */}
+            <div class="rz-scanfeld">
+              <Show
+                when={scannen()}
+                fallback={
+                  <div class="rz-scan-aus">
+                    {arbeitet() ? 'Einen Moment …' : 'Kamera ist aus'}
+                  </div>
+                }
+              >
+                <Scanner
+                  accept={nimmt}
+                  onScan={gescannt}
+                  onFehler={kameraFehler}
+                />
+              </Show>
+              <span class="rz-ecke lo" />
+              <span class="rz-ecke ro" />
+              <span class="rz-ecke lu" />
+              <span class="rz-ecke ru" />
+            </div>
+            <p class="rz-erkannt fremd rz-scan-zeile" aria-live="polite">
+              {scanFehler() ?? ''}
+            </p>
+            <button
+              type="button"
+              class="rz-knopf rz-weiter rz-kamera"
+              disabled={!canScan() || arbeitet()}
+              onClick={kamera}
+            >
+              <span class="lbl">{scannen() ? 'Kamera aus' : 'Kamera ein'}</span>
+            </button>
+          </Match>
+
           <Match when={schritt() === 'eingabe'}>
             {kopf(() => navigate(-1))}
             <label class="rz-feldname" for="bz-feld">
@@ -359,7 +447,7 @@ const Bezahlen: Component = () => {
           </Match>
 
           <Match when={schritt() === 'betrag'}>
-            {kopf(() => setSchritt('eingabe'))}
+            {kopf(zurEingabe)}
             <p class="rz-hinweis rz-mitte">
               An {adresse()}
               <Show when={info() && adressText(info()!.metadata)}>
@@ -398,7 +486,7 @@ const Bezahlen: Component = () => {
           </Match>
 
           <Match when={schritt() === 'bestaetigen'}>
-            {kopf(() => setSchritt(adresse() ? 'betrag' : 'eingabe'))}
+            {kopf(() => (adresse() ? setSchritt('betrag') : zurEingabe()))}
             <Zaehlwerk sats={sats()} sofort kalt={!quelle()} />
             <div class="rz-gruppe">
               <Show when={adresse()}>
