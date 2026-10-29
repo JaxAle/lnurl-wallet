@@ -2,6 +2,8 @@
 // Dialogs mit zwei Symbolknöpfen. Wer bezahlt, will vorher sicher wissen: wem, wie viel, was es kostet.
 //   1. Eingeben: Rechnung oder Lightning-Adresse einfügen oder scannen; eine Zeile sagt, was erkannt wurde.
 //      Bei einer Adresse ohne Betrag folgt die Röhren-Tastatur wie beim Senden.
+//      LNURL-pay („lnurl1…“, „lnurlp://“) geht denselben Weg wie eine Adresse; lässt der Empfänger nur einen
+//      Betrag zu, ohne Tastatur gleich zum Bestätigen (Gerhard, 2026-10-29).
 //      Kommt man über „Rechnung scannen“ (Senden), ist Schritt 1 nur die Kamera: kein Feld, kein Weiter —
 //      ein gültiger Code führt von selbst zu Schritt 2 (Betrag oder Bestätigen), bezahlt wird nie ohne
 //      Tippen auf „N Sats bezahlen“ (Gerhard, 2026-10-29).
@@ -52,6 +54,7 @@ import {gebunden} from './klaerung'
 import {
   adressText,
   bezahlenScannen,
+  lnurlZahlziel,
   rechnungsZweck,
   saeubere,
   setBezahlenScannen,
@@ -77,6 +80,8 @@ const Bezahlen: Component = () => {
   const [scannen, setScannen] = createSignal(false)
   // über „Rechnung scannen“ gekommen: Schritt 1 ist nur die Kamera
   const [nurScan, setNurScan] = createSignal(false)
+  // der Empfänger lässt nur einen Betrag zu — zurück vom Bestätigen nicht zur Tastatur
+  const [fest, setFest] = createSignal(false)
   const [scanFehler, setScanFehler] = createSignal<string | null>(null)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [adresse, setAdresse] = createSignal<string | null>(null)
@@ -109,10 +114,23 @@ const Bezahlen: Component = () => {
         satz: `Lightning-Adresse ${t}`,
         geht: true
       }
+    const l = lnurlZahlziel(t)
+    if (l && 'url' in l)
+      return {
+        art: 'lnurl' as const,
+        wert: t,
+        url: l.url,
+        stelle: l.stelle,
+        satz: `LNURL-Zahlungscode von ${l.stelle}`,
+        geht: true
+      }
     return {
       art: 'nichts' as const,
       wert: t,
-      satz: 'Keine Rechnung und keine Lightning-Adresse',
+      satz:
+        l && 'fehler' in l
+          ? l.fehler
+          : 'Keine Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode',
       geht: false
     }
   }
@@ -123,9 +141,9 @@ const Bezahlen: Component = () => {
     const e = erkenne(w)
     if (e?.geht) return true
     setScanFehler(
-      e?.art === 'rechnung'
-        ? e.satz
-        : 'Dieser Code ist keine Lightning-Rechnung und keine Lightning-Adresse.'
+      e?.art === 'rechnung' || (e && lnurlZahlziel(e.wert))
+        ? e!.satz
+        : 'Dieser Code ist keine Lightning-Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode.'
     )
     return false
   }
@@ -182,20 +200,58 @@ const Bezahlen: Component = () => {
       setSchritt('bestaetigen')
       return
     }
-    const url = resolveMintInput(e.wert)
+    const url = e.art === 'lnurl' ? e.url : resolveMintInput(e.wert)
     if (!url) return
     setArbeitet(true)
     try {
-      setInfo(await fetchPayRequest(url))
-      setAdresse(e.wert)
-      setSchritt('betrag')
-    } catch (err) {
-      notify(
-        `Diese Adresse antwortet gerade nicht: ${(err as Error).message}`,
-        NotifyKind.ERROR
+      let i
+      try {
+        i = await fetchPayRequest(url)
+      } catch (err) {
+        // fetchPayRequest prüft tag „payRequest“ — ein Abhebe- oder Anmelde-LNURL kommt hier nicht weiter
+        const m = (err as Error).message
+        return melde(
+          m.startsWith('Not a payRequest')
+            ? 'Dieser Code ist kein Zahlungscode — der Empfänger nimmt hier keine Zahlung an.'
+            : `${e.art === 'lnurl' ? 'Der Empfänger' : 'Diese Adresse'} antwortet gerade nicht: ${m}`
+        )
+      }
+      if (
+        !(i.minSendable > 0) ||
+        !(i.maxSendable >= i.minSendable) ||
+        Math.floor(i.maxSendable / 1000) < Math.ceil(i.minSendable / 1000)
       )
+        return melde('Der Empfänger nennt keinen gültigen Betrag.')
+      setInfo(i)
+      setAdresse(e.art === 'lnurl' ? e.stelle : e.wert)
+      // nur ein Betrag möglich: keine Tastatur, gleich die Rechnung über genau diesen Betrag
+      if (i.minSendable === i.maxSendable) {
+        setFest(true)
+        await holeRechnung(i, i.minSendable)
+        return
+      }
+      setFest(false)
+      setSchritt('betrag')
     } finally {
       setArbeitet(false)
+    }
+  }
+  // Fehler beim Abrufen: als Meldung, beim Scannen zusätzlich unter dem Kamerafeld
+  const melde = (satz: string) => {
+    notify(satz, NotifyKind.ERROR)
+    if (nurScan()) setScanFehler(satz)
+  }
+  // Rechnung über genau diesen Betrag; eine ohne oder mit anderem Betrag wird nicht angenommen
+  // (requestInvoice prüft Betrag und Metadaten-Hash, hier zusätzlich: ohne Betrag gibt es nichts zu bestätigen)
+  const holeRechnung = async (i: PayRequestInfo, betragMsat: number) => {
+    try {
+      const r = await requestInvoice(i, betragMsat)
+      if (decodeBolt11AmountMsat(r.pr) !== betragMsat)
+        throw new Error('Rechnung ohne Betrag')
+      setRechnung(r.pr)
+      setSchritt('bestaetigen')
+    } catch (err) {
+      melde(`Die Rechnung kam nicht: ${(err as Error).message}`)
     }
   }
 
@@ -216,14 +272,7 @@ const Bezahlen: Component = () => {
     if (!i || !betragGeht()) return
     setArbeitet(true)
     try {
-      const r = await requestInvoice(i, ein.betrag() * 1000)
-      setRechnung(r.pr)
-      setSchritt('bestaetigen')
-    } catch (err) {
-      notify(
-        `Die Rechnung kam nicht: ${(err as Error).message}`,
-        NotifyKind.ERROR
-      )
+      await holeRechnung(i, ein.betrag() * 1000)
     } finally {
       setArbeitet(false)
     }
@@ -393,13 +442,13 @@ const Bezahlen: Component = () => {
           <Match when={schritt() === 'eingabe'}>
             {kopf(() => navigate(-1))}
             <label class="rz-feldname" for="bz-feld">
-              Rechnung oder Lightning-Adresse
+              Rechnung, Lightning-Adresse oder LNURL
             </label>
             <textarea
               id="bz-feld"
               class="rz-feld"
               rows="3"
-              placeholder="lnbc… oder name@stelle.at"
+              placeholder="lnbc…, name@stelle.at oder lnurl1…"
               autocomplete="off"
               autocapitalize="off"
               spellcheck={false}
@@ -486,7 +535,9 @@ const Bezahlen: Component = () => {
           </Match>
 
           <Match when={schritt() === 'bestaetigen'}>
-            {kopf(() => (adresse() ? setSchritt('betrag') : zurEingabe()))}
+            {kopf(() =>
+              adresse() && !fest() ? setSchritt('betrag') : zurEingabe()
+            )}
             <Zaehlwerk sats={sats()} sofort kalt={!quelle()} />
             <div class="rz-gruppe">
               <Show when={adresse()}>

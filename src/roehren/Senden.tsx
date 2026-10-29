@@ -14,13 +14,13 @@ import RequireWallet from '../components/RequireWallet'
 import {useDevice} from '../DeviceContext'
 import {requireDeviceClient} from '../deviceOrchestration'
 import {notify, NotifyKind} from '../helpers'
+import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import {
-  isBolt11Invoice,
-  isLightningAddress,
-  serverOf,
-  toBech32Lnurl
-} from '../lnurlcash'
-import {saeubere, setBezahlenScannen, setZuBezahlen} from './rechnung'
+  istZahlziel,
+  saeubere,
+  setBezahlenScannen,
+  setZuBezahlen
+} from './rechnung'
 import type {Bearer} from '../storage'
 import {useWallet} from '../WalletContext'
 import {merkeUnterwegs, unterwegs} from './einloesen'
@@ -63,12 +63,12 @@ const Senden: Component = () => {
       navigate('/bezahlen')
       return
     }
-    if (isBolt11Invoice(t) || isLightningAddress(t)) {
+    if (istZahlziel(t)) {
       setZuBezahlen(t)
       navigate('/bezahlen')
     } else
       notify(
-        'In der Zwischenablage ist keine Rechnung und keine Lightning-Adresse.',
+        'In der Zwischenablage ist keine Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode.',
         NotifyKind.ERROR
       )
   }

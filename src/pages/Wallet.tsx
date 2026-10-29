@@ -50,7 +50,6 @@ import {
   serverOf,
   toBech32Lnurl,
   isBolt11Invoice,
-  isLightningAddress,
   isValidNoteInput,
   resolveNoteInput,
   noteDeclaredAmount
@@ -93,7 +92,7 @@ import {
 import {notify, NotifyKind, msatToSats, pasteFromClipboard} from '../helpers'
 import {decodeTag, parseLabelTags} from '../noteTags'
 import {takeMeltInvoice} from '../meltHandoff'
-import {setZuBezahlen} from '../roehren/rechnung'
+import {istZahlziel, setZuBezahlen} from '../roehren/rechnung'
 import {receiveIntoWallet} from '../receive'
 import BearerCard from '../components/BearerCard'
 import Dialog from '../components/Dialog'
@@ -343,8 +342,7 @@ const Wallet: Component<{
     setMeltHandoffAddress(null)
   }
 
-  const isValidHeroInput = (v: string) =>
-    isValidNoteInput(v) || isBolt11Invoice(v) || isLightningAddress(v)
+  const isValidHeroInput = (v: string) => isValidNoteInput(v) || istZahlziel(v)
 
   // re-entrancy-guarded the same way ReceiveDialog's own receive is: a
   // scanner double-fire or Enter-key/confirm-click landing together must
@@ -401,14 +399,14 @@ const Wallet: Component<{
       return
     }
     // Fork: Rechnung oder Adresse → Bezahlen-Seite statt Dialog (Steve, 2026-10-24)
-    if (isBolt11Invoice(trimmed) || isLightningAddress(trimmed)) {
+    if (istZahlziel(trimmed)) {
       setHeroValue('')
       setZuBezahlen(trimmed)
       navigate('/bezahlen')
       return
     }
     notify(
-      'Das ist kein Schein, keine Rechnung und keine Lightning-Adresse.',
+      'Das ist kein Schein, keine Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode.',
       NotifyKind.ERROR
     )
   }
