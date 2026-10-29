@@ -78,6 +78,9 @@ const Bezahlen: Component = () => {
   // über „Rechnung scannen“ gekommen: Schritt 1 ist nur die Kamera
   const [nurScan, setNurScan] = createSignal(false)
   const [scanFehler, setScanFehler] = createSignal<string | null>(null)
+  // ein gültiger Code wurde angenommen: die Ecken leuchten einmal auf (Gerhard, 2026-10-29). Nur hier
+  // gesetzt — ungültige Codes kommen gar nicht bis gescannt(); zurückgesetzt erst, wenn die Kamera neu läuft
+  const [treffer, setTreffer] = createSignal(false)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [adresse, setAdresse] = createSignal<string | null>(null)
   const [info, setInfo] = createSignal<PayRequestInfo | null>(null)
@@ -130,6 +133,8 @@ const Bezahlen: Component = () => {
     return false
   }
   const gescannt = (w: string) => {
+    if (treffer()) return // ein Treffer je Kameralauf — keine zweite Animation, kein zweites Weiter
+    setTreffer(true)
     setScannen(false) // Scanner hat die Kamera schon freigegeben; ein zweiter Treffer kommt nicht mehr
     setScanFehler(null)
     setText(saeubere(w))
@@ -145,6 +150,7 @@ const Bezahlen: Component = () => {
   }
   const kamera = () => {
     setScanFehler(null)
+    setTreffer(false)
     setScannen(s => !s)
   }
   // zurück zu Schritt 1: beim Scannen wieder mit laufender Kamera und leerem Ziel
@@ -155,6 +161,7 @@ const Bezahlen: Component = () => {
     setAdresse(null)
     setInfo(null)
     setRechnung(null)
+    setTreffer(false)
     if (canScan()) setScannen(true)
   }
 
@@ -357,7 +364,7 @@ const Bezahlen: Component = () => {
           <Match when={nurScan() && schritt() === 'eingabe'}>
             {kopf(() => navigate(-1), 'Rechnung scannen')}
             {/* nur die Kamera: Bild ungefiltert, Rahmen und Ecken liegen darüber, nicht darauf */}
-            <div class="rz-scanfeld">
+            <div class="rz-scanfeld" classList={{'rz-treffer': treffer()}}>
               <Show
                 when={scannen()}
                 fallback={
