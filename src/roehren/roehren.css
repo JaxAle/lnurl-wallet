@@ -3081,50 +3081,14 @@ html[data-haut='fallblatt']
   color: var(--rz-leise);
   font-size: 15px;
 }
-/* Farbe und Licht der Ecken als Designparameter — Ruhe und Treffer; Fallblatt setzt eigene (fallblatt.css) */
-.rz-scanfeld {
-  --ecke-farbe: rgba(var(--rz-glut-rgb), 0.75);
-  --ecke-licht: drop-shadow(0 0 3px rgba(var(--rz-glut-rgb), 0.6));
-  --ecke-treffer-farbe: rgba(var(--rz-glut-rgb), 1);
-  --ecke-treffer-licht: drop-shadow(0 0 4px rgba(var(--rz-glut-rgb), 1))
-    drop-shadow(0 0 10px rgba(var(--rz-glut-rgb), 0.85));
-}
 .rz-ecke {
   position: absolute;
   z-index: 1;
   width: 26px;
   height: 26px;
-  border: 0 solid var(--ecke-farbe);
-  filter: var(--ecke-licht);
+  border: 0 solid rgba(var(--rz-glut-rgb), 0.75);
+  filter: drop-shadow(0 0 3px rgba(var(--rz-glut-rgb), 0.6));
   pointer-events: none;
-}
-/* Treffer: einmal aufleuchten, ~120 ms an, ~180 ms halten, ~150 ms ab — läuft nur, solange die Seite noch
-   steht; die Bestätigung wartet nicht darauf */
-.rz-treffer .rz-ecke {
-  animation: rz-ecke-treffer 450ms ease-out 1 both;
-}
-@keyframes rz-ecke-treffer {
-  0% {
-    border-color: var(--ecke-farbe);
-    filter: var(--ecke-licht);
-  }
-  27%,
-  67% {
-    border-color: var(--ecke-treffer-farbe);
-    filter: var(--ecke-treffer-licht);
-  }
-  100% {
-    border-color: var(--ecke-farbe);
-    filter: var(--ecke-licht);
-  }
-}
-/* weniger Bewegung: statt des Aufleuchtens kurz fest hervorgehoben */
-@media (prefers-reduced-motion: reduce) {
-  .rz-treffer .rz-ecke {
-    animation: none;
-    border-color: var(--ecke-treffer-farbe);
-    filter: var(--ecke-treffer-licht);
-  }
 }
 .rz-ecke.lo {
   top: 14px;

@@ -2162,12 +2162,9 @@ html[data-haut='fallblatt'] .rz-scanfeld {
   filter: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
 }
-html[data-haut='fallblatt'] .rz-scanfeld {
-  --ecke-farbe: rgba(230, 209, 170, 0.55);
-  --ecke-licht: drop-shadow(0 0 0 transparent);
-  --ecke-treffer-farbe: var(--beara-amber-light);
-  --ecke-treffer-licht: drop-shadow(0 0 3px rgba(var(--beara-licht), 0.95))
-    drop-shadow(0 0 8px rgba(var(--beara-licht), 0.6));
+html[data-haut='fallblatt'] .rz-ecke {
+  border-color: rgba(230, 209, 170, 0.55);
+  filter: none;
 }
 html[data-haut='fallblatt'] .rz-scan-aus {
   color: rgba(230, 209, 170, 0.45);

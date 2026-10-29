@@ -78,9 +78,6 @@ const Bezahlen: Component = () => {
   // über „Rechnung scannen“ gekommen: Schritt 1 ist nur die Kamera
   const [nurScan, setNurScan] = createSignal(false)
   const [scanFehler, setScanFehler] = createSignal<string | null>(null)
-  // ein gültiger Code wurde angenommen: die Ecken leuchten einmal auf (Gerhard, 2026-10-29). Nur hier
-  // gesetzt — ungültige Codes kommen gar nicht bis gescannt(); zurückgesetzt erst, wenn die Kamera neu läuft
-  const [treffer, setTreffer] = createSignal(false)
   const [arbeitet, setArbeitet] = createSignal(false)
   const [adresse, setAdresse] = createSignal<string | null>(null)
   const [info, setInfo] = createSignal<PayRequestInfo | null>(null)
@@ -88,11 +85,6 @@ const Bezahlen: Component = () => {
   const [bezahlt, setBezahlt] = createSignal<Bearer | null>(null)
   let uhr: ReturnType<typeof setInterval> | undefined
   onCleanup(() => uhr && clearInterval(uhr))
-  // nach einem Treffer kurz stehen bleiben, damit man das Aufleuchten der Ecken sieht (Gerhard am Pixel,
-  // 2026-10-29: sonst ersetzt die Bestätigung die Seite, bevor es anläuft — Lösung 1, 300 ms)
-  const TREFFER_MS = 300
-  let trefferUhr: ReturnType<typeof setTimeout> | undefined
-  onCleanup(() => clearTimeout(trefferUhr))
 
   // was im Feld steht (oder die Kamera sieht), erkannt
   const erkenne = (roh: string) => {
@@ -138,12 +130,10 @@ const Bezahlen: Component = () => {
     return false
   }
   const gescannt = (w: string) => {
-    if (treffer()) return // ein Treffer je Kameralauf — keine zweite Animation, kein zweites Weiter
-    setTreffer(true)
     setScannen(false) // Scanner hat die Kamera schon freigegeben; ein zweiter Treffer kommt nicht mehr
     setScanFehler(null)
     setText(saeubere(w))
-    trefferUhr = setTimeout(() => void weiter(), TREFFER_MS)
+    void weiter()
   }
   const kameraFehler = (art: 'verweigert' | 'keine') => {
     setScannen(false)
@@ -154,9 +144,7 @@ const Bezahlen: Component = () => {
     )
   }
   const kamera = () => {
-    clearTimeout(trefferUhr)
     setScanFehler(null)
-    setTreffer(false)
     setScannen(s => !s)
   }
   // zurück zu Schritt 1: beim Scannen wieder mit laufender Kamera und leerem Ziel
@@ -167,7 +155,6 @@ const Bezahlen: Component = () => {
     setAdresse(null)
     setInfo(null)
     setRechnung(null)
-    setTreffer(false)
     if (canScan()) setScannen(true)
   }
 
@@ -370,7 +357,7 @@ const Bezahlen: Component = () => {
           <Match when={nurScan() && schritt() === 'eingabe'}>
             {kopf(() => navigate(-1), 'Rechnung scannen')}
             {/* nur die Kamera: Bild ungefiltert, Rahmen und Ecken liegen darüber, nicht darauf */}
-            <div class="rz-scanfeld" classList={{'rz-treffer': treffer()}}>
+            <div class="rz-scanfeld">
               <Show
                 when={scannen()}
                 fallback={
