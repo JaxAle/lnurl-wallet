@@ -88,6 +88,11 @@ const Bezahlen: Component = () => {
   const [bezahlt, setBezahlt] = createSignal<Bearer | null>(null)
   let uhr: ReturnType<typeof setInterval> | undefined
   onCleanup(() => uhr && clearInterval(uhr))
+  // nach einem Treffer kurz stehen bleiben, damit man das Aufleuchten der Ecken sieht (Gerhard am Pixel,
+  // 2026-10-29: sonst ersetzt die Bestätigung die Seite, bevor es anläuft — Lösung 1, 300 ms)
+  const TREFFER_MS = 300
+  let trefferUhr: ReturnType<typeof setTimeout> | undefined
+  onCleanup(() => clearTimeout(trefferUhr))
 
   // was im Feld steht (oder die Kamera sieht), erkannt
   const erkenne = (roh: string) => {
@@ -138,7 +143,7 @@ const Bezahlen: Component = () => {
     setScannen(false) // Scanner hat die Kamera schon freigegeben; ein zweiter Treffer kommt nicht mehr
     setScanFehler(null)
     setText(saeubere(w))
-    void weiter()
+    trefferUhr = setTimeout(() => void weiter(), TREFFER_MS)
   }
   const kameraFehler = (art: 'verweigert' | 'keine') => {
     setScannen(false)
@@ -149,6 +154,7 @@ const Bezahlen: Component = () => {
     )
   }
   const kamera = () => {
+    clearTimeout(trefferUhr)
     setScanFehler(null)
     setTreffer(false)
     setScannen(s => !s)
