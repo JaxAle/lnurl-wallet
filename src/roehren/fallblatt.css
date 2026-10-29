@@ -1750,3 +1750,139 @@ html[data-haut='fallblatt']
     letter-spacing: 0.03em;
   }
 }
+
+/* ---------- Material- und Lichtwelt (Gerhard, 2026-10-29) ----------
+   Fünf Referenzfarben, zentral — gelten vorerst für Senden (.rz-senden-eingabe), später Aufladen/Kassa/Tombola
+   durch Aufnahme in diese Selektoren. Drei Zustände: dunkles Metall, gealtertes Elfenbein, Bernsteinlicht. */
+html[data-haut='fallblatt'] {
+  --beara-hintergrund: #17130b;
+  --beara-metall: #62594b;
+  --beara-elfenbein: #e6d1aa;
+  --beara-schrift: #292117;
+  --beara-licht: 220, 166, 75; /* #DCA64B — die einzige Leuchtfarbe */
+}
+/* Zählwerk: beleuchtete Karten Elfenbein statt Kupfer, Licht in Bernstein */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .fb-zaehl:not(.cold):not(.idle)
+  .tube:not(.unlit) {
+  filter: brightness(1.27) saturate(0.72)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(
+      0 -2px 3px rgba(var(--beara-licht), calc(var(--fb-licht) * 0.85))
+    )
+    drop-shadow(
+      0 2px 3px rgba(var(--beara-licht), calc(var(--fb-licht) * 0.85))
+    )
+    drop-shadow(0 0 5px rgba(var(--beara-licht), calc(var(--fb-licht) * 0.3)));
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl::before {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(var(--beara-licht), 0.22),
+    transparent 70%
+  );
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl .tube .glow {
+  background: radial-gradient(
+    ellipse 48% 14% at 50% 50%,
+    rgba(var(--beara-licht), 0.55),
+    rgba(var(--beara-licht), 0.2) 55%,
+    transparent 100%
+  );
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .fb-zaehl .tube .ch,
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .roehren-zaehlwerk
+  .fb-zaehl.cold
+  .tube
+  .ch,
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .roehren-zaehlwerk
+  .fb-zaehl.idle
+  .tube
+  .ch {
+  color: var(--beara-schrift);
+}
+/* Euro-Betrag Elfenbein, ohne Licht */
+html[data-haut='fallblatt'] .rz-senden-eingabe .roehren-zaehlwerk .rz-euro {
+  color: var(--beara-elfenbein);
+  text-shadow: none;
+}
+/* Tastatur: dasselbe Elfenbein wie die beleuchteten Karten, Ziffern Schwarzbraun */
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste {
+  filter: brightness(1.2) saturate(0.78);
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste .w {
+  color: var(--beara-schrift);
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-taste:active {
+  filter: brightness(1.14) saturate(0.78)
+    drop-shadow(0 -2px 3px rgba(var(--beara-licht), 0.38))
+    drop-shadow(0 2px 3px rgba(var(--beara-licht), 0.38));
+}
+/* Weiter: aktiv Elfenbein mit Bernstein, gesperrt Graubraun mit gedämpftem Elfenbein */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled) {
+  color: var(--beara-schrift);
+  filter: brightness(1.12) saturate(0.78)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 -2px 3px rgba(var(--beara-licht), 0.34))
+    drop-shadow(0 2px 3px rgba(var(--beara-licht), 0.34))
+    drop-shadow(0 0 5px rgba(var(--beara-licht), 0.12));
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter.an:not(:disabled)
+  .lbl {
+  color: var(--beara-schrift);
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled {
+  filter: brightness(1.22) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-tastatur
+  + .rz-weiter:disabled
+  .lbl {
+  color: rgba(230, 209, 170, 0.72);
+  filter: brightness(0.82);
+}
+/* Rechnungstasten: unbeleuchtete Karte (Graubraun), Schrift und Symbol Elfenbein; Drücken: Bernstein */
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf {
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf:active {
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 0 4px rgba(var(--beara-licht), 0.35));
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf .lbl,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-duo-flach .rz-knopf svg {
+  color: var(--beara-elfenbein);
+  filter: brightness(0.8);
+}
+/* Trennbeschriftung: Elfenbein gedämpft, Linien im selben Ton */
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie {
+  color: rgba(230, 209, 170, 0.78);
+}
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::before,
+html[data-haut='fallblatt'] .rz-senden-eingabe .rz-oder-linie::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(230, 209, 170, 0.3) 30%,
+    rgba(230, 209, 170, 0.3) 70%,
+    transparent
+  );
+}
