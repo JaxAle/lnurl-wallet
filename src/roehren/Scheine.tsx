@@ -33,6 +33,7 @@ import {merkeUnterwegs} from './einloesen'
 import {schickeLink, WARNUNG} from './weitergabe'
 import Zaehlwerk from './Zaehlwerk'
 import {anSchluesselAn} from './anSchluessel'
+import {probeBurnedNote} from '../lib/request'
 import './roehren.css'
 
 export type ScheineMotor = {
@@ -330,6 +331,37 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
   const [gezeigt, setGezeigt] = createSignal<string | null>(null)
   const [holt, setHolt] = createSignal(false)
   const gezeigterSchein = () => draussen().find(b => b.id === gezeigt()) ?? null
+
+  // Ausgegebener Schein: bei der Stelle nachfragen, nur lesend (probeBurnedNote, wie die Einlöse-Wache).
+  // Noch gültig → zurück in die Wallet. Anlass: Bezahlen markierte Scheine schon beim Anstoßen der Zahlung
+  // als ausgegeben, auch wenn sie scheiterte und die Stelle den Schein wiederherstellte (Pixel, 2026-10-29)
+  const [nachfrage, setNachfrage] = createSignal<{
+    id: string
+    stand: 'fragt' | 'gone' | 'unknown'
+  } | null>(null)
+  const nachfragen = async (b: Bearer) => {
+    setNachfrage({id: b.id, stand: 'fragt'})
+    const antwort = await probeBurnedNote(b.url)
+    if (antwort === 'live') {
+      await updateBearer(b.id, {spent: false, spentGrund: undefined})
+      const sats = Math.floor(b.amount / 1000).toLocaleString('de-DE')
+      logActivity(
+        'unspent',
+        `Bei ${serverOf(b.url)} noch gültig: ${sats} Sats wieder in der Wallet.`,
+        b.label
+      )
+      notify(
+        `Noch gültig — ${sats} Sats sind wieder in der Wallet.`,
+        NotifyKind.SUCCESS
+      )
+      setNachfrage(null)
+      setAusBlatt(null)
+      return
+    }
+    setNachfrage({id: b.id, stand: antwort})
+  }
+  const nachfrageStand = (id: string) =>
+    nachfrage()?.id === id ? nachfrage()!.stand : null
   const zurueckholen = async (b: Bearer) => {
     setHolt(true)
     try {
@@ -790,6 +822,31 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
                   }}
                 >
                   <span class="lbl">Markierung aufheben</span>
+                </button>
+              </Show>
+              <Show when={!s().deviceId}>
+                <Show when={nachfrageStand(s().id) === 'gone'}>
+                  <p class="rz-hinweis">
+                    Die Ausgabestelle bestätigt: Dieser Schein ist eingelöst.
+                  </p>
+                </Show>
+                <Show when={nachfrageStand(s().id) === 'unknown'}>
+                  <p class="rz-hinweis">
+                    Keine klare Antwort der Ausgabestelle — später noch einmal
+                    nachfragen.
+                  </p>
+                </Show>
+                <button
+                  type="button"
+                  class="rz-knopf rz-weiter"
+                  disabled={nachfrageStand(s().id) === 'fragt'}
+                  onClick={() => void nachfragen(s())}
+                >
+                  <span class="lbl">
+                    {nachfrageStand(s().id) === 'fragt'
+                      ? 'Fragt nach …'
+                      : 'Bei der Stelle nachfragen'}
+                  </span>
                 </button>
               </Show>
               <button
