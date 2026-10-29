@@ -2031,3 +2031,18 @@ html[data-haut='fallblatt']
   text-shadow: none;
   opacity: 1;
 }
+/* Rechnungstasten mit eigenen Gebrauchsspuren (Gerhard, 2026-10-29; schild_rechnung.py) — Weiter unverändert */
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-duo-flach
+  .rz-knopf:nth-child(1) {
+  --schild: url('./fb-schild-einfuegen-kurz.webp');
+  --schild-druck: url('./fb-schild-einfuegen-druck-kurz.webp');
+}
+html[data-haut='fallblatt']
+  .rz-senden-eingabe
+  .rz-duo-flach
+  .rz-knopf:nth-child(2) {
+  --schild: url('./fb-schild-scannen-kurz.webp');
+  --schild-druck: url('./fb-schild-scannen-druck-kurz.webp');
+}
