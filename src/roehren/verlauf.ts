@@ -45,7 +45,10 @@ export const titel = (e: ActivityEvent): string => {
         return 'Unbekannt — zu prüfen'
       return 'Erneuert'
     case 'unspent':
-      return 'Markierung aufgehoben'
+      // Bezahl-Wache: die Zahlung scheiterte, der Schein ist zurück (bezahlwache.ts) — keine Markierung
+      return m.startsWith('Nicht durchgegangen')
+        ? 'Nicht durchgegangen'
+        : 'Markierung aufgehoben'
     case 'deleted':
       return 'Gelöscht'
   }

@@ -40,6 +40,17 @@ describe('Verlauf lesen', () => {
     expect(
       titel(e('refresh', 'Schein über 50 Sats zurückgeholt (x.at).'))
     ).toBe('Zurückgeholt')
+    expect(
+      titel(
+        e(
+          'unspent',
+          'Nicht durchgegangen: 49 Sats an kanimer@blink.sv — der Schein (minty.exe.xyz) ist wieder in der Wallet.'
+        )
+      )
+    ).toBe('Nicht durchgegangen')
+    expect(
+      titel(e('unspent', 'Markierung aufgehoben: 50 Sats von x.at.'))
+    ).toBe('Markierung aufgehoben')
   })
   it('trennt den Prüf-Link ab, englisch wie deutsch', () => {
     expect(
