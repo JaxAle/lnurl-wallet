@@ -11,6 +11,7 @@ import {createEffect, createMemo, createSignal, For, Show} from 'solid-js'
 import {A, useNavigate, useParams} from '@solidjs/router'
 
 import {serverOf} from '../lnurlcash'
+import {erfahrung, erfahrungText} from './auszahlung'
 import {registeredAddresses} from '../addressRegistry'
 import Scanner, {canScan} from '../components/Scanner'
 import {copyToClipboard, mempoolNodeUrl} from '../helpers'
@@ -155,16 +156,21 @@ export const AusgabestellenListe: Component<{
                     <span
                       class="s"
                       classList={{
-                        warn: !!m.pendingMintPubkey || !!m.sunsetDate
+                        warn:
+                          !!m.pendingMintPubkey ||
+                          !!m.sunsetDate ||
+                          erfahrung(host)?.ok === false
                       }}
                     >
                       {m.pendingMintPubkey
                         ? 'Neuer Prüfschlüssel — bitte ansehen'
                         : m.sunsetDate
                           ? `Schließt am ${new Date(m.sunsetDate).toLocaleDateString('de-DE')}`
-                          : aufladeGebuehr(host)
-                            ? `${host} · Aufladen ${aufladeGebuehr(host)}`
-                            : host}
+                          : erfahrung(host)?.ok === false
+                            ? `${host} · ${erfahrungText(host)}`
+                            : aufladeGebuehr(host)
+                              ? `${host} · Aufladen ${aufladeGebuehr(host)}`
+                              : host}
                     </span>
                   </span>
                   <Show
@@ -656,6 +662,23 @@ export const StelleSeite: Component<{motor: StelleMotor}> = props => {
                   onClick={() => setStandard(s().server)}
                 />
               </Show>
+              {/* letzte Zahlung aus dieser Wallet über diese Stelle (auszahlung.ts, Gerhard 2026-10-31) */}
+              <Zeile
+                label="Auszahlen"
+                wert={
+                  erfahrung(params.host)
+                    ? erfahrung(params.host)!.ok
+                      ? 'ging'
+                      : 'ging nicht'
+                    : 'noch nicht versucht'
+                }
+                unter={
+                  erfahrung(params.host)
+                    ? `${erfahrungText(params.host)} — letzte Zahlung aus dieser Wallet`
+                    : 'Bezahlen aus dieser Stelle über Lightning'
+                }
+                still
+              />
               <Show when={offen()}>
                 <Zeile
                   label="Hier aufladen"
