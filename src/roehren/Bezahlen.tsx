@@ -48,6 +48,7 @@ import {useWallet} from '../WalletContext'
 import {scheinUeber, scheineJeStelle} from './abspalten'
 import {createBetrag, Tastatur} from './Betrag'
 import {teilGebuehr} from './gebuehren'
+import {erfahrungText} from './auszahlung'
 import {Zeile} from './Bedienfeld'
 import {pruefeZahlung} from './bezahlwache'
 import {gebunden} from './klaerung'
@@ -572,7 +573,18 @@ const Bezahlen: Component = () => {
                 when={kandidaten().length > 1}
                 fallback={
                   <div class="rz-setting rz-still">
-                    <span class="sl">Bezahlt aus</span>
+                    <span>
+                      <span class="sl">Bezahlt aus</span>
+                      <Show
+                        when={
+                          quelle() && erfahrungText(serverOf(quelle()!.url))
+                        }
+                      >
+                        <span class="s">
+                          {erfahrungText(serverOf(quelle()!.url))}
+                        </span>
+                      </Show>
+                    </span>
                     <span class="val" classList={{'rz-fehlt': !quelle()}}>
                       {quelle()
                         ? serverOf(quelle()!.url)
@@ -583,7 +595,10 @@ const Bezahlen: Component = () => {
               >
                 <Zeile
                   label="Bezahlt aus"
-                  unter="Antippen wechselt die Ausgabestelle"
+                  unter={
+                    erfahrungText(serverOf(quelle()!.url)) ??
+                    'Antippen wechselt die Ausgabestelle'
+                  }
                   wert={serverOf(quelle()!.url)}
                   onClick={naechsteStelle}
                 />

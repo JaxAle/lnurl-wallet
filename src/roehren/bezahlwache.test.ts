@@ -21,6 +21,7 @@ vi.mock('../lnurlcash', async orig => {
 
 import type {Bearer} from '../storage'
 import {FRIST_MS, istZahlung, pruefeZahlung} from './bezahlwache'
+import {erfahrung} from './auszahlung'
 
 let n = 0
 const schein = (z: Partial<NonNullable<Bearer['zahlung']>> = {}): Bearer => ({
@@ -63,6 +64,7 @@ describe('pruefeZahlung', () => {
       undefined
     )
     expect(c.removeBearer).toHaveBeenCalledWith(b.id)
+    expect(erfahrung('mint.example')?.ok).toBe(true)
   })
 
   it('Nachweis der Stelle meldet bezahlt (gleiche Rechnung) → bezahlt ohne Schein-Abfrage', async () => {
@@ -109,6 +111,7 @@ describe('pruefeZahlung', () => {
       'Nicht durchgegangen: 60 Sats an a@b.c — der Schein (mint.example) ist wieder in der Wallet.',
       undefined
     )
+    expect(erfahrung('mint.example')?.ok).toBe(false)
   })
 
   it('Stelle meldet pending → offen, als schwebend vermerkt, nie zurückgebucht', async () => {

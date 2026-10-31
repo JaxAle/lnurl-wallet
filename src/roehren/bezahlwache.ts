@@ -19,6 +19,7 @@ import {
   serverOf
 } from '../lnurlcash'
 import type {Bearer} from '../storage'
+import {merkeAuszahlung} from './auszahlung'
 
 export const FRIST_MS = 5 * 60 * 1000
 
@@ -37,6 +38,7 @@ const erledigt = new Set<string>()
 export const bezahlt = async (b: Bearer, ctx: Ctx): Promise<void> => {
   if (erledigt.has(b.id) || !b.zahlung) return
   erledigt.add(b.id)
+  merkeAuszahlung(serverOf(b.url), true)
   ctx.logActivity(
     'melt',
     `${b.zahlung.text} — von ${serverOf(b.url)} bestätigt.`,
@@ -48,6 +50,7 @@ export const bezahlt = async (b: Bearer, ctx: Ctx): Promise<void> => {
 export const gescheitert = async (b: Bearer, ctx: Ctx): Promise<void> => {
   if (erledigt.has(b.id) || !b.zahlung) return
   erledigt.add(b.id)
+  merkeAuszahlung(serverOf(b.url), false)
   await ctx.updateBearer(b.id, {
     spent: false,
     spentGrund: undefined,
