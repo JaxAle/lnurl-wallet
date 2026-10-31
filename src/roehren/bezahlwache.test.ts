@@ -20,7 +20,7 @@ vi.mock('../lnurlcash', async orig => {
 })
 
 import type {Bearer} from '../storage'
-import {FRIST_MS, istZahlung, pruefeZahlung} from './bezahlwache'
+import {FRIST_MS, istZahlung, pruefeZahlung, quittiere} from './bezahlwache'
 import {erfahrung} from './auszahlung'
 
 let n = 0
@@ -141,6 +141,34 @@ describe('pruefeZahlung', () => {
       pruefeZahlung(b, c, 1_000_100)
     ])
     expect(c.logActivity).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('Umziehen', () => {
+  it('gescheitert: Text ohne „umgezogen“', async () => {
+    probe.mockResolvedValue('live')
+    const b = schein({text: '637 Sats umgezogen nach neu.example'})
+    const c = ctx()
+    await pruefeZahlung(b, c, 1_000_000 + FRIST_MS + 1)
+    expect(c.logActivity).toHaveBeenCalledWith(
+      'unspent',
+      'Nicht durchgegangen: 637 Sats nach neu.example — der Schein (mint.example) ist wieder in der Wallet.',
+      undefined
+    )
+  })
+
+  it('Fenster hat entschieden: quittiert, Erfahrung gemerkt, Wache trägt nichts mehr ein', async () => {
+    probe.mockResolvedValue('gone')
+    const b = schein()
+    const c = ctx()
+    await quittiere(b, false, c.updateBearer)
+    expect(c.updateBearer).toHaveBeenCalledWith(b.id, {
+      spentGrund: undefined,
+      zahlung: undefined
+    })
+    expect(erfahrung('mint.example')?.ok).toBe(false)
+    await pruefeZahlung(b, c, 1_000_100)
+    expect(c.logActivity).not.toHaveBeenCalled()
   })
 })
 

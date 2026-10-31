@@ -58,7 +58,7 @@ export const gescheitert = async (b: Bearer, ctx: Ctx): Promise<void> => {
   })
   ctx.logActivity(
     'unspent',
-    `Nicht durchgegangen: ${b.zahlung.text.replace(' bezahlt', '')} — der Schein (${serverOf(b.url)}) ist wieder in der Wallet.`,
+    `Nicht durchgegangen: ${b.zahlung.text.replace(/ (bezahlt|umgezogen)/, '')} — der Schein (${serverOf(b.url)}) ist wieder in der Wallet.`,
     b.label
   )
 }
@@ -76,6 +76,20 @@ const frageSchein = async (
     if (err instanceof PendingNoteError) return 'schwebt'
     return 'unknown'
   }
+}
+
+// Ein anderer Teil der Wallet hat selbst entschieden (Umziehen-Fenster des Originals): nur die Erfahrung
+// merken und den Vermerk lösen, damit die Wache nichts doppelt einträgt. bezahlt: Schein bleibt ausgegeben
+// (wie im Original); sonst wurde er dort schon zurückgeholt.
+export const quittiere = async (
+  b: Bearer,
+  ok: boolean,
+  updateBearer: Ctx['updateBearer']
+): Promise<void> => {
+  if (erledigt.has(b.id)) return
+  erledigt.add(b.id)
+  merkeAuszahlung(serverOf(b.url), ok)
+  await updateBearer(b.id, {spentGrund: undefined, zahlung: undefined})
 }
 
 // eine Nachfrage für einen Schein; 'offen' = noch nicht entschieden
