@@ -32,12 +32,17 @@ type Ctx = {
 export const istZahlung = (b: Bearer): boolean =>
   !!b.spent && b.spentGrund === 'zahlung' && !!b.zahlung
 
-// einmal je Schein abschließen, auch wenn Seite und Wache zugleich fertig werden
+// einmal je Zahlungsversuch abschließen, auch wenn Seite und Wache zugleich fertig werden. Schlüssel ist
+// Schein UND Beginn des Versuchs: ein zurückgeholter Schein behält seine id — nach Schein allein wurde ein
+// zweiter Versuch mit demselben Schein still übersprungen (Pixel 31.10.: 49er hing 20 min, 23er bis Neuladen)
 const erledigt = new Set<string>()
+const versuch = (id: string, seit: number) => `${id}:${seit}`
+const schonErledigt = (b: Bearer) =>
+  !b.zahlung || erledigt.has(versuch(b.id, b.zahlung.seit))
 
 export const bezahlt = async (b: Bearer, ctx: Ctx): Promise<void> => {
-  if (erledigt.has(b.id) || !b.zahlung) return
-  erledigt.add(b.id)
+  if (schonErledigt(b)) return
+  erledigt.add(versuch(b.id, b.zahlung!.seit))
   merkeAuszahlung(serverOf(b.url), true)
   ctx.logActivity(
     'melt',
@@ -48,8 +53,8 @@ export const bezahlt = async (b: Bearer, ctx: Ctx): Promise<void> => {
 }
 
 export const gescheitert = async (b: Bearer, ctx: Ctx): Promise<void> => {
-  if (erledigt.has(b.id) || !b.zahlung) return
-  erledigt.add(b.id)
+  if (schonErledigt(b)) return
+  erledigt.add(versuch(b.id, b.zahlung!.seit))
   merkeAuszahlung(serverOf(b.url), false)
   await ctx.updateBearer(b.id, {
     spent: false,
@@ -82,12 +87,13 @@ const frageSchein = async (
 // merken und den Vermerk lösen, damit die Wache nichts doppelt einträgt. bezahlt: Schein bleibt ausgegeben
 // (wie im Original); sonst wurde er dort schon zurückgeholt.
 export const quittiere = async (
-  b: Bearer,
+  b: Pick<Bearer, 'id' | 'url'>,
+  seit: number,
   ok: boolean,
   updateBearer: Ctx['updateBearer']
 ): Promise<void> => {
-  if (erledigt.has(b.id)) return
-  erledigt.add(b.id)
+  if (erledigt.has(versuch(b.id, seit))) return
+  erledigt.add(versuch(b.id, seit))
   merkeAuszahlung(serverOf(b.url), ok)
   await updateBearer(b.id, {spentGrund: undefined, zahlung: undefined})
 }
@@ -114,7 +120,7 @@ export const pruefeZahlung = async (
   const antwort = await frageSchein(b.url)
   // „hängt bei der Stelle“ nur bei Wechsel speichern, nicht bei jeder Runde
   const schwebt = antwort === 'schwebt'
-  if (!!z.schwebt !== schwebt && !erledigt.has(b.id))
+  if (!!z.schwebt !== schwebt && !schonErledigt(b))
     await ctx.updateBearer(b.id, {zahlung: {...z, schwebt}})
   if (antwort === 'gone') {
     await bezahlt(b, ctx)

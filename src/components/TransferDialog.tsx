@@ -215,6 +215,8 @@ const TransferDialog: Component<TransferDialogProps> = props => {
   // fires the transfer: get an invoice for exactly the note's value, then
   // melt the note to pay it - the source is locked as spent immediately,
   // same as any other melt, and confirmed (or restored) by polling below
+  // Beginn des laufenden Versuchs — Schlüssel für die Bezahl-Wache (quittiere)
+  let zahlungSeit = 0
   const startTransfer = async () => {
     const info = payRequest()
     if (!info?.withdrawLink) return
@@ -250,6 +252,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
       // Fork: wie Bezahlen als „Zahlung unterwegs“ — schließt man das Fenster, bevor es entschieden hat,
       // führt die Bezahl-Wache zu Ende (Gerhard, 2026-10-31; roehren/bezahlwache.ts). Tresor-Scheine
       // tragen kein Geheimnis zum Nachfragen und bleiben wie im Original
+      zahlungSeit = Date.now()
       await updateBearer(
         props.sourceBearer.id,
         props.sourceBearer.deviceId
@@ -258,7 +261,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
               spent: true,
               spentGrund: 'zahlung',
               zahlung: {
-                seit: Date.now(),
+                seit: zahlungSeit,
                 text: `${Math.floor(props.sourceBearer.amount / 1000).toLocaleString('de-DE')} Sats umgezogen nach ${serverOf(info.withdrawLink || info.callback)}`,
                 verify: result.verify,
                 pr: result.pr
@@ -580,7 +583,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
             sourceK1()
           )
           stopPolling()
-          await quittiere(props.sourceBearer, false, updateBearer)
+          await quittiere(props.sourceBearer, zahlungSeit, false, updateBearer)
           await updateBearer(props.sourceBearer.id, {
             url: withNewK1(
               props.sourceBearer.url,
@@ -623,7 +626,7 @@ const TransferDialog: Component<TransferDialogProps> = props => {
             )
           } else if (!(err instanceof PendingNoteError)) {
             setSourceConfirmed(true)
-            await quittiere(props.sourceBearer, true, updateBearer)
+            await quittiere(props.sourceBearer, zahlungSeit, true, updateBearer)
             // the source burning is the melt having paid the invoice
             if (payingAddress()) await finishAddressPayment()
           }

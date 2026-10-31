@@ -161,7 +161,7 @@ describe('Umziehen', () => {
     probe.mockResolvedValue('gone')
     const b = schein()
     const c = ctx()
-    await quittiere(b, false, c.updateBearer)
+    await quittiere(b, b.zahlung!.seit, false, c.updateBearer)
     expect(c.updateBearer).toHaveBeenCalledWith(b.id, {
       spentGrund: undefined,
       zahlung: undefined
@@ -169,6 +169,34 @@ describe('Umziehen', () => {
     expect(erfahrung('mint.example')?.ok).toBe(false)
     await pruefeZahlung(b, c, 1_000_100)
     expect(c.logActivity).not.toHaveBeenCalled()
+  })
+})
+
+describe('derselbe Schein, zweiter Versuch', () => {
+  it('nach einem gescheiterten Versuch wird der nächste wieder entschieden', async () => {
+    probe.mockResolvedValue('live')
+    const b = schein()
+    const c = ctx()
+    expect(await pruefeZahlung(b, c, 1_000_000 + FRIST_MS + 1)).toBe(
+      'gescheitert'
+    )
+    // zurückgeholt, gleicher Schein (gleiche id), neuer Versuch
+    const zweiter = {...b, zahlung: {...b.zahlung!, seit: 2_000_000}}
+    expect(await pruefeZahlung(zweiter, c, 2_000_000 + FRIST_MS + 1)).toBe(
+      'gescheitert'
+    )
+    expect(c.logActivity).toHaveBeenCalledTimes(2)
+  })
+
+  it('nach Quittung durch das Fenster wird der nächste Versuch wieder entschieden', async () => {
+    probe.mockResolvedValue('live')
+    const b = schein()
+    const c = ctx()
+    await quittiere(b, b.zahlung!.seit, false, c.updateBearer)
+    const zweiter = {...b, zahlung: {...b.zahlung!, seit: 3_000_000}}
+    expect(await pruefeZahlung(zweiter, c, 3_000_000 + FRIST_MS + 1)).toBe(
+      'gescheitert'
+    )
   })
 })
 
