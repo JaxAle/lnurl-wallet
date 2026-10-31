@@ -50,7 +50,14 @@ export type Bearer = {
   // 'zahlung' = Bezahlen hat die Zahlung angestoßen, bestätigt ist sie noch nicht (roehren/bezahlwache.ts)
   spentGrund?: 'markiert' | 'unbekannt' | 'zahlung'
   // Fork: zur angestoßenen Zahlung — seit wann, Verlaufstext, LUD-21-Nachweis der Stelle (falls angeboten)
-  zahlung?: {seit: number; text: string; verify?: string; pr: string}
+  // schwebt: die Stelle meldet den Schein als „pending“ — die Zahlung hängt dort noch (bezahlwache.ts)
+  zahlung?: {
+    seit: number
+    text: string
+    verify?: string
+    pr: string
+    schwebt?: boolean
+  }
   // a free-text note the holder can attach for their own reference (e.g.
   // "rent", "gift for Alex") - purely local, never sent anywhere, no
   // protocol meaning at all

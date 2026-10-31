@@ -3,14 +3,21 @@ import {beforeEach, describe, expect, it, vi} from 'vitest'
 
 const probe = vi.fn()
 const verify = vi.fn()
-vi.mock('../lib/request', async orig => ({
-  ...(await orig<typeof import('../lib/request')>()),
-  probeBurnedNote: (u: string) => probe(u)
-}))
-vi.mock('../lnurlcash', async orig => ({
-  ...(await orig<typeof import('../lnurlcash')>()),
-  fetchInvoiceVerification: (u: string) => verify(u)
-}))
+// probe liefert wie früher 'live' | 'gone' | 'unknown' | 'schwebt' — hier in die Antwort der Stelle übersetzt
+vi.mock('../lnurlcash', async orig => {
+  const echt = await orig<typeof import('../lnurlcash')>()
+  return {
+    ...echt,
+    fetchInvoiceVerification: (u: string) => verify(u),
+    fetchNoteInfo: async (u: string) => {
+      const a = await probe(u)
+      if (a === 'live') return {}
+      if (a === 'gone') throw new echt.NoteSpentError('spent')
+      if (a === 'schwebt') throw new echt.PendingNoteError()
+      throw new Error('keine Antwort')
+    }
+  }
+})
 
 import type {Bearer} from '../storage'
 import {FRIST_MS, istZahlung, pruefeZahlung} from './bezahlwache'
@@ -102,6 +109,17 @@ describe('pruefeZahlung', () => {
       'Nicht durchgegangen: 60 Sats an a@b.c — der Schein (mint.example) ist wieder in der Wallet.',
       undefined
     )
+  })
+
+  it('Stelle meldet pending → offen, als schwebend vermerkt, nie zurückgebucht', async () => {
+    probe.mockResolvedValue('schwebt')
+    const b = schein()
+    const c = ctx()
+    expect(await pruefeZahlung(b, c, 1_000_000 + FRIST_MS * 9)).toBe('offen')
+    expect(c.updateBearer).toHaveBeenCalledWith(b.id, {
+      zahlung: {...b.zahlung, schwebt: true}
+    })
+    expect(c.logActivity).not.toHaveBeenCalled()
   })
 
   it('keine Antwort → offen, auch nach der Frist', async () => {

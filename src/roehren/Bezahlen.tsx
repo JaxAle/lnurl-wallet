@@ -619,8 +619,10 @@ const Bezahlen: Component = () => {
               </Zaehlwerk>
               <p class="rz-hinweis">
                 Du kannst die Seite schließen — die Wallet fragt weiter nach.
-                Bestätigt, steht es im Verlauf; kommt die Zahlung nicht durch,
-                ist der Schein nach spätestens fünf Minuten wieder da.
+                Bestätigt, steht es im Verlauf. Kommt die Zahlung nicht durch,
+                ist der Schein wieder da, sobald die Ausgabestelle sie abbricht
+                — meist nach wenigen Minuten, bei Lightning manchmal erst nach
+                Stunden.
               </p>
               <button
                 type="button"

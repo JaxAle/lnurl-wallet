@@ -59,7 +59,11 @@ const UnterwegsListe: Component = () => {
             <div class="rz-zeile">
               <span class="rz-lampe-klein" />
               <span>{b.zahlung?.text}</span>
-              <span class="rz-matt">wird bestätigt …</span>
+              <span class="rz-matt">
+                {b.zahlung?.schwebt
+                  ? `hängt bei ${host(b.url)}`
+                  : `${host(b.url)} · wird bestätigt …`}
+              </span>
             </div>
           )}
         </For>

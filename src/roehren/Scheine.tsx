@@ -785,9 +785,10 @@ const Scheine: Component<{motor: ScheineMotor}> = props => {
               <Schein schein={s()} />
               <Show when={s().spentGrund === 'zahlung'}>
                 <p class="rz-hinweis">
-                  {s().zahlung?.text} — angestoßen, noch nicht bestätigt. Die
-                  Wallet fragt selbst nach: Kommt die Zahlung nicht durch, ist
-                  der Schein nach spätestens fünf Minuten wieder da.
+                  {s().zahlung?.text} — angestoßen, noch nicht bestätigt.{' '}
+                  {s().zahlung?.schwebt
+                    ? `Die Zahlung hängt bei ${serverOf(s().url)}: Bis die Stelle sie abschließt oder abbricht, ist der Schein dort gesperrt — bei Lightning kann das Stunden dauern. Die Wallet fragt weiter nach.`
+                    : 'Die Wallet fragt selbst nach: Kommt die Zahlung nicht durch, ist der Schein wieder da, sobald die Stelle sie abbricht.'}
                 </p>
               </Show>
               <Show when={s().spentGrund === 'unbekannt'}>
