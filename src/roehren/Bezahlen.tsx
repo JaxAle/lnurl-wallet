@@ -214,7 +214,8 @@ const Bezahlen: Component = () => {
         return melde(
           m.startsWith('Not a payRequest')
             ? 'Dieser Code ist kein Zahlungscode — der Empfänger nimmt hier keine Zahlung an.'
-            : `${e.art === 'lnurl' ? 'Der Empfänger' : 'Diese Adresse'} antwortet gerade nicht: ${m}`
+            : // den Host nennen: ein Pay-Link-QR aus LNbits trägt oft „localhost“ (BETRIEB/0038)
+              `${e.art === 'lnurl' ? `Der Empfänger (${e.stelle})` : 'Diese Adresse'} antwortet gerade nicht: ${m}`
         )
       }
       if (
