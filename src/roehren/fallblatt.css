@@ -2211,3 +2211,68 @@ html[data-haut='fallblatt'] .rz-scan .rz-kamera .lbl {
 html[data-haut='fallblatt'] .rz-scan .rz-erkannt.fremd {
   color: var(--beara-amber-light);
 }
+
+/* Empfangen: die drei Wege als Metallschilder wie die Rechnungstasten auf Senden (Gerhard, 2026-10-31, 1a;
+   schild_rechnung.py fb-schild-empfang-*) — Metall auf ::before, Schrift Elfenbein deckend, ohne Symbole */
+html[data-haut='fallblatt'] .rz-empfangen .rz-option {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  text-align: center;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-seitenkopf + .rz-option {
+  margin-top: var(--beara-space-md);
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option + .rz-option {
+  margin-top: var(--beara-space-lg);
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+  z-index: -1;
+  border: 11px solid transparent;
+  border-image: var(--schild) 28 fill / 11px stretch;
+  filter: brightness(1.25) saturate(0.7)
+    drop-shadow(0 2px 1.5px rgba(0, 0, 0, 0.75));
+  pointer-events: none;
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option:active::before {
+  border-image-source: var(--schild-druck);
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option[href$='scannen'] {
+  --schild: url('./fb-schild-empfang-scannen.webp');
+  --schild-druck: url('./fb-schild-empfang-scannen-druck.webp');
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option[href$='einfuegen'] {
+  --schild: url('./fb-schild-empfang-einfuegen.webp');
+  --schild-druck: url('./fb-schild-empfang-einfuegen-druck.webp');
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option[href$='aufladen'] {
+  --schild: url('./fb-schild-empfang-aufladen.webp');
+  --schild-druck: url('./fb-schild-empfang-aufladen-druck.webp');
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option .ic,
+html[data-haut='fallblatt'] .rz-empfangen .rz-option > svg {
+  display: none;
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option .t {
+  transform: none;
+  font-family: 'Barlow Condensed', var(--rz-schrift-familie), sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--beara-button-text-dark-surface);
+}
+html[data-haut='fallblatt'] .rz-empfangen .rz-option .s {
+  font-family: 'Barlow Condensed', var(--rz-schrift-familie), sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(230, 209, 170, 0.72);
+}

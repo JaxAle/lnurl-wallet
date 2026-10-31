@@ -3123,3 +3123,18 @@ html[data-haut='fallblatt']
   align-self: stretch;
   margin-top: var(--beara-space-xs);
 }
+
+/* Schein scannen (Empfangen) wie Rechnung scannen (Gerhard, 2026-10-31): unter der Taste noch der Foto-Ausweg —
+   etwas mehr Rest, damit das Feld nicht unter die Reiterleiste schiebt */
+.rz-empfangen.rz-scan {
+  --scan-rest: calc(
+    58px + env(safe-area-inset-top, 0px) + 84px +
+      env(safe-area-inset-bottom, 0px) + 190px
+  );
+}
+.rz-empfangen.rz-scan .rz-kamera {
+  margin-top: var(--beara-space-xs);
+}
+.rz-empfangen.rz-scan .rz-foto {
+  margin-top: var(--beara-space-sm);
+}

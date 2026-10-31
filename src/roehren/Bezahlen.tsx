@@ -50,6 +50,7 @@ import {createBetrag, Tastatur} from './Betrag'
 import {teilGebuehr} from './gebuehren'
 import {erfahrungText} from './auszahlung'
 import {Zeile} from './Bedienfeld'
+import Scanansicht, {kameraFehlerText} from './Scanansicht'
 import {pruefeZahlung} from './bezahlwache'
 import {gebunden} from './klaerung'
 import {
@@ -156,11 +157,7 @@ const Bezahlen: Component = () => {
   }
   const kameraFehler = (art: 'verweigert' | 'keine') => {
     setScannen(false)
-    setScanFehler(
-      art === 'keine'
-        ? 'Keine Kamera gefunden.'
-        : 'Die Kamera ist nicht freigegeben. Erlaube sie in den Website-Einstellungen des Browsers und tippe dann auf „Kamera ein“.'
-    )
+    setScanFehler(kameraFehlerText(art))
   }
   const kamera = () => {
     setScanFehler(null)
@@ -419,38 +416,15 @@ const Bezahlen: Component = () => {
         <Switch>
           <Match when={nurScan() && schritt() === 'eingabe'}>
             {kopf(() => navigate(-1), 'Rechnung scannen')}
-            {/* nur die Kamera: Bild ungefiltert, Rahmen und Ecken liegen darüber, nicht darauf */}
-            <div class="rz-scanfeld">
-              <Show
-                when={scannen()}
-                fallback={
-                  <div class="rz-scan-aus">
-                    {arbeitet() ? 'Einen Moment …' : 'Kamera ist aus'}
-                  </div>
-                }
-              >
-                <Scanner
-                  accept={nimmt}
-                  onScan={gescannt}
-                  onFehler={kameraFehler}
-                />
-              </Show>
-              <span class="rz-ecke lo" />
-              <span class="rz-ecke ro" />
-              <span class="rz-ecke lu" />
-              <span class="rz-ecke ru" />
-            </div>
-            <p class="rz-erkannt fremd rz-scan-zeile" aria-live="polite">
-              {scanFehler() ?? ''}
-            </p>
-            <button
-              type="button"
-              class="rz-knopf rz-weiter rz-kamera"
-              disabled={!canScan() || arbeitet()}
-              onClick={kamera}
-            >
-              <span class="lbl">{scannen() ? 'Kamera aus' : 'Kamera ein'}</span>
-            </button>
+            <Scanansicht
+              an={scannen()}
+              zeile={scanFehler()}
+              wartet={arbeitet()}
+              annehmen={nimmt}
+              gescannt={gescannt}
+              kameraFehler={kameraFehler}
+              kamera={kamera}
+            />
           </Match>
 
           <Match when={schritt() === 'eingabe'}>

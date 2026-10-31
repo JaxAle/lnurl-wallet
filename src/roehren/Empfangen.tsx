@@ -10,7 +10,7 @@ import {createSignal, Match, Show, Switch} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import RequireWallet from '../components/RequireWallet'
-import Scanner, {canScan} from '../components/Scanner'
+import {canScan} from '../components/Scanner'
 import {notify, NotifyKind} from '../helpers'
 import {qrAusFoto} from './fotoQr'
 import {
@@ -20,6 +20,8 @@ import {
   noteDeclaredAmount,
   resolveNoteInput
 } from '../lnurlcash'
+import {istZahlziel} from './rechnung'
+import Scanansicht, {scanZustand} from './Scanansicht'
 import {setEingang} from './uebergabe'
 import {ausText} from './weitergabe'
 import './roehren.css'
@@ -89,6 +91,15 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
   const [text, setText] = createSignal('')
   const erkannt = () => erkenne(text())
 
+  // Scannen: Schein, Rechnung, Adresse oder LNURL-pay geht durch (die Startseite verarbeitet es, uebergabe.ts)
+  const scan = scanZustand()
+  const annehmen = (wert: string) => {
+    const e = erkenne(wert)
+    if ((e && e.art !== 'unbekannt') || istZahlziel(ausText(wert))) return true
+    scan.setZeile('Das ist kein Schein, keine Rechnung und keine Adresse.')
+    return false
+  }
+
   const uebernimm = (wert: string) => {
     const w = ausText(wert)
     if (!w) return
@@ -98,28 +109,26 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
 
   return (
     <RequireWallet>
-      <div class="page rz-empfangen">
+      <div
+        class="page rz-empfangen"
+        classList={{'rz-scan': props.weg === 'scannen'}}
+      >
         <Switch>
           <Match when={props.weg === 'scannen'}>
-            <Kopf titel="Scannen" zurueck="/empfangen" />
-            <Show
-              when={canScan()}
-              fallback={
-                <p class="rz-hinweis">
-                  Dieses Gerät kann hier nicht scannen — füge den Schein
-                  stattdessen ein.
-                </p>
-              }
+            {/* wie „Rechnung scannen“ (Scanansicht, Gerhard 2026-10-31): Kamera groß im Rahmen, eine Taste,
+            fremde Codes als Zeile statt Sprung; der Foto-Ausweg bleibt (iPhone, 2026-10-17) */}
+            <Kopf titel="Schein scannen" zurueck="/empfangen" />
+            <Scanansicht
+              an={scan.an()}
+              zeile={scan.zeile()}
+              annehmen={annehmen}
+              gescannt={w => {
+                scan.setAn(false)
+                uebernimm(w)
+              }}
+              kameraFehler={scan.kameraFehler}
+              kamera={scan.kamera}
             >
-              <div class="rz-scanner">
-                <Scanner onScan={uebernimm} />
-              </div>
-              <p class="rz-hinweis rz-mitte">
-                Schein oder Rechnung in den Rahmen halten — erkannt wird von
-                selbst.
-              </p>
-              {/* Ausweg, wenn das Kamerabild schwarz bleibt (iPhone, 2026-10-17): Foto mit der
-              Kamera des Geräts, die Wallet liest den QR daraus */}
               <label class="rz-leise rz-block rz-mitte rz-foto">
                 Bild bleibt schwarz? Stattdessen ein Foto machen ›
                 <input
@@ -141,7 +150,7 @@ const Empfangen: Component<{weg?: 'scannen' | 'einfuegen'}> = props => {
                   }}
                 />
               </label>
-            </Show>
+            </Scanansicht>
           </Match>
 
           <Match when={props.weg === 'einfuegen'}>
