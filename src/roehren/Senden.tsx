@@ -6,7 +6,7 @@
 // Euro-Eingabe: Zeile antippen = dort tippen (Prototyp 'cur-set'/'key'). Noch nicht hier: „Als Link
 // teilen“, „Geschenkkarte“.
 import type {Component} from 'solid-js'
-import {createMemo, createSignal, Show} from 'solid-js'
+import {createMemo, createSignal, onCleanup, Show} from 'solid-js'
 import {A, useNavigate} from '@solidjs/router'
 
 import Qr from '../components/Qr'
@@ -55,17 +55,36 @@ const Senden: Component = () => {
     setWeg('link')
   }
 
-  // Einfügen: Rechnung/Adresse aus der Zwischenablage → gleich zur Bestätigung beim Bezahlen
+  // Einfügen: Rechnung/Adresse aus der Zwischenablage → gleich zur Bestätigung beim Bezahlen.
+  // iPhone (Gerhard, 2026-11-01): Safari zeigt erst die Blase „Einsetzen“; ein zweiter Tipp daneben schloss
+  // sie, das erste Lesen galt als verweigert und die Seite sprang weg, während der Finger schon auf der
+  // nächsten Seite landete (Wallet, Verlauf). Darum: solange gelesen wird, kein zweites Lesen; wer die Blase
+  // wegtippt, bleibt auf Senden und bekommt einen Satz; nur ein Browser ganz ohne Lesen geht zur Bezahlen-Seite.
+  let liest = false
+  let verlassen = false
+  onCleanup(() => (verlassen = true))
   const einfuegen = async () => {
-    let roh = ''
-    try {
-      roh = await navigator.clipboard.readText()
-    } catch {
-      // Zugriff verweigert: Bezahlen-Seite, dort von Hand einfügen — mit Hinweis, warum das Feld leer ist
+    if (liest) return
+    if (!navigator.clipboard?.readText) {
       setEinfuegenGesperrt(true)
       navigate('/bezahlen')
       return
     }
+    liest = true
+    let roh: string
+    try {
+      roh = await navigator.clipboard.readText()
+    } catch {
+      if (!verlassen)
+        notify(
+          'Nicht eingefügt — tippe in der Blase auf „Einsetzen“.',
+          NotifyKind.ERROR
+        )
+      return
+    } finally {
+      liest = false
+    }
+    if (verlassen) return
     const t = saeubere(roh)
     if (istZahlziel(t)) {
       setZuBezahlen(t)
