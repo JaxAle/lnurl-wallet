@@ -57,8 +57,10 @@ import {
   adressText,
   bezahlenScannen,
   lnurlZahlziel,
+  einfuegenGesperrt,
   rechnungsZweck,
   saeubere,
+  setEinfuegenGesperrt,
   setBezahlenScannen,
   setZuBezahlen,
   zuBezahlen
@@ -74,6 +76,9 @@ const Bezahlen: Component = () => {
   const {bearers, addBearer, updateBearer, removeBearer, logActivity} =
     useWallet()
   const {client: deviceClient} = useDevice()
+  // „Rechnung einfügen“ aus Senden scheiterte an der Zwischenablage (rechnung.ts, einfuegenGesperrt)
+  const [gesperrt, setGesperrt] = createSignal(false)
+  let feld: HTMLTextAreaElement | undefined
   const navigate = useNavigate()
   const ein = createBetrag()
 
@@ -176,6 +181,11 @@ const Bezahlen: Component = () => {
 
   // von der Startseite oder aus Empfangen übergeben
   onMount(() => {
+    if (einfuegenGesperrt()) {
+      setEinfuegenGesperrt(false)
+      setGesperrt(true)
+      feld?.focus()
+    }
     if (bezahlenScannen()) {
       setBezahlenScannen(false)
       setNurScan(true)
@@ -432,7 +442,14 @@ const Bezahlen: Component = () => {
             <label class="rz-feldname" for="bz-feld">
               Rechnung, Lightning-Adresse oder LNURL
             </label>
+            <Show when={gesperrt()}>
+              <p class="rz-erkannt fremd">
+                Der Browser gibt die Zwischenablage nicht frei. Halte den Finger
+                ins Feld und wähle „Einfügen“.
+              </p>
+            </Show>
             <textarea
+              ref={feld}
               id="bz-feld"
               class="rz-feld"
               rows="3"
@@ -441,7 +458,10 @@ const Bezahlen: Component = () => {
               autocapitalize="off"
               spellcheck={false}
               value={text()}
-              onInput={e => setText(e.currentTarget.value)}
+              onInput={e => {
+                setGesperrt(false)
+                setText(e.currentTarget.value)
+              }}
             />
             <Show when={erkannt()}>
               <p class="rz-erkannt" classList={{fremd: !erkannt()!.geht}}>

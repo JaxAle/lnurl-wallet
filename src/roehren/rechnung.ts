@@ -50,12 +50,28 @@ export const adressText = (metadata: string): string | null => {
   }
 }
 
-// „lightning:lnbc…“ und Leerzeichen entfernen; Groß/klein bleibt (bech32 ist ohnehin einheitlich)
-export const saeubere = (t: string): string =>
-  t
-    .trim()
-    .replace(/^lightning:/i, '')
-    .replace(/\s+/g, '')
+// „lightning:lnbc…“ und Leerzeichen entfernen; Groß/klein bleibt (bech32 ist ohnehin einheitlich).
+// BIP21 („bitcoin:bc1…?lightning=lnbc…“ — so kopieren und zeigen Phoenix, Zeus u. a.) → der Lightning-Teil;
+// ohne ihn bleibt der Text, wie er ist, und gilt als kein Zahlziel (Gerhard am Pixel, 2026-11-01)
+export const saeubere = (t: string): string => {
+  const s = t.trim().replace(/\s+/g, '')
+  const bip21 = /^bitcoin:[^?]*\?(.*)$/i.exec(s)
+  if (bip21)
+    for (const [k, v] of new URLSearchParams(bip21[1]))
+      if (k.toLowerCase() === 'lightning' && v) return saeubere(v)
+  return s.replace(/^lightning:/i, '')
+}
+
+// Warum der Text aus der Zwischenablage kein Zahlziel ist — mit seinem Anfang, damit man sieht, was drinsteht
+export const keinZahlziel = (roh: string): string => {
+  const t = roh.trim()
+  if (!t)
+    return 'Die Zwischenablage ist leer. Kopiere die Rechnung noch einmal.'
+  if (/^bitcoin:/i.test(t))
+    return 'In der Zwischenablage steht eine Bitcoin-Adresse ohne Lightning-Rechnung. Die Wallet bezahlt nur über Lightning.'
+  const anfang = t.length > 18 ? t.slice(0, 18) + '…' : t
+  return `In der Zwischenablage steht „${anfang}“ — das ist keine Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode.`
+}
 
 // LNURL-pay als Zahlungsziel (Gerhard, 2026-10-29): bech32 „lnurl1…“ (LUD-01) oder „lnurlp://“ (LUD-17),
 // entschlüsselt wie überall (resolveLnurlInput — nur https, http nur lokal). Ohne Abruf erkennbar falsch sind
@@ -94,3 +110,7 @@ export {zuBezahlen, setZuBezahlen}
 // „Scannen“ aus Senden: die Bezahlen-Seite öffnet gleich die Kamera
 const [bezahlenScannen, setBezahlenScannen] = createSignal(false)
 export {bezahlenScannen, setBezahlenScannen}
+// „Rechnung einfügen“ aus Senden, aber der Browser gibt die Zwischenablage nicht frei (Firefox, Safari ohne
+// Tippen auf „Einfügen“): die Bezahlen-Seite sagt es und setzt den Cursor ins Feld (Gerhard, 2026-11-01)
+const [einfuegenGesperrt, setEinfuegenGesperrt] = createSignal(false)
+export {einfuegenGesperrt, setEinfuegenGesperrt}

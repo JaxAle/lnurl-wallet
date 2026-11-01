@@ -4,6 +4,7 @@ import {buildNoteUrl, decodeBolt11AmountMsat, toBech32Lnurl} from '../lnurlcash'
 import {
   adressText,
   istZahlziel,
+  keinZahlziel,
   lnurlZahlziel,
   rechnungsZweck,
   saeubere
@@ -19,6 +20,21 @@ describe('Rechnung lesen', () => {
     expect(decodeBolt11AmountMsat(PR)).toBe(250_000_000)
     expect(saeubere(' lightning:' + PR.toUpperCase() + ' ')).toBe(
       PR.toUpperCase()
+    )
+  })
+  it('nimmt aus BIP21 den Lightning-Teil (Phoenix, Zeus)', () => {
+    expect(saeubere(`bitcoin:bc1qxyz?amount=0.0025&lightning=${PR}`)).toBe(PR)
+    expect(saeubere(`BITCOIN:BC1QXYZ?LIGHTNING=${PR.toUpperCase()}`)).toBe(
+      PR.toUpperCase()
+    )
+    expect(istZahlziel(`bitcoin:bc1qxyz?lightning=${PR}`)).toBe(true)
+    expect(istZahlziel('bitcoin:bc1qxyz?amount=0.001')).toBe(false)
+  })
+  it('sagt, was statt einer Rechnung in der Zwischenablage steht', () => {
+    expect(keinZahlziel('  ')).toMatch(/leer/)
+    expect(keinZahlziel('bitcoin:bc1qxyz')).toMatch(/ohne Lightning/)
+    expect(keinZahlziel('Hallo, hier die Rechnung')).toMatch(
+      /„Hallo, hier die Re…“/
     )
   })
   it('liest den Text einer Lightning-Adresse', () => {

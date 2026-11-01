@@ -17,8 +17,10 @@ import {notify, NotifyKind} from '../helpers'
 import {serverOf, toBech32Lnurl} from '../lnurlcash'
 import {
   istZahlziel,
+  keinZahlziel,
   saeubere,
   setBezahlenScannen,
+  setEinfuegenGesperrt,
   setZuBezahlen
 } from './rechnung'
 import type {Bearer} from '../storage'
@@ -55,22 +57,20 @@ const Senden: Component = () => {
 
   // Einfügen: Rechnung/Adresse aus der Zwischenablage → gleich zur Bestätigung beim Bezahlen
   const einfuegen = async () => {
-    let t = ''
+    let roh = ''
     try {
-      t = saeubere(await navigator.clipboard.readText())
+      roh = await navigator.clipboard.readText()
     } catch {
-      // Zugriff verweigert: Bezahlen-Seite, dort von Hand einfügen
+      // Zugriff verweigert: Bezahlen-Seite, dort von Hand einfügen — mit Hinweis, warum das Feld leer ist
+      setEinfuegenGesperrt(true)
       navigate('/bezahlen')
       return
     }
+    const t = saeubere(roh)
     if (istZahlziel(t)) {
       setZuBezahlen(t)
       navigate('/bezahlen')
-    } else
-      notify(
-        'In der Zwischenablage ist keine Rechnung, keine Lightning-Adresse und kein LNURL-Zahlungscode.',
-        NotifyKind.ERROR
-      )
+    } else notify(keinZahlziel(roh), NotifyKind.ERROR)
   }
 
   // nur Scheine, deren Geheimnis in diesem Browser liegt (kein Vault) — die lassen sich spalten
