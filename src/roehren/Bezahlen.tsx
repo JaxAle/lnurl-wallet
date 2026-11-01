@@ -11,8 +11,8 @@
 //   3. Fertig: das Zählwerk zählt herunter, „Bezahlt“.
 // Bezahlen heißt hier: ein Schein über genau den Betrag wird bei seiner Ausgabestelle eingeschmolzen
 // (meltNote des Originals). Hat kein Schein genau den Betrag, wird er wie beim Senden abgespalten
-// (abspalten.ts); eine Gebühr der Stelle geht dabei vom Rest ab. Sonderwege des Originals (interne
-// Überweisung, Tresor, mehrere Scheine) bleiben über „Mehr Möglichkeiten“ im alten Dialog.
+// (abspalten.ts); eine Gebühr der Stelle geht dabei vom Rest ab. Interne Überweisung (LUD-25) kann die Seite
+// selbst (intern.ts, 2026-11-01); der alte Dialog bleibt nur für den Tresor, sichtbar mit dessen Schalter.
 import type {Component} from 'solid-js'
 import {
   createMemo,
@@ -28,6 +28,7 @@ import {A, useNavigate} from '@solidjs/router'
 import RequireWallet from '../components/RequireWallet'
 import Scanner, {canScan} from '../components/Scanner'
 import {useDevice} from '../DeviceContext'
+import {vaultEnabled} from '../vaultFeature'
 import {requireDeviceClient} from '../deviceOrchestration'
 import {notify, NotifyKind} from '../helpers'
 import type {PayRequestInfo} from '../lnurlcash'
@@ -65,6 +66,7 @@ import {
   setZuBezahlen,
   zuBezahlen
 } from './rechnung'
+import {scheineBei, uebertrageIntern, waehleIntern} from './intern'
 import Zaehlwerk from './Zaehlwerk'
 import './roehren.css'
 
@@ -328,9 +330,20 @@ const Bezahlen: Component = () => {
     return g ? `${g}, vom Rest` : 'beim Abspalten möglich, vom Rest'
   }
 
+  // Interne Überweisung (intern.ts): die Adresse nennt eine Ableitung und hier liegen genug Scheine bei
+  // derselben Stelle — dann ist das der vorgeschlagene Weg (ohne Gebühr); Antippen wechselt zu Lightning
+  const internGeht = createMemo(() => {
+    const i = info()
+    if (!i?.internalTransfer || !msat()) return false
+    return waehleIntern(scheineBei(verfuegbar(), i.callback), msat()).length > 0
+  })
+  const [lieberLightning, setLieberLightning] = createSignal(false)
+  const intern = () => internGeht() && !lieberLightning()
+
   const bezahlen = async () => {
     const r = rechnung()
     const q = quelle()
+    if (intern()) return void internBezahlen()
     if (!r || !q) return
     setArbeitet(true)
     try {
@@ -396,6 +409,31 @@ const Bezahlen: Component = () => {
         }
       }
       uhr = setInterval(() => void frage(), 3000)
+    } catch (err) {
+      notify(`Bezahlen ging nicht: ${(err as Error).message}`, NotifyKind.ERROR)
+    } finally {
+      setArbeitet(false)
+    }
+  }
+
+  const internBezahlen = async () => {
+    const i = info()
+    if (!i?.internalTransfer) return
+    const gewaehlt = waehleIntern(scheineBei(verfuegbar(), i.callback), msat())
+    setArbeitet(true)
+    try {
+      await uebertrageIntern(gewaehlt, msat(), i.internalTransfer, {
+        addBearer,
+        updateBearer,
+        removeBearer,
+        notify: satz => notify(satz, NotifyKind.ERROR)
+      })
+      const fuer = zweck() ? ` (${zweck()})` : ''
+      logActivity(
+        'melt',
+        `${zahl(sats())} Sats an ${adresse()} intern übertragen (bei ${serverOf(i.callback)})${fuer}.`
+      )
+      setSchritt('fertig')
     } catch (err) {
       notify(`Bezahlen ging nicht: ${(err as Error).message}`, NotifyKind.ERROR)
     } finally {
@@ -498,9 +536,12 @@ const Bezahlen: Component = () => {
                 </span>
               </button>
             </div>
-            <A href="/wallet?bezahlen=1" class="rz-aendern rz-block rz-mitte">
-              Mehr Möglichkeiten (interne Überweisung, Tresor) ›
-            </A>
+            {/* interne Überweisung kann die Seite selbst (intern.ts); der alte Dialog nur noch für den Tresor */}
+            <Show when={vaultEnabled()}>
+              <A href="/wallet?bezahlen=1" class="rz-aendern rz-block rz-mitte">
+                Mit dem Tresor bezahlen ›
+              </A>
+            </Show>
           </Match>
 
           <Match when={schritt() === 'betrag'}>
@@ -546,7 +587,7 @@ const Bezahlen: Component = () => {
             {kopf(() =>
               adresse() && !fest() ? setSchritt('betrag') : zurEingabe()
             )}
-            <Zaehlwerk sats={sats()} sofort kalt={!quelle()} />
+            <Zaehlwerk sats={sats()} sofort kalt={!quelle() && !intern()} />
             <div class="rz-gruppe">
               <Show when={adresse()}>
                 <div class="rz-setting rz-still">
@@ -560,32 +601,52 @@ const Bezahlen: Component = () => {
                   <span class="val">{zweck()}</span>
                 </div>
               </Show>
+              <Show when={internGeht()}>
+                <Zeile
+                  label="Weg"
+                  unter={
+                    intern()
+                      ? 'Antippen: stattdessen über Lightning'
+                      : 'Antippen: intern, ohne Gebühr'
+                  }
+                  wert={intern() ? 'Intern' : 'Lightning'}
+                  onClick={() => setLieberLightning(l => !l)}
+                />
+              </Show>
               <div class="rz-setting rz-still">
                 <span class="sl">Gebühr</span>
-                <span class="val">{gebuehrText()}</span>
+                <span class="val">{intern() ? 'keine' : gebuehrText()}</span>
               </div>
+              <Show when={intern()}>
+                <div class="rz-setting rz-still">
+                  <span class="sl">Bezahlt aus</span>
+                  <span class="val">{serverOf(info()!.callback)}</span>
+                </div>
+              </Show>
               <Show
-                when={kandidaten().length > 1}
+                when={!intern() && kandidaten().length > 1}
                 fallback={
-                  <div class="rz-setting rz-still">
-                    <span>
-                      <span class="sl">Bezahlt aus</span>
-                      <Show
-                        when={
-                          quelle() && erfahrungText(serverOf(quelle()!.url))
-                        }
-                      >
-                        <span class="s">
-                          {erfahrungText(serverOf(quelle()!.url))}
-                        </span>
-                      </Show>
-                    </span>
-                    <span class="val" classList={{'rz-fehlt': !quelle()}}>
-                      {quelle()
-                        ? serverOf(quelle()!.url)
-                        : 'kein Schein reicht allein'}
-                    </span>
-                  </div>
+                  <Show when={!intern()}>
+                    <div class="rz-setting rz-still">
+                      <span>
+                        <span class="sl">Bezahlt aus</span>
+                        <Show
+                          when={
+                            quelle() && erfahrungText(serverOf(quelle()!.url))
+                          }
+                        >
+                          <span class="s">
+                            {erfahrungText(serverOf(quelle()!.url))}
+                          </span>
+                        </Show>
+                      </span>
+                      <span class="val" classList={{'rz-fehlt': !quelle()}}>
+                        {quelle()
+                          ? serverOf(quelle()!.url)
+                          : 'kein Schein reicht allein'}
+                      </span>
+                    </div>
+                  </Show>
                 }
               >
                 <Zeile
@@ -599,7 +660,7 @@ const Bezahlen: Component = () => {
                 />
               </Show>
             </div>
-            <Show when={!quelle()}>
+            <Show when={!quelle() && !intern()}>
               <p class="rz-hinweis">
                 Bezahlt wird aus einem Schein einer Ausgabestelle. Leg vorher
                 Scheine derselben Stelle zusammen oder lade auf.
@@ -608,7 +669,7 @@ const Bezahlen: Component = () => {
             <button
               type="button"
               class="rz-knopf an rz-weiter"
-              disabled={!quelle() || arbeitet()}
+              disabled={(!quelle() && !intern()) || arbeitet()}
               onClick={() => void bezahlen()}
             >
               <span class="lbl">
