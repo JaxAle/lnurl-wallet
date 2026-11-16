@@ -93,7 +93,11 @@ export const classifyNoteError = (err: Error): Error => {
   if (!(err instanceof ServiceError)) return err
   const reason = err.reason
   if (reason === 'pending') return new PendingNoteError()
-  if (/spent/i.test(reason)) return new NoteSpentError(reason)
+  // Fork, aus Original d01143d: LUD-25 (luds 92abbb3) nennt einen verbrannten Schein genau „already in use“,
+  // bei Nachfrage und callback — aktualisierte Stellen (600.wtf, 16.11.) antworten so; ohne diese Zeile galt die
+  // Antwort als „keine Auskunft“, Zurückholen blieb gemerkt und gesendete Scheine ewig „unterwegs“ (Gerhard)
+  if (/spent/i.test(reason) || reason.trim().toLowerCase() === 'already in use')
+    return new NoteSpentError(reason)
   if (/unknown|not found/i.test(reason)) return new NoteUnknownError(reason)
   return err
 }
