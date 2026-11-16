@@ -16,6 +16,7 @@ import {serverOf} from './urls'
 import {
   AmbiguousMintError,
   AmbiguousMutationError,
+  NoteSpentError,
   ServiceError
 } from './errors'
 import {
@@ -65,8 +66,13 @@ export const parseInternalTransferHint = (
   return null
 }
 
+// „already in use“ gilt seit dem Fork-Commit 1259ff2 (classifyNoteError) als NoteSpentError — hier, beim
+// Ausgabe-Index des Empfängers, heißt es weiterhin „Index belegt, nächsten nehmen“
 const isIndexInUse = (err: unknown): boolean =>
-  err instanceof ServiceError && /already in use/i.test(err.reason)
+  (err instanceof ServiceError || err instanceof NoteSpentError) &&
+  /already in use/i.test(
+    err instanceof ServiceError ? err.reason : (err as Error).message
+  )
 
 // bounded the same defensive way addresses.ts's scanForAddressNotes bounds
 // its own index walk - a stale hint, or a mint that keeps reporting every
