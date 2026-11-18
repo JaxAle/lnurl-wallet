@@ -13,6 +13,7 @@ import {
   fetchInvoiceVerification,
   fetchNoteInfo,
   NoteSpentError,
+  NoteWorthZeroError,
   NoteUnknownError,
   PendingNoteError,
   sameInvoice,
@@ -71,11 +72,14 @@ export const gescheitert = async (b: Bearer, ctx: Ctx): Promise<void> => {
 // wie probeBurnedNote, aber „pending“ eigens: gültig · verbraucht · schwebt · keine Auskunft
 const frageSchein = async (
   url: string
-): Promise<'live' | 'gone' | 'schwebt' | 'unknown'> => {
+): Promise<'live' | 'gone' | 'schwebt' | 'wert0' | 'unknown'> => {
   try {
     await fetchNoteInfo(url)
     return 'live'
   } catch (err) {
+    // v0.17: Wert 0 heißt verbrannt ODER mitten im Einschmelzen — für die eigene Zahlung keine Entscheidung;
+    // die trifft nur der LUD-21-Nachweis (verify), den v0.17 bei jedem melt-OK mitgibt
+    if (err instanceof NoteWorthZeroError) return 'wert0'
     if (err instanceof NoteSpentError || err instanceof NoteUnknownError)
       return 'gone'
     if (err instanceof PendingNoteError) return 'schwebt'
@@ -117,7 +121,10 @@ export const pruefeZahlung = async (
       // Nachweis nicht erreichbar — der Schein selbst sagt es auch
     }
   }
-  const antwort = await frageSchein(b.url)
+  const roh = await frageSchein(b.url)
+  // Wert 0 mit Nachweis: der Nachweis hat oben noch nicht „bezahlt“ gesagt → schwebt; ohne Nachweis (alte
+  // Stellen geben nie Wert 0, v0.17 gibt immer verify) bleibt es beim bisherigen „verbraucht = bezahlt“
+  const antwort = roh === 'wert0' ? (z.verify ? 'schwebt' : 'gone') : roh
   // „hängt bei der Stelle“ nur bei Wechsel speichern, nicht bei jeder Runde
   const schwebt = antwort === 'schwebt'
   if (!!z.schwebt !== schwebt && !schonErledigt(b))

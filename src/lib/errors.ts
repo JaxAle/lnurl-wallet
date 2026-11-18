@@ -64,6 +64,17 @@ export class NoteSpentError extends Error {
   }
 }
 
+// Fork (Conformance v0.17 / luds fd80cdd, 2026-11-18): ein verbrannter Schein — oder einer mitten im
+// Einschmelzen — antwortet bei der Nachfrage nicht mehr mit einem Fehler, sondern als withdrawRequest im
+// Wert 0. Für alles außer einer eigenen laufenden Zahlung heißt das „verbraucht“ (darum eine Unterart von
+// NoteSpentError); die Bezahl-Wache unterscheidet es eigens und lässt nur den LUD-21-Nachweis entscheiden.
+export class NoteWorthZeroError extends NoteSpentError {
+  constructor() {
+    super('worth 0')
+    this.name = 'NoteWorthZeroError'
+  }
+}
+
 // Thrown when SERVICE reports an unknown note.  For privacy, a hash lookup
 // uses this same response for burned and never-issued identifiers, so it is a
 // definitive "not outstanding" verdict but not proof the note never existed.

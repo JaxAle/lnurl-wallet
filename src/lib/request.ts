@@ -13,6 +13,7 @@ import {
   AmbiguousMutationError,
   NoteSpentError,
   NoteUnknownError,
+  NoteWorthZeroError,
   PendingNoteError,
   ServiceError,
   classifyNoteError
@@ -106,7 +107,10 @@ const requestNoteInfoByRef = async (
   if (body.k1 !== undefined) {
     throw new Error('SERVICE returned k1 in a hash-only lookup response.')
   }
-  return parseNoteLookupBody(body)
+  const info = parseNoteLookupBody(body)
+  // v0.17: verbrannt oder mitten im Einschmelzen = Wert 0 (errors.ts, NoteWorthZeroError)
+  if (info.maxWithdrawable === 0) throw new NoteWorthZeroError()
+  return info
 }
 
 const requestNoteInfoByHash = async (

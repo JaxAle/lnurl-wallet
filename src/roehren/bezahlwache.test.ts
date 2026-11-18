@@ -14,6 +14,7 @@ vi.mock('../lnurlcash', async orig => {
       if (a === 'live') return {}
       if (a === 'gone') throw new echt.NoteSpentError('spent')
       if (a === 'schwebt') throw new echt.PendingNoteError()
+      if (a === 'wert0') throw new echt.NoteWorthZeroError()
       throw new Error('keine Antwort')
     }
   }
@@ -123,6 +124,32 @@ describe('pruefeZahlung', () => {
       zahlung: {...b.zahlung, schwebt: true}
     })
     expect(c.logActivity).not.toHaveBeenCalled()
+  })
+
+  // Conformance v0.17: Wert 0 = verbrannt ODER mitten im Einschmelzen (2026-11-18)
+  it('Wert 0 mit Nachweis, Nachweis noch nicht bezahlt → offen, schwebend, nie bezahlt', async () => {
+    probe.mockResolvedValue('wert0')
+    verify.mockResolvedValue({settled: false})
+    const b = schein({verify: 'https://mint.example/v/geheim'})
+    const c = ctx()
+    expect(await pruefeZahlung(b, c, 1_000_000 + FRIST_MS * 9)).toBe('offen')
+    expect(c.updateBearer).toHaveBeenCalledWith(b.id, {
+      zahlung: {...b.zahlung, schwebt: true}
+    })
+    expect(c.removeBearer).not.toHaveBeenCalled()
+    expect(c.logActivity).not.toHaveBeenCalled()
+  })
+
+  it('Wert 0 mit Nachweis „bezahlt“ → bezahlt', async () => {
+    probe.mockResolvedValue('wert0')
+    verify.mockResolvedValue({settled: true, pr: 'lnbc1x'})
+    const b = schein({verify: 'https://mint.example/v/geheim'})
+    expect(await pruefeZahlung(b, ctx())).toBe('bezahlt')
+  })
+
+  it('Wert 0 ohne Nachweis (alte Stelle) → bezahlt wie bisher', async () => {
+    probe.mockResolvedValue('wert0')
+    expect(await pruefeZahlung(schein(), ctx())).toBe('bezahlt')
   })
 
   it('keine Antwort → offen, auch nach der Frist', async () => {

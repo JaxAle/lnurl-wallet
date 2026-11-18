@@ -98,7 +98,9 @@ describe("VERBS['note.split']", () => {
         // echoes back whatever amount the settle GET asked about, as a
         // fee-free remainder - this test only cares about the verb's own
         // output shape, not fee accounting
-        const amount = Number(url.searchParams.get('amount') ?? '0')
+        // Fork: die Nachfrage schickt kein amount mit — die Attrappe gab dann Wert 0 zurück, und Wert 0 heißt
+        // seit Conformance v0.17 „verbraucht“ (NoteWorthZeroError); eine echte Stelle nennt den Wert
+        const amount = Number(url.searchParams.get('amount') ?? '0') || 1000
         return {
           json: async () => ({
             tag: 'withdrawRequest',

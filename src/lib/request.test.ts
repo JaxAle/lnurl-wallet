@@ -32,6 +32,8 @@ const CS1 = encodeCs1WithAmount(1000, new Uint8Array(65).fill(0xab))
 import {
   AmbiguousMintError,
   AmbiguousMutationError,
+  NoteSpentError,
+  NoteWorthZeroError,
   PendingNoteError
 } from './errors'
 import {configureSecretProvider, configurePubkeySecretProvider} from './secrets'
@@ -817,5 +819,24 @@ describe('short-form variants', () => {
     await fetchNoteInfoByHash('https://mint.example.com/w', h)
     await fetchNoteInfoByHashShort('https://mint.example.com/w', h)
     expect(seen.map(u => u.searchParams.get('p'))).toEqual([noteRef(h), h])
+  })
+
+  // Fork, Conformance v0.17 (luds fd80cdd): verbrannt oder mitten im Einschmelzen = withdrawRequest Wert 0
+  it('reads a lookup worth 0 as spent (NoteWorthZeroError)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      capture([], {
+        tag: 'withdrawRequest',
+        callback: 'https://mint.example.com/w/cb',
+        minWithdrawable: 0,
+        maxWithdrawable: 0,
+        mintPubkey: MINT_KEY
+      })
+    )
+    const p = fetchNoteInfoByHash('https://mint.example.com/w', h)
+    await expect(p).rejects.toBeInstanceOf(NoteWorthZeroError)
+    await expect(
+      fetchNoteInfoByHash('https://mint.example.com/w', h)
+    ).rejects.toBeInstanceOf(NoteSpentError)
   })
 })
