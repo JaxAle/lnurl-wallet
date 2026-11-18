@@ -152,6 +152,33 @@ describe('pruefeZahlung', () => {
     expect(await pruefeZahlung(schein(), ctx())).toBe('bezahlt')
   })
 
+  it('Nachweis „Not found“ und Schein wieder gültig → sofort gescheitert, ohne Frist', async () => {
+    const echt =
+      await vi.importActual<typeof import('../lnurlcash')>('../lnurlcash')
+    verify.mockRejectedValue(new echt.ServiceError('Not found'))
+    probe.mockResolvedValue('live')
+    const b = schein({verify: 'https://mint.example/v/geheim'})
+    const c = ctx()
+    expect(await pruefeZahlung(b, c, 1_000_001)).toBe('gescheitert')
+    expect(c.logActivity).toHaveBeenCalledTimes(1)
+  })
+
+  it('Nachweis „Not found“, Schein noch Wert 0 → offen (nicht gescheitert)', async () => {
+    const echt =
+      await vi.importActual<typeof import('../lnurlcash')>('../lnurlcash')
+    verify.mockRejectedValue(new echt.ServiceError('Not found'))
+    probe.mockResolvedValue('wert0')
+    const b = schein({verify: 'https://mint.example/v/geheim'})
+    expect(await pruefeZahlung(b, ctx(), 1_000_001)).toBe('offen')
+  })
+
+  it('Nachweis nicht erreichbar, Schein gültig → innerhalb der Frist offen', async () => {
+    verify.mockRejectedValue(new Error('network down'))
+    probe.mockResolvedValue('live')
+    const b = schein({verify: 'https://mint.example/v/geheim'})
+    expect(await pruefeZahlung(b, ctx(), 1_000_001)).toBe('offen')
+  })
+
   it('keine Antwort → offen, auch nach der Frist', async () => {
     probe.mockResolvedValue('unknown')
     expect(await pruefeZahlung(schein(), ctx(), 1_000_000 + FRIST_MS * 9)).toBe(

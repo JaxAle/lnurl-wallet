@@ -17,7 +17,8 @@ import {
   NoteUnknownError,
   PendingNoteError,
   sameInvoice,
-  serverOf
+  serverOf,
+  ServiceError
 } from '../lnurlcash'
 import type {Bearer} from '../storage'
 import {merkeAuszahlung} from './auszahlung'
@@ -110,6 +111,9 @@ export const pruefeZahlung = async (
 ): Promise<'bezahlt' | 'gescheitert' | 'offen'> => {
   const z = b.zahlung
   if (!z) return 'offen'
+  // v0.17: nach einer gescheiterten Zahlung antwortet der Nachweis „Not found“ und der Schein ist wieder
+  // gültig — beides zusammen heißt gescheitert, ohne die Frist abzuwarten (Gerhard, 2026-11-18)
+  let nichtGefunden = false
   if (z.verify) {
     try {
       const v = await fetchInvoiceVerification(z.verify)
@@ -117,8 +121,10 @@ export const pruefeZahlung = async (
         await bezahlt(b, ctx)
         return 'bezahlt'
       }
-    } catch {
+    } catch (err) {
       // Nachweis nicht erreichbar — der Schein selbst sagt es auch
+      nichtGefunden =
+        err instanceof ServiceError && /^not found\.?$/i.test(err.reason.trim())
     }
   }
   const roh = await frageSchein(b.url)
@@ -133,7 +139,7 @@ export const pruefeZahlung = async (
     await bezahlt(b, ctx)
     return 'bezahlt'
   }
-  if (antwort === 'live' && jetzt - z.seit > FRIST_MS) {
+  if (antwort === 'live' && (nichtGefunden || jetzt - z.seit > FRIST_MS)) {
     await gescheitert(b, ctx)
     return 'gescheitert'
   }
